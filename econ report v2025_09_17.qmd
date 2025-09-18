@@ -1,5 +1,5 @@
 ---
-title: "econ report v2025_09_18"
+title: "Peter"
 format: docx
 editor: visual
 ---
@@ -43,15 +43,12 @@ from
 
 ```{r}
 
-trip_vol<-load("W:\\PTBoard\\Initiatives\\Data Modelling & Policy Initiative\\Data Economic Modelling Projects\\2023_011_Indicators\\src\\trip_volume\\3_trip_volume_cube.Rda")
 
+load("W:\\PTBoard\\Initiatives\\Data Modelling & Policy Initiative\\Data Economic Modelling Projects\\2023_011_Indicators\\src\\trip_volume\\3_trip_volume_cube.Rda")
 
-colnames(trip_vol)
 
 library(tidyverse)
-trip_vol_reduced<-
-  
-trip_vol%>%
+trip_vol_reduced<-trip_vol%>%
 group_by(
   yr, 
   mth, 
