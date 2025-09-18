@@ -6,7 +6,7 @@ editor: visual
 
 ## Quarto
 
-xxx
+xxxzaa
 
 ## Trip Volume
 
@@ -17,14 +17,39 @@ When you click the **Render** button a document will be generated that includes 
 test
 
 ```{r}
-1 + 1
+
+con <- DBI::dbConnect(odbc::odbc(),
+                      ## Driver = "SQL Server",
+                      ##Driver = "{SQL Server Native Client 11.0}",
+                      Driver = "{ODBC Driver 17 for SQL Server}", # this driver works better; it needs to be installed
+                      Server = "TRSQLAG-PTDWP.th.gov.bc.ca",
+                      Database = "PTDW_PRD",
+                      Trusted_Connection = "yes")
+
+
 ```
 
 You can add options to executable code like this
 
+```{sql, connection=con}
+ 
+select 
+*
+from 
+
+	[PTDW_PRD].[dbo].[PTDW_ORGANIZATION] c
+
+```
+ 
+
+
+
+
 ```{r}
 #| echo: false
 2 * 2
+
+plot(cars)
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
