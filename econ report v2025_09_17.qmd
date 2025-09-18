@@ -1,30 +1,87 @@
 ---
-title: "econ report v2025_09_17"
+title: "econ report v2025_09_18"
 format: docx
 editor: visual
 ---
 
 ## Quarto
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+xxxzaa
 
-## Running Code
+## Trip Volume
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:'
 
-test 
+test
 
 5:48 pm
 
 ```{r}
-1 + 1
+
+con <- DBI::dbConnect(odbc::odbc(),
+                      ## Driver = "SQL Server",
+                      ##Driver = "{SQL Server Native Client 11.0}",
+                      Driver = "{ODBC Driver 17 for SQL Server}", # this driver works better; it needs to be installed
+                      Server = "TRSQLAG-PTDWP.th.gov.bc.ca",
+                      Database = "PTDW_PRD",
+                      Trusted_Connection = "yes")
+
+
 ```
 
 You can add options to executable code like this
 
-```{r}
-#| echo: false
-2 * 2
+```{sql, connection=con}
+ 
+select 
+*
+from 
+
+	[PTDW_PRD].[dbo].[PTDW_ORGANIZATION] c
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+
+trip_vol<-load("W:\\PTBoard\\Initiatives\\Data Modelling & Policy Initiative\\Data Economic Modelling Projects\\2023_011_Indicators\\src\\trip_volume\\3_trip_volume_cube.Rda")
+
+
+colnames(trip_vol)
+
+library(tidyverse)
+trip_vol_reduced<-
+  
+trip_vol%>%
+group_by(
+  yr, 
+  mth, 
+  GEOSPATIAL_AREA_TYPE_CODE,
+  TRIP_SERVICE_TYPE_CODE, 
+  PICKUP_AREA,  
+  PTS_ORGANIZATION_NAME
+  )%>%
+  summarize(
+  vol=sum(volume),
+  rev=sum(rev_per_vehcile)
+  ) 
+
+```
+
+
+```{r}
+library(kableExtra)
+
+mtcars[1:10, 1:6]
+
+kbl(mtcars[1:10, 1:6], caption = "Group Rows") %>%
+  kable_paper("striped", full_width = F) %>%
+  pack_rows("Group 1", 4, 7) %>%
+  pack_rows("Group 2", 8, 10)
+
+
+trip_vol_reduced
+
+```
+
+
+
