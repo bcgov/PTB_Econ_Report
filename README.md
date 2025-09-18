@@ -2,6 +2,7 @@
 
 ## Huibin testing init.
 ## peter is here.  5:52 pm , 2025_09_17
+## Jala is here 9:56 am, 2025_09_28
 
 
 
@@ -13,12 +14,6 @@ Sys.setenv(PATH = paste(
   Sys.getenv("PATH"),
   sep = ";"
 ))
-
-## 2) Verify R can see Git
-system("git --version")
-
-## 3) (Optional but recommended) make GCM the helper
-system('"C:/Git/PortableGit/cmd/git.exe" config --global credential.helper manager-core')
 
 ## 4) Now set your GitHub creds via gitcreds
 install.packages("gitcreds")       # if not installed yet
