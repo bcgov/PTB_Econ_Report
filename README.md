@@ -9,8 +9,6 @@
 ## Nav is also here!
 ## Peter is here again. 
 
-xxwrtwt
-
 
 
 ## 1) Put PortableGit on PATH for this session
