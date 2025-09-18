@@ -109,6 +109,60 @@ kbl(mtcars[1:10, 1:6], caption = "Group Rows") %>%
 
 trip_vol_reduced
 
+
+
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+
+# --- 0) Your long data (example column names from your screenshot)
+# df_long: yr, mth (1–12), TRIP_SERVICE_TYPE_CODE, vol, ...
+
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# --- 1) Pivot to Jan–Dec columns
+df_pivot <- trip_vol_reduced %>%
+  mutate(
+    mth = factor(mth, levels = 1:12, labels = month_labs),
+    yr  = as.integer(yr)
+  ) %>%
+  group_by(TRIP_SERVICE_TYPE_CODE, yr, mth) %>%
+  summarise(vol = sum(vol, na.rm = TRUE), .groups = "drop") %>%
+  complete(TRIP_SERVICE_TYPE_CODE, yr, mth, fill = list(vol = 0)) %>%
+  pivot_wider(names_from = mth, values_from = vol)
+
+# --- 2) Order rows and prepare a printable data frame
+df_print <- df_pivot %>%
+  arrange(TRIP_SERVICE_TYPE_CODE, yr) %>%
+  select(Service = TRIP_SERVICE_TYPE_CODE, Year = yr, all_of(month_labs))
+
+# --- 3) Compute row ranges for each Service to feed pack_rows()
+grp_meta <- df_print %>%
+  count(Service, name = "n") %>%
+  mutate(start = lag(cumsum(n), default = 0) + 1,
+         end   = cumsum(n))
+
+# --- 4) Build the kable with group headers
+tab <- df_print %>%
+  select(-Service) %>%  # drop the Service column; we'll show it as a group header
+  kbl(
+    caption = "Metro Vancouver Regional District Trip Volume",
+    align   = c("l", rep("r", length(month_labs))),  # Year left, months right
+    digits  = 0,
+    format.args = list(big.mark = ",")
+  ) %>%
+  kable_paper("striped", full_width = FALSE) %>%
+  column_spec(1, bold = TRUE)  # make the Year column stand out
+
+# Add a pack_rows() block for each service (TAXI, TNS) programmatically
+for (i in seq_len(nrow(grp_meta))) {
+  tab <- tab %>%
+    pack_rows(grp_meta$Service[i], grp_meta$start[i], grp_meta$end[i])
+}
+
+tab
+
+
 ```
 
 
