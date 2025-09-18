@@ -62,6 +62,37 @@ group_by(
   rev=sum(rev_per_vehcile)
   ) 
 
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+# 1) (Optional) keep only the region you want
+# df_long <- df_long %>%
+#   filter(GEOSPATIAL_AREA_TYPE_CODE == "REGIONAL",
+#          PICKUP_AREA == "Metro Vancouver Regional District")
+
+# 2) Ensure months are labeled Jan…Dec and present even if missing
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+df_pivot <- trip_vol_reduced %>%
+  mutate(
+    mth = factor(mth, levels = 1:12, labels = month_labs),
+    yr  = as.integer(yr)
+  ) %>%
+  group_by(TRIP_SERVICE_TYPE_CODE, yr, mth) %>%     # sum to year-month-service
+  summarise(vol = sum(vol, na.rm = TRUE), .groups = "drop") %>%
+  complete(TRIP_SERVICE_TYPE_CODE, yr, mth, fill = list(vol = 0)) %>% # fill missing months
+  arrange(TRIP_SERVICE_TYPE_CODE, yr, mth) %>%
+  pivot_wider(
+    names_from = mth,
+    values_from = vol
+  ) %>%
+  arrange(TRIP_SERVICE_TYPE_CODE, yr)
+
+df_pivot
+
+
 ```
 
 
