@@ -271,4 +271,4 @@ The increase in taxi trip revenue was modest (6.45% YTD), suggesting that the de
 Meanwhile, in March 2024, the TNS sector had a total of **\$41,996,572 in trip revenue** in the Metro Vancouver Regional District. On a year-over-year basis, total TNS revenue increased by **30.74%**, while on a year-to-date basis, TNS revenue increased by **27.33%**.\
 The TNS trip revenue experienced significant growth (27.33% YTD), reflecting a strong increase in demand for TNS services.
 
-**Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
+**Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service..
