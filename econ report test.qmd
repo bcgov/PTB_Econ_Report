@@ -54,7 +54,7 @@ table.indicator-table td:last-child {
 
 ### Commencing Investigation
 
-Peter makes changes..........xxx
+Peter makes changes..........xxxyyyy
 
 This economics report has been produced pursuant to a Board investigation under section 27 of the Act ([Policy Manual](#)). The Board investigation was commenced on August 27, 2024, with respect to application #79999-24.
 
