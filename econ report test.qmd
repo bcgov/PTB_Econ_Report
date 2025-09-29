@@ -1,0 +1,274 @@
+---
+title: "Economics Report"
+format:
+  docx:
+    reference-doc: "Economics Report (Region 2).docx"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+/* Center big title and give a bit more spacing */
+.quarto-title-block .title {
+  text-align: center;
+  letter-spacing: .5px;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Section and subsection colors to match screenshot */
+h2 { color: #2ecc71; /* green */ }
+h3 { color: #6dd5d8; /* teal */ }
+
+/* Body copy sizing similar to the screenshot */
+p { font-size: 1.05rem; line-height: 1.6; }
+
+/* Checklist table styling */
+table.indicator-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: .25rem;
+  margin-bottom: 1.25rem;
+}
+table.indicator-table td {
+  border: none;
+  padding: .35rem .25rem;
+  vertical-align: top;
+}
+table.indicator-table td:first-child {
+  width: 70%;
+}
+table.indicator-table td:last-child {
+  text-align: right;
+  width: 30%;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+</style>
+```
+
+## Introduction
+
+### Commencing Investigation
+
+This economics report has been produced pursuant to a Board investigation under section 27 of the Act ([Policy Manual](#)). The Board investigation was commenced on August 27, 2024, with respect to application #79999-24.
+
+The Board’s letter of instruction to Senior Economist included the application details, outlined below, along with a request for economic analysis pertaining to the following relevant indicators:
+
+|                                                  |     |
+|--------------------------------------------------|-----|
+| Trip Volume:                                     | ✓   |
+| Trip Revenue:                                    | ✓   |
+| Number of Wheelchair Accessible Vehicles (WAVs): | ✓   |
+| Number of Active Vehicles per 1,000 Persons:     | ✓   |
+| Fare per Kilometre:                              | ✓   |
+| Wait Time:                                       | ✓   |
+| Concentration indices:                           | ✓   |
+| Revenue per Active Vehicle:                      | ✓   |
+| Taxi Fleet Utilization Rate:                     | ✓   |
+| Taxi Vehicle Occupancy Rate:                     | ✓   |
+| Peak-Hour Taxi Vehicle Occupancy Rate:           | ✓   |
+
+### Application Details
+
+```{=html}
+<!--
+Add your “Application Details” content here (tables, figures, etc.)
+You can continue sections as needed, e.g.:
+
+### Data Sources
+### Methodology
+### Results
+-->
+```
+
+This report was produced for the Board regarding a new application for a taxi licence.
+
+The applicant is **MS Taxi Ltd.**, which is doing business as MS Taxi. The application summary states the following:
+
+> There is a need for an additional taxi company servicing West Vancouver, North Vancouver, Vancouver, and YVR. It will positively affect transportation services.\
+> As MS Taxi, we will attract new taxi users that will increase the trip volume of all existing and new companies.
+
+Additional details of the application include:
+
+-   Proposed operating area: West Vancouver, North Vancouver, Vancouver, YVR\
+-   Proposed fleet size: 30 (25 Conventional; 5 WAV)
+
+## Area of Study
+
+The proposed operating area for this taxi application is mainly within the City of Vancouver, District of West Vancouver, and District of North Vancouver. These municipalities are located in the Greater Vancouver Regional District.
+
+For the purpose of statistical analysis, both taxi and TNS applications are associated with the same Region, as contemplated in the Board’s operating areas policy in the *Policy Manual*, even though taxi businesses do not generally operate at a regional level.
+
+For taxi applicants, the Region is determined based on where the existing or proposed operating area is located. In this case, **this taxi application is located in Region 1**. The Regional District is also determined based on where the existing or proposed operating area is located.
+
+## Existing Licensees
+
+The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (*MoTI*). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
+
+-   At the municipal level,
+    -   Number of taxi licensees operating: 8\
+    -   Combined Board-approved maximum fleet size: 1,226
+-   At the Regional District level,
+    -   Number of taxi licensees operating: 29\
+    -   Combined Board-approved maximum fleet size: 2,384
+-   At the Region level,
+    -   Number of taxi licensees operating: 49\
+    -   Combined Board-approved maximum fleet size: 2,604
+
+## Background
+
+### Section 28 Criteria
+
+Under section 28(1) of the Act, the Board must consider the following factors when determining applications:
+
+-   Whether the applicant is fit, proper, and capable of providing the service applied for (threshold test);\
+-   Whether there is a public need for the service; and\
+-   Whether the application would promote sound economic conditions in the B.C. passenger transportation business.
+
+This economics report provides the Board with data analysis pertaining only to the “public need” (PN) and “sound economic conditions” (SEC) criteria. It does not speak to the fit, proper, and capable criteria.
+
+### PN and SEC Factors
+
+The Board’s *Policy Manual* provides information on the factors the Board may consider when determining PN and SEC. This economics report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economics report does not determine whether PN and SEC exist.
+
+Under the public need policy in the *Policy Manual*, PN is divided into the following factors:
+
+-   Demand
+-   Accessibility\
+-   Affordability\
+-   Safety\
+-   Service Quality
+
+Under the sound economic conditions policy in the *Policy Manual*, SEC is divided into the following factors:
+
+-   Sustainability\
+-   Competition\
+-   Innovation\
+-   Variety
+
+This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
+
+![](images/Picture1.png)
+
+*Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.*
+
+## Report Constraints
+
+Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established *data requirements* outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
+
+Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economics report *at this time*.
+
+Due to data limitations, only two regions will be analyzed:
+
+-   Region 1 – Lower Mainland including Whistler; and,\
+-   Region 2 – Capital Regional District (CRD).
+
+**Regional Districts within these Regions may be analyzed so long as there is adequate data reliability for those Regional Districts.**
+
+At this time, three other regions will not be included in this economics report due to insufficient data coverage, poor data quality, or unreliable trip data submissions: Region 3 (Vancouver Island excluding CRD); Region 4 (Interior); and, Region 5 (Northern B.C. and other).
+
+## Qualifications
+
+This economics report was authored by the Board’s Senior Economist, **Peter Tseng**, who is ultimately responsible for the analysis contained in this report.
+
+Peter Tseng has over a decade of experience in economic analytics, policy evaluation, and statistical reporting. He holds a Ph.D. in Economics from the University of Victoria and has held senior roles with the BC Public Service, including at the Ministry of Finance and Ministry of Health.
+
+## Factors and Their Indicators
+
+All analyses in this report are based on data from the Trip Database unless otherwise specified. Technical details of each indicator can be found in Appendix 1.
+
+### Demand Factor (PN)
+
+#### Trip Volume (Jun)
+
+**Primary Factor:** Demand
+
+**Description:** Trip volume represents, in real terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+
+**Measurement:** Trip volume is calculated as the number of completed trips reported to the Trip Database in an area over a month.
+
+**Interpretation:** Increases in taxi trip volume or TNS trip volume indicate growth in the quantity demanded in the respective markets. Moreover, a shift in trip volume from the taxi sector to the TNS sector suggests evolving consumer preferences and competition between the two types of partially substitutable services.
+
+> *It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.*
+
+::: {custom-style="WarningRed"}
+The Board’s public need policy in the *Policy Manual* lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume:
+
+-   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+:::
+
+-   When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume.\
+
+-   The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
+
+-   There are people who would use the proposed service:
+
+    -   If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.\
+    -   The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
+
+### Metro Vancouver Regional District Trip Volume Findings
+
+**Table 1: Metro Vancouver Regional District Trip Volume**
+
+![](images/Picture2.png)
+
+*Figure 1: Metro Vancouver Regional District Trip Volume*
+
+![](images/Picture3.png)
+
+**Analysis and Conclusions:**
+
+In March 2024, Metro Vancouver Regional District saw a total of **493,787 taxi trips**. On a year-over-year (YoY) basis, the total taxi trip volume increased by **0.82%**, while on a year-to-date (YTD) basis, the total taxi trip volume increased by **3.66%**.[^1]\
+The modest increase in taxi trip volume (3.66% YTD) suggests that the demand for taxi services was stable.
+
+[^1]: *Year-over-year (YoY)* compares March 2024 with March 2023, while *year-to-date (YTD)* compares the cumulative data from January to March 2024 with the same period in 2023. YoY evaluates specific monthly changes, while YTD assesses trends over a recent period of time.
+
+Meanwhile, in March 2024, there were **2,408,838 TNS trips** in the Metro Vancouver Regional District. On a year-over-year basis, the total TNS trip volume increased by **47.55%**, while on a year-to-date basis, the total TNS trip volume increased by **47.46%**. The increase in TNS trip volume was significant, indicating strong growth in the demand for TNS services.
+
+**Limitations:** Quantity demanded does not equate to demand. Quantity demanded refers to the actual number of trips observed, whereas demand includes all potential trips if there were no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
+
+------------------------------------------------------------------------
+
+### Trip Revenue (Jun)
+
+**Primary Factor:** Demand
+
+**Description:** Trip revenue represents, in nominal terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+
+**Measurement:** Trip revenue is calculated as the total fare amount of all completed trips reported to the Trip Database in an area over a month.
+
+**Interpretations:** Increases in taxi trip revenue or TNS trip revenue indicate growth of quantity demanded in the respective markets. Moreover, a shift in trip revenue from the taxi sector to the TNS sector can signify a structural change in market dynamics, suggesting evolving consumer preferences or competition between the two types of partially substitutable services.
+
+As stated previously, it is helpful to note that although taxis and TNS are similar, they are not the same. Taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined revenue of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
+
+The Board’s public need policy in the *Policy Manual* lists examples of the demand factor, which are set out below alongside their corresponding implications on trip revenue:
+
+-   There are people who would use the proposed service. There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+    -   If the proposed service attracts current taxi or TNS users, it will result in a redistribution of market share as measured by trip revenue among existing providers.\
+    -   The redistribution can only be observed after the proposed service is introduced. However, historical trends can provide valuable indications. For instance, ongoing shifts in market share of sectors can indicate changes in customer preference.
+
+------------------------------------------------------------------------
+
+### Metro Vancouver Regional District Trip Revenue Findings
+
+**Table 2: Metro Vancouver Regional District Trip Revenue**
+
+![](images/Picture4.png)
+
+**Figure 2: Metro Vancouver Regional District Trip Revenue**
+
+![](images/Picture5.png)
+
+**Analysis and Conclusions:**
+
+In March 2024, the Metro Vancouver Regional District saw a total of **\$10,354,294 in taxi revenue**. On a year-over-year basis, total taxi revenue increased by **7.85%**, while on a year-to-date basis, taxi revenue rose by **6.45%**.\
+The increase in taxi trip revenue was modest (6.45% YTD), suggesting that the demand for taxi services was stable.
+
+Meanwhile, in March 2024, the TNS sector had a total of **\$41,996,572 in trip revenue** in the Metro Vancouver Regional District. On a year-over-year basis, total TNS revenue increased by **30.74%**, while on a year-to-date basis, TNS revenue increased by **27.33%**.\
+The TNS trip revenue experienced significant growth (27.33% YTD), reflecting a strong increase in demand for TNS services.
+
+**Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
