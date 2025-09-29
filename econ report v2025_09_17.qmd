@@ -785,5 +785,10 @@ ft
 as.array()
 ```
 
-
+```{python}
+#| echo: true
+#| results: true
+x = 1 + 1
+x
+```
 
