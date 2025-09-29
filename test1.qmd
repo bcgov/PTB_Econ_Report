@@ -1,0 +1,38 @@
+---
+title: "Life Expectancy Report"
+format: html
+execute: 
+  echo: false
+  warning: false
+  message: fals e
+params:
+  country: "Afghanistan"
+---
+
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+```{r}
+life_expectancy <-
+  gapminder |>
+  select(country, year, lifeExp) |> 
+  filter(country == params$country)
+```
+
+## Life Expectancy in `r params$country`
+
+```{r}
+ggplot(
+  data = life_expectancy,
+  aes(
+    x = year,
+    y = lifeExp
+  )
+) +
+  geom_line() +
+  theme_minimal()
+```
+
+nam nam?
