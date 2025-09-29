@@ -47,8 +47,8 @@ from
 load("W:\\PTBoard\\Initiatives\\Data Modelling & Policy Initiative\\Data Economic Modelling Projects\\2023_011_Indicators\\src\\trip_volume\\3_trip_volume_cube.Rda")
 
 
-library(tidyverse)
-trip_vol_reduced<-trip_vol%>%
+library(tidyverse) colnames(trip_vol)
+trip_vol_reduced<-trip_vol%>% filter()
 group_by(
   yr, 
   mth, 
@@ -61,6 +61,7 @@ group_by(
   vol=sum(volume),
   rev=sum(rev_per_vehcile)
   ) 
+
 
 
 library(dplyr)
@@ -80,9 +81,9 @@ df_pivot <- trip_vol_reduced %>%
     mth = factor(mth, levels = 1:12, labels = month_labs),
     yr  = as.integer(yr)
   ) %>%
-  group_by(TRIP_SERVICE_TYPE_CODE, yr, mth) %>%     # sum to year-month-service
+  group_by(GEOSPATIAL_AREA_TYPE_CODE,PICKUP_AREA,  TRIP_SERVICE_TYPE_CODE, yr, mth) %>%     # sum to year-month-service
   summarise(vol = sum(vol, na.rm = TRUE), .groups = "drop") %>%
-  complete(TRIP_SERVICE_TYPE_CODE, yr, mth, fill = list(vol = 0)) %>% # fill missing months
+ ## complete(TRIP_SERVICE_TYPE_CODE, yr, mth, fill = list(vol = 0)) %>% # fill missing months
   arrange(TRIP_SERVICE_TYPE_CODE, yr, mth) %>%
   pivot_wider(
     names_from = mth,
@@ -90,11 +91,12 @@ df_pivot <- trip_vol_reduced %>%
   ) %>%
   arrange(TRIP_SERVICE_TYPE_CODE, yr)
 
-df_pivot
+df_pivot%>%
+filter(GEOSPATIAL_AREA_TYPE_CODE=='REGIONAL'& PICKUP_AREA %in% c('Regional District of Nanaimo', 'Capital Regional District'))%>%
+arrange(GEOSPATIAL_AREA_TYPE_CODE,  PICKUP_AREA  )
 
 
 ```
-
 
 ```{r}
 library(kableExtra)
@@ -165,5 +167,1301 @@ tab
 
 ```
 
+```{r}
+# Build the wide table from your long data
+df_show <- trip_vol_reduced %>%
+  filter(GEOSPATIAL_AREA_TYPE_CODE == "REGIONAL") %>%
+  mutate(
+    mth  = factor(mth, levels = 1:12, labels = month_labs),
+    yr   = as.integer(yr),
+    TRIP_SERVICE_TYPE_CODE = factor(TRIP_SERVICE_TYPE_CODE, levels = c("TAXI","TNS"))
+  ) %>%
+  group_by(PICKUP_AREA, TRIP_SERVICE_TYPE_CODE, yr, mth) %>%
+  summarise(vol = sum(vol, na.rm = TRUE), .groups = "drop") %>%
+  complete(PICKUP_AREA, TRIP_SERVICE_TYPE_CODE, yr, mth, fill = list(vol = 0)) %>%
+  pivot_wider(names_from = mth, values_from = vol) %>%
+  arrange(PICKUP_AREA, TRIP_SERVICE_TYPE_CODE, yr) %>%
+  rename(Region = PICKUP_AREA, Service = TRIP_SERVICE_TYPE_CODE, Year = yr)
+
+# Safety: stop early if filter produced no rows
+if (nrow(df_show) == 0) stop("No REGIONAL rows in trip_vol_reduced.")
+
+# Make the Word-friendly table:
+ft <- flextable(df_show) |>
+  merge_v(j = c("Region", "Service")) |>            # <- two-layer grouping
+ # theme_booktabs() |>
+  autofit() |>
+  align(j = month_labs, align = "right") |>
+  bold(j = "Year", bold = TRUE) |>
+  set_caption("Regional District Trip Volume (by Service)")
+ft
 
 
+ft <- flextable(df_show) |>
+  merge_v(j = c("Region", "Service")) |>
+  valign(j = c("Region", "Service"), valign = "top", part = "body") |>
+  # optional niceties
+  align(j = c("Region","Service","Year"), align = "left", part = "body") |>
+  align(j = month_labs, align = "right", part = "body") |>
+  theme_booktabs() |>
+  autofit()
+
+ft
+# Ensure types are consistent
+df_show <- df_show |>
+  dplyr::mutate(
+    Year    = as.integer(Year),
+    Service = factor(Service, levels = c("TAXI","TNS"))  # order services if you like
+  )
+
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+make_sectioned_once <- function(d){
+  months_blank <- setNames(as.list(rep(NA_real_, length(month_labs))), month_labs)
+
+  d |>
+    dplyr::group_by(Region) |>
+    dplyr::group_modify(function(.x, keys){
+      # one Region header row
+      reg_row <- tibble::tibble(RD_Service = keys$Region, Year = NA_integer_, !!!months_blank)
+
+      # build Service sections under this single Region header
+      servs <- unique(.x$Service)
+      svc_blocks <- purrr::map_dfr(servs, function(s){
+        svc_row <- tibble::tibble(RD_Service = paste0("\u2014 ", as.character(s)),
+                                  Year = NA_integer_, !!!months_blank)
+        data_rows <- .x |>
+          dplyr::filter(Service == s) |>
+          dplyr::mutate(RD_Service = "") |>
+          dplyr::select(RD_Service, Year, dplyr::all_of(month_labs))
+        dplyr::bind_rows(svc_row, data_rows)
+      })
+
+      dplyr::bind_rows(reg_row, svc_blocks)
+    }) |>
+    dplyr::ungroup() |>
+    dplyr::select(RD_Service, Year, dplyr::all_of(month_labs))
+}
+
+df_sectioned <- make_sectioned_once(df_show)
+
+library(flextable)
+ft <- flextable(df_sectioned) |>
+  # show blanks for NA "header" rows
+  colformat_int(j = "Year", na_str = "") |>
+  colformat_num(j = month_labs, digits = 0, na_str = "") |>
+  align(j = "RD_Service", align = "left") |>
+  align(j = "Year", align = "left") |>
+  align(j = month_labs, align = "right") |>
+  # style: Region row bold, Service row italic
+  theme_booktabs() |>
+  autofit()
+
+idx_region  <- which(is.na(df_sectioned$Year) & !startsWith(df_sectioned$RD_Service, "\u2014 "))
+idx_service <- which(is.na(df_sectioned$Year) &  startsWith(df_sectioned$RD_Service, "\u2014 "))
+ft <- bold(ft,   i = idx_region,  j = "RD_Service", bold = TRUE)
+ft <- italic(ft, i = idx_service, j = "RD_Service", italic = TRUE)
+
+ft
+
+
+
+
+
+library(dplyr)
+library(flextable)
+
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+df_compact <- df_show %>%
+  mutate(
+    Year       = as.integer(Year),
+    RD_Service = paste0(Region, "\n      ", as.character(Service))
+  ) %>%
+  select(RD_Service, Year, all_of(month_labs)) %>%
+  arrange(RD_Service, Year)
+
+ft <- flextable(df_compact) %>%
+  merge_v(j = "RD_Service") %>%
+  valign(j = "RD_Service", valign = "top") %>%
+  align(j = c("RD_Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+  theme_booktabs() %>%
+  autofit()
+
+ft
+
+
+
+
+library(dplyr)
+library(kableExtra)
+
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# 1) Build a single display column with a line break (HTML) and a bit of styling
+df_kbl <- df_show %>%
+  mutate(
+    RD_Service = paste0(
+      "<b>", Region, "</b><br>",
+      "<span style='font-style:italic;'>", Service, "</span>"
+    )
+  ) %>%
+  select(RD_Service, Year, all_of(month_labs)) %>%
+  arrange(RD_Service, Year)
+
+# 2) Make the table: HTML format, don't escape HTML, merge repeated RD_Service cells, top align
+kbl(
+  df_kbl,
+  format  = "html",
+  escape  = FALSE,                       # allow <br>, <b>, <span>
+  caption = "Trips by Region ▶ Service ▶ Year (Jan–Dec)",
+  align   = c("l","l", rep("r", length(month_labs)))
+) %>%
+  kable_paper("striped", full_width = FALSE) %>%
+  collapse_rows(columns = 1, valign = "top") %>%  # merge first col and top-align
+  column_spec(1, width = "18em", extra_css = "line-height: 1.1;")
+
+
+
+
+library(dplyr)
+library(flextable)
+
+region_label <- "Metro Vancouver Regional District"         # change as needed
+month_labs   <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+df_reg <- df_show %>%
+  filter(Region == region_label) %>%
+  arrange(Service, Year) %>%
+  select(Service, Year, all_of(month_labs))
+
+ft <- flextable(df_reg) %>%
+  merge_v(j = "Service") %>%
+  valign(j = "Service", valign = "top") %>%
+  bold(j = "Service", bold = TRUE) %>%           # Service acts as the block label (like TAXI/TNS row)
+  add_header_lines(region_label) %>%             # big region title above the table
+  align(j = c("Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+  theme_booktabs() %>%
+  autofit()
+
+ft
+
+library(dplyr)
+library(flextable)
+library(officer)  # for fp_border()
+
+region_label <- "Metro Vancouver Regional District"
+month_labs   <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+df_reg <- df_show %>%
+  filter(Region == region_label) %>%
+  arrange(Service, Year) %>%
+  select(Service, Year, all_of(month_labs))
+
+# end-of-block rows (where the next row is a different Service)
+cuts <- which(dplyr::lead(df_reg$Service) != df_reg$Service)
+
+ft <- flextable(df_reg) %>%
+  theme_vanilla() %>%          # start simple
+  border_remove() %>%          # clear all borders to avoid duplicates
+  add_header_lines(region_label) %>%
+  merge_v(j = "Service") %>%
+  valign(j = "Service", valign = "top") %>%
+  bold(j = "Service", bold = TRUE) %>%
+  align(j = c("Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+
+  # ---- borders you asked for ----
+  # 1) a line *under* the month header row
+  hline_bottom(part = "header",
+               border = fp_border(color = "grey70", width = 1)) %>%
+  # 2) a line between TAXI and TNS blocks
+  { if (length(cuts)) hline(., i = cuts, j = 1:ncol(df_reg),
+                            border = fp_border(color = "grey80", width = .75)) else . } %>%
+  # 3) optional: bottom rule of the whole table
+  hline_bottom(part = "body",
+               border = fp_border(color = "grey70", width = 1)) %>%
+
+  fix_border_issues() %>%
+  autofit()
+
+ft
+
+
+
+
+library(dplyr)
+library(kableExtra)
+
+regions    <- c("Metro Vancouver Regional District", "Capital Regional District")
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# Long → ordered body (drop label cols; we’ll label via pack_rows)
+tbl <- df_show %>%
+  filter(Region %in% regions) %>%
+  arrange(Region, Service, Year) %>%
+  select(Region, Service, Year, all_of(month_labs))
+
+body <- select(tbl, -Region, -Service)
+
+# Row spans for Region and Service blocks
+svc_blocks <- tbl %>%
+  group_by(Region, Service) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(start = cumsum(lag(n, default = 0) + 1L),
+         end   = cumsum(n))
+
+reg_blocks <- svc_blocks %>%
+  group_by(Region) %>%
+  summarise(start = min(start), end = max(end), .groups = "drop")
+
+# Build table
+kb <- kbl(
+  body,
+  format = "html",
+  align  = c("l", rep("r", length(month_labs))),
+  escape = FALSE
+) %>%
+  kable_paper("striped", full_width = FALSE) %>%
+  row_spec(0, extra_css = "border-bottom:1px solid #bfbfbf;")  # rule under months
+
+# Outer groups: Regions
+for (i in seq_len(nrow(reg_blocks))) {
+  kb <- pack_rows(
+    kb,
+    group_label = reg_blocks$Region[i],
+    start_row   = reg_blocks$start[i],
+    end_row     = reg_blocks$end[i],
+    bold = TRUE
+  )
+}
+
+# Inner groups: Services (TAXI/TNS) within each Region
+for (i in seq_len(nrow(svc_blocks))) {
+  kb <- pack_rows(
+    kb,
+    group_label = svc_blocks$Service[i],
+    start_row   = svc_blocks$start[i],
+    end_row     = svc_blocks$end[i],
+    bold = TRUE
+  )
+}
+
+# Thin separator line after each service block
+kb <- row_spec(
+  kb,
+  row = svc_blocks$end[ svc_blocks$end < nrow(body) ],
+  extra_css = "border-bottom:1px solid #d0d0d0;"
+)
+
+kb
+
+
+
+
+library(dplyr)
+library(flextable)
+library(officer)  # for fp_border()
+
+regions    <- c("Capital Regional District", "Metro Vancouver Regional District")
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# 1) Build the multi-region body
+df_multi <- df_show %>%
+  filter(Region %in% regions) %>%
+  arrange(Region, Service, Year) %>%
+  select(Region, Service, Year, all_of(month_labs))
+
+# 2) Row boundaries
+# line between TAXI and TNS (end of a service block within a region)
+service_cuts <- which(
+  dplyr::lead(df_multi$Service) != df_multi$Service |
+  dplyr::lead(df_multi$Region)  != df_multi$Region
+)
+
+# thicker line after each region
+region_cuts <- which(dplyr::lead(df_multi$Region) != df_multi$Region)
+
+# 3) Flextable
+ft <- flextable(df_multi) %>%
+  theme_vanilla() %>%
+  #border_remove() %>%                             # avoid double rules
+  merge_v(j = c("Region","Service")) %>%
+  valign(j = c("Region","Service"), valign = "top") %>%
+  bold(j = "Region",  bold = TRUE) %>%            # Region acts as outer label
+  bold(j = "Service", bold = TRUE) %>%            # Service as inner label
+  align(j = c("Region","Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+  # rule under month header
+  hline_bottom(part = "header",
+               border = fp_border(color = "grey70", width = 1)) %>%
+  # separator between TAXI and TNS blocks
+  { if (length(service_cuts))
+      hline(., i = service_cuts, j = 1:ncol(df_multi),
+            border = fp_border(color = "grey85", width = .75)) else . } %>%
+  # thicker line after each region block
+  { if (length(region_cuts))
+      hline(., i = region_cuts, j = 1:ncol(df_multi),
+            border = fp_border(color = "grey60", width = 1)) else . } %>%
+  fix_border_issues() %>%
+  autofit()
+
+ft
+
+library(dplyr)
+library(tidyr)
+library(flextable)
+
+# ---- Parameters you can change -------------------------------------
+area_type  <- "REGIONAL"   # or "MUNICIPAL"
+value_col  <- "vol"        # or "rev"
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# ---- Prep data from your trip_vol_reduced --------------------------
+df_show <- trip_vol_reduced %>%
+  filter(GEOSPATIAL_AREA_TYPE_CODE == area_type) %>%
+  transmute(
+    Region  = PICKUP_AREA,                 # for REGIONAL, this is the RD name; for MUNICIPAL, city
+    Service = TRIP_SERVICE_TYPE_CODE,      # TAXI / TNS
+    Year    = as.integer(yr),
+    mth     = factor(mth, levels = 1:12, labels = month_labs),
+    val     = .data[[value_col]]
+  ) %>%
+  group_by(Region, Service, Year, mth) %>%
+  summarise(val = sum(val, na.rm = TRUE), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = mth, values_from = val, values_fill = 0) %>%
+  arrange(Region, factor(Service, levels = c("TAXI","TNS")), Year) %>%
+  group_by(Region, Service) %>%
+  mutate(.is_service_header = row_number() == 1) %>%
+  ungroup()
+
+
+
+library(dplyr)
+library(tidyr)
+library(flextable)
+
+# Months across columns
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# Build Region ▶ Service ▶ Year wide table (Trips summed)
+df_print <- trip_vol_reduced %>%
+  filter(GEOSPATIAL_AREA_TYPE_CODE == "REGIONAL") %>%   # change if needed
+  transmute(
+    Region  = PICKUP_AREA,
+    Service = TRIP_SERVICE_TYPE_CODE,
+    Year    = as.integer(yr),
+    Month   = factor(mth, levels = 1:12, labels = month_labs),
+    Trips   = as.integer(vol)
+  ) %>%
+  group_by(Region, Service, Year, Month) %>%
+  summarise(Trips = sum(Trips), .groups = "drop") %>%
+  tidyr::pivot_wider(
+    names_from  = Month,
+    values_from = Trips,
+    values_fill = NA_integer_
+  ) %>%
+  arrange(Region, Service, Year) %>%
+  group_by(Region, Service) %>%
+  mutate(.is_service_header = Year == min(Year)) %>%   # mark first Year row within each Service
+  ungroup()
+
+# Row indices for the first row of each Service block
+idx_hdr <- which(df_print$.is_service_header)
+
+# Drop the helper column from what we print
+df_out <- select(df_print, Region, Service, Year, all_of(month_labs))
+
+# Build flextable
+ft <- flextable(df_out) %>%
+  # merge Region and Service vertically to mimic hierarchy
+  merge_v(j = c("Region", "Service")) %>%
+  valign(j = c("Region", "Service"), valign = "top") %>%
+  # left-indent Year; right-align month numbers
+  align(j = c("Region","Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+  padding(j = "Year", padding.left = 18) %>%
+  # number formatting
+  colformat_int(j = month_labs, big.mark = ",") %>%
+  # header styling
+  bg(part = "header", bg = "#F3F4F6") %>%
+  bold(part = "header", bold = TRUE) %>%
+  # style the first row of each Service block like a section header
+  bg(i = idx_hdr, j = c("Region","Service","Year", month_labs), bg = "#F9FAFB") %>%
+  bold(i = idx_hdr, j = c("Region","Service"), bold = TRUE) %>%
+  theme_booktabs() %>%
+  autofit()
+
+ft
+
+library(dplyr)
+library(flextable)
+
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# Build display data (Region shown once, Service indented)
+df_compact <- df_show %>%
+  mutate(Service = factor(Service, levels = c("TAXI","TNS"))) %>%  # optional
+  arrange(Region, Service, Year) %>%
+  group_by(Region, Service) %>%
+  mutate(
+    RD_Service = ifelse(first(as.integer(Service)) == 1,
+                        paste0(first(Region), "\n      ", as.character(first(Service))),
+                        paste0("      ", as.character(first(Service))))
+  ) %>%
+  ungroup() %>%
+  select(Region, Service, RD_Service, Year, all_of(month_labs))
+
+# Group start indices in the BODY (row 1 == first body row)
+idx_service_start <- which(!duplicated(df_compact[c("Region","Service")]))
+idx_region_start  <- which(!duplicated(df_compact["Region"]))
+
+# Because hline() draws ABOVE row i, drop the very first body row for each set
+idx_service_lines <- idx_service_start[idx_service_start > 1]
+idx_region_lines  <- idx_region_start[idx_region_start > 1]
+
+# Build table (hide Region/Service via col_keys)
+ft <- flextable(df_compact, col_keys = c("RD_Service","Year", month_labs)) %>%
+  merge_v(j = "RD_Service") %>%
+  valign(j = "RD_Service", valign = "top") %>%
+  align(j = c("RD_Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+  padding(j = "Year", padding.left = 18) %>%
+  colformat_int(j = month_labs, big.mark = ",") %>%
+  bg(part = "header", bg = "#F3F4F6") %>%
+  bold(part = "header", bold = TRUE) %>%
+  theme_booktabs()
+
+# Borders: thin for Service, thick for Region
+thin  <- officer::fp_border(color = "#E5E7EB", width = 0.75)
+thick <- officer::fp_border(color = "#9CA3AF", width = 1.5)
+all_cols <- c("RD_Service","Year", month_labs)
+
+# Draw lines exactly at group boundaries (above the first row of each *subsequent* block)
+if (length(idx_service_lines)) ft <- hline(ft, i = idx_service_lines, j = all_cols, border = thin, part = "body")
+if (length(idx_region_lines))  ft <- hline(ft, i = idx_region_lines,  j = all_cols, border = thick, part = "body")
+ft <- hline_top(ft, part = "header", border = thick)
+
+ft <- autofit(ft)
+ft
+
+
+
+library(dplyr)
+library(flextable)
+
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# Build compact display (Region shown once; Service indented)
+df_compact <- df_show %>%
+  mutate(Service = factor(Service, levels = c("TAXI","TNS"))) %>%   # optional order
+  arrange(Region, Service, Year) %>%
+  group_by(Region, Service) %>%
+  mutate(
+    RD_Service = ifelse(first(as.integer(Service)) == 1,
+                        paste0(first(Region), "\n      ", as.character(first(Service))),
+                        paste0("      ", as.character(first(Service))))
+  ) %>%
+  ungroup() %>%
+  select(Region, Service, RD_Service, Year, all_of(month_labs))
+
+# ---- indices for lines (make them PLAIN, UNNAMED INTEGERS) ----
+svc_start <- unname(as.integer(which(!duplicated(df_compact[c("Region","Service")]))))
+reg_start <- unname(as.integer(which(!duplicated(df_compact["Region"]))))
+
+svc_lines <- svc_start[svc_start > 1]
+reg_lines <- reg_start[reg_start > 1]
+
+# ---- table ----
+ft <- flextable(df_compact, col_keys = c("RD_Service","Year", month_labs)) %>%
+  merge_v(j = "RD_Service") %>%
+  valign(j = "RD_Service", valign = "top") %>%
+  align(j = c("RD_Service","Year"), align = "left") %>%
+  align(j = month_labs, align = "right") %>%
+  padding(j = "Year", padding.left = 18) %>%
+  colformat_int(j = month_labs, big.mark = ",") %>%
+  bg(part = "header", bg = "#F3F4F6") %>%
+  bold(part = "header", bold = TRUE) %>%
+  theme_booktabs()
+
+thin  <- officer::fp_border(color = "#E5E7EB", width = 0.75)
+thick <- officer::fp_border(color = "#9CA3AF", width = 1.5)
+all_cols <- c("RD_Service","Year", month_labs)
+
+if (length(svc_lines))  ft <- hline(ft, i = svc_lines, j = all_cols, border = thin,  part = "body")
+if (length(reg_lines))  ft <- hline(ft, i = reg_lines, j = all_cols, border = thick, part = "body")
+ft <- hline_top(ft, part = "header", border = thick) |> autofit()
+
+ft
+
+
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+library(scales)
+
+region_label <- "Metro Vancouver Regional District"
+month_labs   <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+# Build wide table for the region: Service ▶ Year, columns = months
+df_kbl <- trip_vol_reduced %>%
+  filter(GEOSPATIAL_AREA_TYPE_CODE == "REGIONAL",
+         PICKUP_AREA == region_label) %>%
+  transmute(Service = TRIP_SERVICE_TYPE_CODE,
+            Year    = as.integer(yr),
+            Month   = factor(mth, levels = 1:12, labels = month_labs),
+            Trips   = as.integer(vol)) %>%
+  group_by(Service, Year, Month) %>%
+  summarise(Trips = sum(Trips), .groups = "drop") %>%
+  pivot_wider(names_from = Month, values_from = Trips, values_fill = 0L) %>%
+  mutate(Service = factor(Service, levels = c("TAXI","TNS"))) %>%
+  arrange(Service, Year)
+
+# kableExtra: pack rows by Service
+grp_index <- df_kbl %>% count(Service, name = "n") %>%
+  arrange(Service) %>% {setNames(.$n, as.character(.$Service))}
+
+kbl(df_kbl %>% select(-Service),
+    caption = paste(region_label, "Trip Volume"),
+    format  = "html",
+    align   = c("l", rep("r", 12))) %>%
+  kable_paper("hover", full_width = FALSE) %>%
+  pack_rows(index = grp_index, bold = TRUE, background = "#F3F4F6") %>%
+  column_spec(1, width = "5em") %>%
+  kable_styling() %>%
+  row_spec(0, bold = TRUE) %>%
+  # pretty numbers
+  htmltools::HTML()  # (scales::comma already applied by kable; for strict control, pre-format months)
+
+
+```
+
+
+
+
+```{r}
+# Packages
+library(dplyr)
+library(tidyr)
+library(flextable)
+
+# ---- 1) Prep: Year × Jan–Dec with Region (RD) and Service ----
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+df_wide <- trip_vol_reduced %>%
+  filter(GEOSPATIAL_AREA_TYPE_CODE == "REGIONAL") %>%
+  transmute(
+    Region  = PICKUP_AREA,                   # RD
+    Service = TRIP_SERVICE_TYPE_CODE,        # TAXI / TNS
+    Year    = as.integer(yr),
+    Month   = factor(mth, levels = 1:12, labels = month_labs),
+    Trips   = as.integer(vol)
+  ) %>%
+  group_by(Region, Service, Year, Month) %>%
+  summarise(Trips = sum(Trips), .groups = "drop") %>%
+  pivot_wider(names_from = Month, values_from = Trips, values_fill = 0L) %>%
+  arrange(Region, Service, Year)
+
+# ---- 2) Two-level grouping → flextable ----
+gd <- as_grouped_data(
+  x       = df_wide,
+  groups  = c("Region", "Service"),          # <- two layers: RD, then Service
+  columns = c("Year", month_labs),
+  expand_single = TRUE
+)
+
+ft <- as_flextable(gd)
+
+# ---- 3) Style: left-align group labels; right-align months; indent service & year ----
+# Grab body data to target group-header rows (Year is NA on headers)
+body_dat <- ft$body$dataset
+rows_region  <- which(is.na(body_dat$Year) & is.na(body_dat$Service))   # Region header rows
+rows_service <- which(is.na(body_dat$Year) & !is.na(body_dat$Service))  # Service header rows
+
+ft <- ft |>
+  # left-align the two grouping columns (1: Region, 2: Service)
+  align(j = 1:2, align = "left", part = "body") |>
+  # left-align Year, right-align months
+  align(j = "Year", align = "left", part = "body") |>
+  align(j = month_labs, align = "right", part = "body") |>
+  # light visual hierarchy
+  padding(i = rows_service, j = 1, padding.left = 8,  part = "body") |>  # indent Service headers slightly
+  padding(i = !is.na(body_dat$Year), j = "Year", padding.left = 16, part = "body") |>  # indent Year rows
+  # number format & header style
+  colformat_int(j = month_labs, big.mark = ",") |>
+  bg(part = "header", bg = "#F3F4F6") |> bold(part = "header") |>
+  theme_booktabs() |>
+  autofit()
+
+ft
+
+
+# --- packages ---
+library(dplyr)
+library(tidyr)
+library(flextable)
+
+# --- 1) Make a wide table: Region ▸ Service ▸ Year  ×  Jan–Dec ---
+month_labs <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+data_rd <- trip_vol_reduced %>%
+  filter(GEOSPATIAL_AREA_TYPE_CODE == "REGIONAL") %>%
+  transmute(
+    Region  = PICKUP_AREA,
+    Service = TRIP_SERVICE_TYPE_CODE,
+    Year    = as.integer(yr),
+    Month   = factor(mth, levels = 1:12, labels = month_labs),
+    Trips   = as.integer(vol)
+  ) %>%
+  group_by(Region, Service, Year, Month) %>%
+  summarise(Trips = sum(Trips), .groups = "drop") %>%
+  pivot_wider(names_from = Month, values_from = Trips, values_fill = 0L) %>%
+  arrange(Region, Service, Year)
+
+# --- 2) as_grouped_data: two layers of grouping (Region, then Service) ---
+data_g  <- as_grouped_data(
+  x       = data_rd,
+  groups  = c("Region", "Service"),
+  columns = c("Year", month_labs)
+)
+
+# --- 3) Build the flextable and do the same kinds of styling as in your CO₂ example ---
+ as_flextable(data_g, hide_grouplabel=T) %>%
+  bold(part = "header", bold = TRUE) %>%
+  bold(i = ~ is.na(Year), j = 1, bold = TRUE, part = "body") %>%
+  align(i = ~ is.na(Year), j = 1, align = "left", part = "body") %>%
+  autofit()
+
+ 
+ 
+
+tib <- tibble(var_group = c("a", "a", "b", "c", "c", "c"),
+              var = 1:6)
+
+tib <- as_grouped_data(x = tib, groups = c("var_group"), columns = NULL)
+tib
+#>   var_group var
+#> 1         a  NA
+#> 4      <NA>   1
+#> 5      <NA>   2
+#> 2         b  NA
+#> 6      <NA>   3
+#> 3         c  NA
+#> 7      <NA>   4
+#> 8      <NA>   5
+#> 9      <NA>   6
+tib %>% 
+  as_flextable( ) %>% 
+  flextable::compose(
+    i = ~ !is.na(var_group), # when var_group not NA
+    j = "var", # on column "var"
+    # create a paragraph containing a chunk containing value of `var_group`
+    value = as_paragraph(as_chunk(var_group))) %>% 
+  hline(i = ~ !is.na(var_group), border = officer::fp_border() ) %>% 
+  autofit()
+
+
+#######################
+
+
+library(dplyr)
+library(flextable)
+library(officer)   # for fp_border()
+
+# toy data
+dat <- tibble::tibble(
+  Region  = c("Metro", "Metro", "Metro", "Capital", "Capital", "Capital"),
+  Service = c("Taxi", "Taxi", "TNS",   "Taxi",    "TNS",     "TNS"),
+  Year    = c(2024,   2025,   2024,    2024,      2024,      2025),
+  Jan     = c(100,120,300,  80, 200, 230),
+  Feb     = c(110,130,320,  90, 220, 240)
+)
+
+# 1) sort so groups are consecutive
+dat <- dat |> arrange(Region, Service, Year)
+
+# 2) restructure with group titles for Region ▶ Service
+gd  <- as_grouped_data(
+  x       = dat,
+  groups  = c("Region", "Service"),
+  columns = c("Year", "Jan", "Feb"),
+  # expand_single = TRUE will also create a title row for single-row groups
+  expand_single = F
+)
+
+# 3) turn into a flextable and style group title rows
+ as_flextable(gd, hide_grouplabel = TRUE) 
+
+
+
+
+
+gd <- as_grouped_data(
+  x = dat,
+  groups  = c("Region", "Service"),
+  columns = c("Year", "Jan", "Feb"),
+  expand_single = T
+)
+
+ft <- as_flextable(gd, hide_grouplabel = TRUE) |>
+  bold(i = ~ !is.na(Region) | !is.na(Service), bold = TRUE) |>
+  hline(i = ~ !is.na(Region) | (!is.na(Service) & Service == "TNS"),
+        border = officer::fp_border(color = "#D1D5DB", width = 1)) |>
+  autofit()
+
+
+
+library(flextable)
+
+ft <- flextable(df)
+ft <- merge_v(ft, j = "Region")      # Region shows once, spanning TNS/Taxi rows
+ft <- valign(ft, j = "Region", valign = "center")
+ft <- autofit(ft)
+
+
+
+###########
+
+
+library(dplyr)
+library(flextable)
+library(ftExtra)     # ok if already loaded
+
+# --- toy data (yours) ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |>
+  arrange(Region, Service, Year)
+
+# A) 2-level grouped_data: Region ▶ Service
+gd <- as_grouped_data(
+  x       = dat,
+  groups  = c("Region","Service"),
+  columns = c("Year","Jan","Feb"),
+  expand_single = TRUE
+)
+
+# B) Flag the *second* Region banner row
+gd_flag <- gd |>
+  mutate(.is_region_banner = !is.na(Region) & is.na(Service) & is.na(Year) & is.na(Jan) & is.na(Feb)) |>
+  group_by(Region) |>
+  mutate(.region_banner_seq = cumsum(.is_region_banner),
+         SecondRegion = if_else(.is_region_banner & .region_banner_seq == 2L, "Yes", NA_character_)) |>
+  ungroup()
+
+# C) Drop that flagged duplicate Region banner
+gd_clean <- gd_flag |>
+  filter(is.na(SecondRegion)) |>
+  select(-.is_region_banner, -.region_banner_seq, -SecondRegion)
+
+# D) Turn into flextable (Region ▶ Service with no repeated Region before the 2nd Service)
+ft <- as_flextable(gd_clean) |>
+  theme_booktabs() |>
+  autofit()
+
+# E) Provide the underlying cleaned dataset (no banner rows, no helper cols)
+clean_dataset <- gd_clean |>
+  filter(!is.na(Service) | !is.na(Year)) |>
+  select(Region, Service, Year, Jan, Feb)
+
+# View results in RStudio:
+ft
+clean_dataset
+
+
+```
+
+```{r}
+library(dplyr)
+library(flextable)
+library(ftExtra)
+library(officer)
+
+# --- example data (yours) ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |> arrange(Region, Service, Year)
+
+
+
+gd <- as_grouped_data(
+  x       = dat,
+  groups  = c("Region","Service"),
+  columns = c("Year","Jan","Feb"),
+  expand_single = TRUE
+)
+
+d<-as_flextable(gd,hide_grouplabel = TRUE )
+
+library(dplyr)
+library(flextable)
+library(ftExtra)
+library(officer)  # for fp_border()
+
+# --- toy data ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |>
+  arrange(Region, Service, Year)
+
+data_cols <- c("Year","Jan","Feb")
+
+# 1) Build grouped_data (Region ▶ Service)
+gd <- as_grouped_data(
+  x       = dat,
+  groups  = c("Region","Service"),
+  columns = data_cols,
+  expand_single = TRUE
+)
+
+# 2) Identify Region banner rows in gd
+is_region_banner <- !is.na(gd$Region) &
+                    is.na(gd$Service) &
+                    apply(is.na(gd[, data_cols, drop = FALSE]), 1, all)
+
+idx_banner <- which(is_region_banner)
+
+# 3) Drop the 2nd (and later) Region banner per Region — keep grouped_data attrs via base `[`
+drop_rows <- idx_banner[duplicated(gd$Region[idx_banner])]
+gd_nodup  <- if (length(drop_rows)) gd[-drop_rows, , drop = FALSE] else gd
+
+# 4) Convert to flextable (two-layer banners; Region not repeated)
+ft <- as_flextable(
+  gd_nodup,
+  col_keys = data_cols,
+  hide_grouplabel = TRUE
+) |>
+  #theme_booktabs() |>
+  autofit()
+
+# 5) Draw horizontal separators BETWEEN Regions using hline() on the row above each Region banner
+is_region_banner_nodup <- !is.na(gd_nodup$Region) &
+                          is.na(gd_nodup$Service) &
+                          apply(is.na(gd_nodup[, data_cols, drop = FALSE]), 1, all)
+
+i_banner <- which(is_region_banner_nodup)
+i_sep_bottom_of_prevrow <- i_banner[-1] - 1L  # bottom border of the row right before each later Region banner
+
+sep_border <- fp_border(color = "#9AA0A6", width = 1.25)
+if (length(i_sep_bottom_of_prevrow) > 0) {
+  ft <- hline(
+    x      = ft,
+    i      = i_sep_bottom_of_prevrow,
+    j      = data_cols,
+    border = sep_border,
+    part   = "body"
+  )
+}
+
+# 6) (Optional) cleaned underlying dataset without banner rows
+clean_dataset <- subset(
+  gd_nodup,
+  !is.na(Service) | !is.na(Year),
+  select = c("Region","Service", data_cols)
+)
+
+# Show results
+ft
+# clean_dataset
+
+
+```
+
+
+```{r}
+
+library(dplyr)
+library(flextable)
+library(ftExtra)
+library(officer)  # for fp_border()
+
+# --- toy data (swap in yours) ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |>
+  arrange(Region, Service, Year)
+
+data_cols <- c("Year","Jan","Feb")
+
+# 1) grouped_data: Region ▶ Service
+gd <- as_grouped_data(
+  x = dat, groups = c("Region","Service"),
+  columns = data_cols, expand_single = TRUE
+)
+
+# 2) Drop duplicate Region banners (keep grouped_data attrs via base `[`):
+#    - find banner rows
+banner_mask <- !is.na(gd$Region) & is.na(gd$Service) &
+               rowSums(is.na(gd[, data_cols, drop = FALSE])) == length(data_cols)
+idx_banner  <- which(banner_mask)
+#    - among those, drop the 2nd+ per Region
+drop_rows   <- idx_banner[ duplicated(gd$Region[idx_banner]) ]
+gd2         <- if (length(drop_rows)) gd[-drop_rows, , drop = FALSE] else gd
+
+# 3) Flextable (two-layer banners; Region not repeated)
+ft <- as_flextable(gd2, col_keys = data_cols, hide_grouplabel = TRUE) |>
+  #theme_booktabs() |>
+  autofit()
+
+# 4) Hlines between Regions: draw the bottom border of the row *before* each later Region banner
+banner_mask2 <- !is.na(gd2$Region) & is.na(gd2$Service) &
+                rowSums(is.na(gd2[, data_cols, drop = FALSE])) == length(data_cols)
+idx_banner2  <- which(banner_mask2)
+i_sep        <- idx_banner2[-1] - 1L
+if (length(i_sep)) {
+  ft <- hline(
+    x = ft, i = i_sep, j = data_cols,
+    border = fp_border(color = "#9AA0A6", width = 1.25),
+    part = "body"
+  )
+}
+
+# (Optional) underlying cleaned dataset (no banner rows)
+clean_dataset <- subset(gd2, !is.na(Service) | !is.na(Year),
+                        select = c("Region","Service", data_cols))
+
+ft
+# clean_dataset
+
+```
+```{r}
+
+library(gt)
+library(dplyr)
+
+# --- Toy Data ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |>
+  arrange(Region, Service, Year)
+
+# 1. Data Preparation for gt
+dat_gt <- dat |>
+  # Create a helper column to identify the last row of each Region group
+  mutate(is_last_in_region = row_number() == n(),.by = Region) |>
+  # Suppress repeated Region labels, keeping only the first
+  mutate(Region = ifelse(row_number() == 1, Region, NA),.by = Region)
+
+# 2. Create the gt table
+gt_table <- dat_gt |>
+  # Use 'Service' for the inner row groups
+  gt(groupname_col = "Service") |>
+  # 3. Add horizontal border using the helper column for targeting
+  tab_style(
+    style = cell_borders(
+      sides = "bottom",
+      color = "#9AA0A6",
+      weight = px(1.25)
+    ),
+    locations = cells_body(
+      rows = is_last_in_region
+    )
+  ) |>
+  # 4. Final formatting touches
+  cols_align(align = "left", columns = Region) |>
+  cols_hide(columns = is_last_in_region)
+
+gt_table
+
+
+
+library(kableExtra)
+library(dplyr)
+
+# --- Toy Data ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+)
+
+# 1. Data Preparation: Ensure data is sorted by grouping variables
+dat_sorted <- dat |>
+  arrange(Region, Service, Year)
+
+# 2. Identify rows where a horizontal separator is needed (i.e., the last row of each Region group)
+end_indices <- which(dat_sorted$Region!= lead(dat_sorted$Region, default = last(dat_sorted$Region)))
+
+# 3. Create the table and apply grouping/collapsing
+kable_table <- dat_sorted |>
+  kbl(format = "html", booktabs = TRUE, col.names = c("Region", "Service", "Year", "Jan", "Feb")) |>
+  kable_styling(bootstrap_options = "striped", full_width = FALSE) |>
+  # Use collapse_rows to automatically merge cells in the first two columns
+  collapse_rows(columns = 1:2, valign = "top") |>
+  # 4. Add the horizontal separator line at the identified indices
+  row_spec(end_indices, extra_css = "border-bottom: 1.25px solid #9AA0A6;")
+
+kable_table
+
+
+
+
+library(huxtable)
+library(dplyr)
+
+# --- Toy Data ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+)
+
+# 1. Data Preparation: Ensure data is sorted
+dat_sorted <- dat |>
+  arrange(Region, Service, Year)
+
+# 2. Identify rows for the separator, adding 1 to account for the header row in huxtable
+end_indices <- which(dat_sorted$Region!= lead(dat_sorted$Region, default = last(dat_sorted$Region)))
+end_indices_hux <- end_indices + 1
+
+# 3. Create the huxtable and merge repeated rows
+hux_table <- dat_sorted |>
+  as_hux(add_colnames = TRUE) |>
+  merge_repeated_rows(cols = 1:2) |>
+  # 4. Add the bottom border at the specified locations
+  set_bottom_border(row = end_indices_hux, col = everywhere, value = 1.25) |>
+  set_bottom_border_color(row = end_indices_hux, col = everywhere, value = "#9AA0A6") |>
+  # Final styling
+  set_valign(row = everywhere, col = everywhere, value = "top") |>
+  set_width(0.8)
+
+hux_table
+
+
+
+
+library(dplyr)
+
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024, 2025, 2024, 2024, 2024, 2025),
+  Jan     = c(200, 230,  80, 300, 100, 120),
+  Feb     = c(220, 240,  90, 320, 110, 130)
+) |>
+  arrange(Region, Service, Year)
+
+
+library(gt)
+
+tbl <- dat
+
+gt_tbl <- tbl |>
+  gt(groupname_col = "Region", rowname_col = "Service") |>
+  # add a line under each Region group:
+  tab_options(
+    row_group.border.bottom.style = "solid",
+    row_group.border.bottom.color = "#9AA0A6",
+    row_group.border.bottom.width = px(1)
+  )
+
+
+
+
+library(huxtable)
+
+tbl <- dat
+ends <- cumsum(rle(tbl$Region)$lengths)
+
+ht <- as_hux(tbl)
+ht <- merge_repeated_rows(ht, col = 1)             # merge Region (shows once)
+# (optional) also merge Service to show it once per block of years:
+# ht <- merge_repeated_rows(ht, col = 2)
+
+bottom_border(ht)[ends[-length(ends)], ] <- 0.8    # lines between Regions
+align(ht)[, 1:2] <- "left"
+align(ht)[, 3:ncol(ht)] <- "right"
+
+quick_docx(ht, file = "table_huxtable.docx")       # creates a real .docx table
+
+
+
+library(huxtable)
+library(dplyr)
+
+# --- Toy Data ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+)
+
+# 1. Data Preparation: Ensure data is sorted
+dat_sorted <- dat |>
+  arrange(Region, Service, Year)
+
+# 2. Identify rows for the separator, adding 1 to account for the header row in huxtable
+end_indices <- which(dat_sorted$Region!= lead(dat_sorted$Region, default = last(dat_sorted$Region)))
+end_indices_hux <- end_indices + 1
+
+# 3. Create the huxtable and merge repeated rows
+hux_table <- dat_sorted |>
+  as_hux(add_colnames = TRUE) |>
+  merge_repeated_rows(col = 1:2) |>
+  # 4. Add the bottom border at the specified locations
+  set_bottom_border(row = end_indices_hux, col = everywhere, value = 1.25) |>
+  set_bottom_border_color(row = end_indices_hux, col = everywhere, value = "#9AA0A6") |>
+  # Final styling
+  set_valign(row = everywhere, col = everywhere, value = "top") |>
+  set_width(0.8)
+
+hux_table
+
+
+
+
+library(knitr)
+library(kableExtra)
+library(officer)
+
+## Row indices for nested groups
+dat_ord <- dat %>% mutate(.row = row_number())
+svc_rng <- dat_ord %>% group_by(Region, Service) %>%
+  summarise(start = min(.row), end = max(.row), .groups = "drop")
+reg_rng <- svc_rng %>% group_by(Region) %>%
+  summarise(start = min(start), end = max(end), .groups = "drop")
+
+## Base table (only the data columns appear as columns; banners will be injected)
+kb <- kbl(dat_ord %>% select(Year, Jan, Feb), format = "html",
+          align = c("r","r","r")) |>
+  kable_paper(full_width = FALSE)
+
+## Top-level Region banners (with a separator line after each Region)
+for (k in seq_len(nrow(reg_rng))) {
+  kb <- pack_rows(kb,
+                  group_label = reg_rng$Region[k],
+                  start_row   = reg_rng$start[k],
+                  end_row     = reg_rng$end[k],
+                  bold = TRUE, italic = FALSE, hline_after = TRUE)
+}
+
+## Second-level Service banners inside each Region
+for (k in seq_len(nrow(svc_rng))) {
+  kb <- pack_rows(kb,
+                  group_label = svc_rng$Service[k],
+                  start_row   = svc_rng$start[k],
+                  end_row     = svc_rng$end[k],
+                  bold = FALSE, italic = FALSE, level = 2)
+}
+
+## Save HTML table as an image and drop it into a Word doc
+png_file <- "table_kable.png"
+save_kable(kb, file = png_file, vwidth = 1200)
+
+doc <- read_docx()
+doc <- body_add_par(doc, "kableExtra table (image)", style = "heading 1")
+doc <- body_add_img(doc, png_file, width = 6)
+print(doc, target = "table_kable.docx")
+library(dplyr)
+library(flextable)
+library(ftExtra)
+
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |>
+  arrange(Region, Service, Year)
+
+flextable( dat )
+
+# ⬇︎ Only data columns in `columns=` — no Region/Service in the body
+gd <- as_grouped_data(
+  x       = dat,
+  groups  = c("Region", "Service"),
+  columns = c("Year","Jan","Feb"),
+  expand_single = TRUE
+)
+
+
+flextable(gd)
+
+
+ft <- ftExtra:: as_flextable(gd) |>
+  flextable::theme_booktabs() |>
+  flextable::align(j = "Year", align = "left",  part = "body") |>
+  flextable::align(j = c("Jan","Feb"), align = "right", part = "body") |>
+  flextable::align(j = c("Year","Jan","Feb"), align = "center", part = "header") |>
+  flextable::colformat_int(j = "Year", big.mark = ",") |>
+  flextable::colformat_double(j = c("Jan","Feb"), digits = 0, big.mark = ",") |>
+  flextable::autofit()
+
+ft
+
+library(dplyr)
+library(flextable)   # as_grouped_data()
+library(ftExtra)     # as_flextable()
+library(officer)     # fp_border()
+
+#--- data ---
+dat <- tibble::tibble(
+  Region  = c("Capital","Capital","Capital","Metro","Metro","Metro"),
+  Service = c("TNS","TNS","Taxi","TNS","Taxi","Taxi"),
+  Year    = c(2024,2025,2024,2024,2024,2025),
+  Jan     = c(200,230, 80, 300,100,120),
+  Feb     = c(220,240, 90, 320,110,130)
+) |>
+  arrange(Region, Service, Year)
+
+val_cols <- setdiff(names(dat), c("Region","Service"))
+
+# 1) Region ▶ Service grouped_data
+gd <- flextable::as_grouped_data(
+  x = dat, groups = c("Region","Service"),
+  columns = val_cols, expand_single = TRUE
+)
+
+# 2) Drop duplicate Region banners (keep grouped_data attrs via base `[`)
+is_reg_banner <- !is.na(gd$Region) & is.na(gd$Service) &
+                 rowSums(is.na(gd[, val_cols, drop = FALSE])) == length(val_cols)
+
+drop_idx <- which(is_reg_banner)[ duplicated(gd$Region[is_reg_banner]) ]
+gd2 <- if (length(drop_idx)) gd[-drop_idx, , drop = FALSE] else gd
+
+# 3) Build table (Region + Service banners; Region shown once)
+ft <- ftExtra::as_flextable(gd2, col_keys = val_cols, hide_grouplabel = TRUE) |>
+  #theme_booktabs() |>
+  autofit()
+
+# 4) Optional: thin rule between Regions
+reg_banner_rows <- which(!is.na(gd2$Region) & is.na(gd2$Service) &
+                         rowSums(is.na(gd2[, val_cols, drop = FALSE])) == length(val_cols))
+if (length(reg_banner_rows) > 1) {
+  ft <- hline(ft, i = reg_banner_rows[-1] - 1L, j = val_cols,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAbElEQVR4Xs2RQQrAMAgEfZgf7W9LAguybljJpR3wEse5JOL3ZObDb4x1loDhHbBOFU6i2Ddnw2KNiXcdAXygJlwE8OFVBHDgKrLgSInN4WMe9iXiqIVsTMjH7z/GhNTEibOxQswcYIWYOR/zAjBJfiXh3jZ6AAAAAElFTkSuQmCC
+              border = fp_border(color = "#9AA0A6", width = 1.25), part = "body")
+}
+
+ft
+
+
+```
