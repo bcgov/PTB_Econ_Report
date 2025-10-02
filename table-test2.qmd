@@ -8,47 +8,342 @@ execute:
   warning: false
   message: false
 ---
+```{r}
+library(readxl)
+library(dplyr)
+library(lubridate)
 
-```{=html}
-<style>
-/* Center big title and give a bit more spacing */
-.quarto-title-block .title {
-  text-align: center;
-  letter-spacing: .5px;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
-}
+# ---- Define temporal window ----
+start_year  <- 2023; start_month <- 1
+end_year    <- 2025; end_month   <- 4
+region_name      <- "Capital"
 
-/* Section and subsection colors to match screenshot */
-h2 { color: #2ecc71; /* green */ }
-h3 { color: #6dd5d8; /* teal */ }
+start_date <- make_date(start_year, start_month, 1)
+end_date   <- make_date(end_year,   end_month,   1)
 
-/* Body copy sizing similar to the screenshot */
-p { font-size: 1.05rem; line-height: 1.6; }
+# ---- Load and filter ----
+raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\3_datahub.xlsx")
 
-/* Checklist table styling */
-table.indicator-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: .25rem;
-  margin-bottom: 1.25rem;
-}
-table.indicator-table td {
-  border: none;
-  padding: .35rem .25rem;
-  vertical-align: top;
-}
-table.indicator-table td:first-child {
-  width: 70%;
-}
-table.indicator-table td:last-child {
-  text-align: right;
-  width: 30%;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-</style>
+filtered <- raw %>%
+  mutate(date = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1)) %>%
+  filter(between(date, start_date, end_date))
+
+# ---- Show first 20 rows ----
+filtered %>% slice_head(n = 20)
+
+
+
+
 ```
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(stringr)
+
+# Format like +5.3%
+.pctfmt <- function(x) {
+  if (is.na(x)) return("n/a")
+  paste0(ifelse(x >= 0, "+", ""), format(round(x, 1), nsmall = 1), "%")
+}
+
+# Filter + minimal shaping (keeps data intact; just adds date)
+.filter_indicator <- function(data, indicator, region, services, area_type) {
+  region_vec <- if (region == "Metro Vancouver Regional District") c(region, "Metro Vancouver") else region
+  data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    transmute(
+      date  = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
+      value = suppressWarnings(as.numeric(INDICATOR_VALUE))
+    )
+}
+
+# === 1) YoY for the last available month (single % string) ===
+yoy_last_month <- function(data,
+                           indicator = "TRIP_VOLUME",
+                           region    = "Metro Vancouver Regional District",
+                           services  = c("TAXI","TNS"),
+                           area_type = "REGIONAL") {
+  df <- .filter_indicator(data, indicator, region, services, area_type)
+  if (nrow(df) == 0) return("n/a")
+  last_date <- max(df$date, na.rm = TRUE)
+  prev_date <- last_date %m-% years(1)
+
+  cur_sum  <- df %>% filter(date == last_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  prev_sum <- df %>% filter(date == prev_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+
+  pct <- if (!is.na(prev_sum) && prev_sum != 0) (cur_sum/prev_sum - 1) * 100 else NA_real_
+  .pctfmt(pct)
+}
+
+# === 2) YTD YoY through the last available month (single % string) ===
+ytd_yoy_last_month <- function(data,
+                               indicator = "TRIP_VOLUME",
+                               region    = "Metro Vancouver Regional District",
+                               services  = c("TAXI","TNS"),
+                               area_type = "REGIONAL") {
+  df <- .filter_indicator(data, indicator, region, services, area_type)
+  if (nrow(df) == 0) return("n/a")
+  last_date  <- max(df$date, na.rm = TRUE)
+  y_last     <- year(last_date)
+  m_last     <- month(last_date)
+
+  cur_ytd  <- df %>% filter(year(date) == y_last,     month(date) <= m_last) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  prev_ytd <- df %>% filter(year(date) == y_last - 1, month(date) <= m_last) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+
+  pct <- if (!is.na(prev_ytd) && prev_ytd != 0) (cur_ytd/prev_ytd - 1) * 100 else NA_real_
+  .pctfmt(pct)
+}
+
+```
+
+
+
+```{r}
+# raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\3_datahub.xlsx")
+
+yoY  <- yoy_last_month(raw,  indicator = "TRIP_VOLUME")
+ytd  <- ytd_yoy_last_month(raw, indicator = "TRIP_VOLUME")
+
+yoY   # e.g. "+2.1%"
+ytd   # e.g. "+5.3%"
+
+```
+
+
+```{r}
+#| message: false
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(flextable)
+library(stringr)
+library(officer)
+
+make_indicator_table_compact <- function(
+  data,
+  indicator        = "TRIP_VOLUME",
+  region           = "Metro Vancouver Regional District",
+  services         = c("TAXI","TNS"),
+  area_type        = "REGIONAL",
+  digits           = 0,
+  zero_to_blank    = FALSE,
+  currency         = NULL,
+  include_alias_mv = TRUE,
+  font_size        = 9,
+  scale_width      = 0.95
+) {
+  library(dplyr)
+  library(tidyr)
+  library(lubridate)
+  library(flextable)
+  library(stringr)
+
+  # auto decide currency formatting
+  if (is.null(currency)) {
+    currency <- str_detect(indicator, regex("REVENUE|FARE", ignore_case = TRUE))
+  }
+
+  # region alias
+  region_vec <- if (include_alias_mv && region == "Metro Vancouver Regional District") {
+    c(region, "Metro Vancouver")
+  } else region
+
+  # ---- 1) Filter ----
+  df <- data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    transmute(
+      service   = TRIP_SERVICE_TYPE_CODE,
+      year      = as.integer(YEAR_POINT),
+      month_num = as.integer(MONTH_POINT),
+      value     = as.numeric(INDICATOR_VALUE)
+    )
+
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+
+  # ---- 2) Fill missing months ----
+  dfc <- df %>%
+    group_by(service, year) %>%
+    complete(month_num = 1:12, fill = list(value = NA_real_)) %>%
+    ungroup() %>%
+    mutate(month_lab = month(ymd(sprintf("2000-%02d-01", month_num)), label = TRUE, abbr = TRUE))
+
+  # ---- 3) Pivot wider ----
+  month_cols <- as.character(month(1:12, label = TRUE, abbr = TRUE))
+  wide <- dfc %>%
+    select(service, year, month_lab, value) %>%
+    tidyr::pivot_wider(names_from = month_lab, values_from = value) %>%
+    arrange(match(service, services), year)
+
+  for (m in month_cols) if (!m %in% names(wide)) wide[[m]] <- NA_real_
+  wide <- wide[, c("service","year", month_cols)]
+
+  if (isTRUE(zero_to_blank)) {
+    wide <- wide %>% mutate(across(all_of(month_cols), ~ ifelse(.x == 0, NA_real_, .x)))
+  }
+
+  # ---- 4) Add service headers ----
+  add_service_headers <- function(w) {
+    res <- list()
+    for (srv in services) {
+      block <- w %>% filter(service == srv)
+      if (nrow(block) == 0) next
+      header <- tibble(service = srv, year = NA_integer_)
+      for (m in month_cols) header[[m]] <- NA_real_
+      res[[srv]] <- bind_rows(header, block)
+    }
+    bind_rows(res)
+  }
+  wide2 <- add_service_headers(wide)
+
+  display <- ifelse(is.na(wide2$year), wide2$service, format(wide2$year, big.mark = ","))
+  out <- wide2 %>%
+    select(year, all_of(month_cols)) %>%
+    mutate(Year = display, .before = 1)
+
+  # ---- 5) Flextable ----
+  ft <- flextable(out)
+
+  header_idx <- which(is.na(wide2$year))
+  if (length(header_idx) > 0) {
+    for (i in header_idx) {
+      ft <- merge_at(ft, i = i, j = 1:ncol(out))
+    }
+    ft <- bold(ft, i = header_idx, bold = TRUE)
+    ft <- align(ft, i = header_idx, align = "left")
+    ft <- bg(ft, i = header_idx, bg = "#d9ead3")  # green-ish band for service rows
+  }
+
+  # Zebra stripes for year rows (makes table readable)
+  ft <- bg(ft, i = setdiff(seq_len(nrow(out)), header_idx), bg = "#f9f9f9")
+  ft <- bg(ft, i = setdiff(seq_len(nrow(out)), header_idx)[c(TRUE,FALSE)], bg = "#ffffff")
+
+  # bold year numbers
+  ft <- bold(ft, i = setdiff(seq_len(nrow(out)), header_idx), j = 1)
+
+  # format numbers
+  if (currency) {
+    ft <- colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", prefix = "$", na_str = "")
+  } else {
+    ft <- colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", na_str = "")
+  }
+
+  # layout & fit
+  ft <- fontsize(ft, part = "all", size = font_size)
+#  ft <- set_table_properties(ft, width = scale_width, layout = "autofit")
+  ft <- autofit(ft)
+#  ft <- fontsize(ft, part = "all", size = 7)      # reduce text size
+  ft <- fit_to_width(ft, max_width = 9)
+#  ft <- set_table_properties(ft, layout = "autofit", width = .9)  # scale table to 90% of page width
+  
+  # ---- 6) Add dynamic title ----
+# build title string
+time_min <- min(wide2$year, na.rm = TRUE)
+time_max <- max(wide2$year, na.rm = TRUE)
+
+title_txt <- paste(region, indicator, sprintf("(%d–%d)", time_min, time_max))
+
+# add as top row spanning all columns
+ft <- add_header_row(ft, values = title_txt, colwidths = ncol(out))
+ft <- bold(ft, part = "header", i = 1)
+ft <- fontsize(ft, part = "header", i = 1, size = font_size + 2)
+ft <- align(ft, part = "header", i = 1, align = "center")
+
+
+  ft
+}
+
+```
+
+
+
+```{r}
+#| message: false
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+make_indicator_chart_stacked <- function(
+  data,
+  indicator        = "TRIP_VOLUME",
+  region           = "Metro Vancouver Regional District",
+  services         =c("TAXI", "TNS"),                     # first = bottom of stack
+  area_type        = "REGIONAL",
+  title            = "Trip Volume (trips)",
+  caption          = NULL,
+  colors           = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),# light blue TAXI, dark blue TNS
+  date_from        = NULL,                                # e.g. as.Date("2022-01-01")
+  date_to          = NULL,                                # e.g. as.Date("2024-03-01")
+  y_breaks         = waiver(),
+  y_labels         = label_number(accuracy = 0.1, scale_cut = cut_short_scale()),
+  base_size        = 10
+) {
+  region_vec <- if (region == "Metro Vancouver Regional District")
+    c(region, "Metro Vancouver") else region
+
+  df <- data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    transmute(
+      service = factor(TRIP_SERVICE_TYPE_CODE, levels = services),
+      date    = as.Date(sprintf("%04d-%02d-01", YEAR_POINT, MONTH_POINT)),
+      value   = as.numeric(INDICATOR_VALUE)
+    )
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+
+  rng <- seq(floor_date(min(df$date), "month"),
+             floor_date(max(df$date), "month"), by = "month")
+  df_full <- df %>% complete(service, date = rng, fill = list(value = 0))
+  if (!is.null(date_from)) df_full <- dplyr::filter(df_full, date >= date_from)
+  if (!is.null(date_to))   df_full <- dplyr::filter(df_full, date <= date_to)
+
+  ggplot(df_full, aes(x = date, y = value, fill = service)) +
+    geom_col(width = 26, position = "stack") +
+    scale_fill_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = y_labels, breaks = y_breaks, expand = c(0, 0.02)) +
+    scale_x_date(
+      breaks = scales::pretty_breaks(n = 18),
+      date_labels = "%Y\n%b"
+    ) +
+    labs(title = title, subtitle = region, x = NULL, y = NULL, caption = caption) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+```
+
+
+
+
+
 
 ## Introduction
 
@@ -74,16 +369,7 @@ The Board’s letter of instruction to Senior Economist included the application
 
 ### Application Details
 
-```{=html}
-<!--
-Add your “Application Details” content here (tables, figures, etc.)
-You can continue sections as needed, e.g.:
 
-### Data Sources
-### Methodology
-### Results
--->
-```
 
 This report was produced for the Board regarding a new application for a taxi licence.
 
@@ -214,11 +500,38 @@ The Board’s public need policy in the *Policy Manual* lists examples of the de
 
 **Table 1: Metro Vancouver Regional District Trip Volume**
 
-![](images/Picture2.png)
+```{r}
+tbl <- make_indicator_table_compact(
+  data      = filtered,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  services  = c("TAXI","TNS"),
+  area_type = "REGIONAL",
+  digits    = 0
+)
+
+tbl  # will now show a title row above the table
+
+```
 
 *Figure 1: Metro Vancouver Regional District Trip Volume*
 
-![](images/Picture3.png)
+```{r}
+#| fig-width: 7.2
+#| fig-height: 3.0
+#| dpi: 220
+chart <- make_indicator_chart_stacked(
+  data      = raw,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  services  = c("TNS", "TAXI"),
+  area_type = "REGIONAL",
+  title     = "TRIP_VOLUME"
+)
+chart
+
+
+```
 
 **Analysis and Conclusions:**
 
@@ -257,15 +570,42 @@ The Board’s public need policy in the *Policy Manual* lists examples of the de
 
 **Table 2: Metro Vancouver Regional District Trip Revenue**
 
-![](images/Picture4.png)
+```{r}
+tbl <- make_indicator_table_compact(
+  data      = raw,
+  indicator = "TRIP_REVENUE",
+  region    = region_name,
+  services  = c("TAXI","TNS"),
+  area_type = "REGIONAL",
+  digits    = 0
+)
+
+tbl  # will now show a title row above the table
+
+```
 
 **Figure 2: Metro Vancouver Regional District Trip Revenue**
 
-![](images/Picture5.png)
+```{r}
+#| fig-width: 7.2
+#| fig-height: 3.0
+#| dpi: 220
+chart <- make_indicator_chart_stacked(
+  data      = raw,
+  indicator = "TRIP_REVENUE",
+  region    = region_name,
+  services  = c("TNS", "TAXI"),
+  area_type = "REGIONAL",
+  title     = "TRIP_REVENUE"
+)
+chart
+
+
+```
 
 **Analysis and Conclusions:**
 
-In March 2024, the Metro Vancouver Regional District saw a total of **\$10,354,294 in taxi revenue**. On a year-over-year basis, total taxi revenue increased by **7.85%**, while on a year-to-date basis, taxi revenue rose by **6.45%**.\
+In March 2024, the Metro Vancouver Regional District saw a total of **\$10,354,294 in taxi revenue**. On a year-over-year basis, total taxi revenue increased by **7.85%**, w hile on a year-to-date basis, taxi revenue rose by **6.45%**.\
 The increase in taxi trip revenue was modest (6.45% YTD), suggesting that the demand for taxi services was stable.
 
 Meanwhile, in March 2024, the TNS sector had a total of **\$41,996,572 in trip revenue** in the Metro Vancouver Regional District. On a year-over-year basis, total TNS revenue increased by **30.74%**, while on a year-to-date basis, TNS revenue increased by **27.33%**.\
