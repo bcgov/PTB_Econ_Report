@@ -1,0 +1,839 @@
+```{r}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+```
+
+---
+title: "Economics Report"
+format:
+  docx:
+    reference-doc: "Economics Report (Region 2).docx"
+
+
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+```{r}
+library(readxl)
+library(dplyr)
+library(lubridate)
+
+# ---- Define temporal window ----
+start_year  <- 2023; start_month <- 1
+end_year    <- 2024; end_month   <- 3
+region_name      <- "Metro Vancouver"
+
+
+# for put it in palce of last month and YOY and Yod
+end_label <- paste0(format(as.Date(sprintf("%04d-%02d-01", end_year, end_month)), "%B %Y")) 
+# for say from last date to now
+prev_label <- paste0(format(as.Date(sprintf("%04d-%02d-01", end_year-1, end_month)), "%B %Y"))
+# for say from last year to now
+prev_year <- end_year - 1
+
+start_date <- make_date(start_year, start_month, 1)
+end_date   <- make_date(end_year,   end_month,   1)
+
+# ---- Load and filter ----
+raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\3_datahub.xlsx")
+
+filtered <- raw %>%
+  mutate(date = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1)) %>%
+  filter(between(date, start_date, end_date))
+
+```
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(stringr)
+
+# Format like +5.3%
+.pctfmt <- function(x) {
+  if (is.na(x)) return("n/a")
+  paste0(ifelse(x >= 0, "+", ""), format(round(x, 1), nsmall = 1), "%")
+}
+
+# Filter + minimal shaping (keeps data intact; just adds date)
+.filter_indicator <- function(data, indicator, region, services, area_type) {
+  region_vec <- if (region == "Metro Vancouver Regional District") c(region, "Metro Vancouver") else region
+  data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    transmute(
+      date  = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
+      value = suppressWarnings(as.numeric(INDICATOR_VALUE))
+    )
+}
+
+# === 1) YoY for the last available month (single % string) ===
+yoy_last_month <- function(data,
+                           indicator = "TRIP_VOLUME",
+                           region    = "Metro Vancouver Regional District",
+                           services  = c("TAXI","TNS"),
+                           area_type = "REGIONAL") {
+  df <- .filter_indicator(data, indicator, region, services, area_type)
+  if (nrow(df) == 0) return("n/a")
+  last_date <- max(df$date, na.rm = TRUE)
+  prev_date <- last_date %m-% years(1)
+
+  cur_sum  <- df %>% filter(date == last_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  prev_sum <- df %>% filter(date == prev_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+
+  pct <- if (!is.na(prev_sum) && prev_sum != 0) (cur_sum/prev_sum - 1) * 100 else NA_real_
+  .pctfmt(pct)
+}
+
+# === 2) YTD YoY through the last available month (single % string) ===
+ytd_yoy_last_month <- function(data,
+                               indicator = "TRIP_VOLUME",
+                               region    = "Metro Vancouver Regional District",
+                               services  = c("TAXI","TNS"),
+                               area_type = "REGIONAL") {
+  df <- .filter_indicator(data, indicator, region, services, area_type)
+  if (nrow(df) == 0) return("n/a")
+  last_date  <- max(df$date, na.rm = TRUE)
+  y_last     <- year(last_date)
+  m_last     <- month(last_date)
+
+  cur_ytd  <- df %>% filter(year(date) == y_last,     month(date) <= m_last) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  prev_ytd <- df %>% filter(year(date) == y_last - 1, month(date) <= m_last) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+
+  pct <- if (!is.na(prev_ytd) && prev_ytd != 0) (cur_ytd/prev_ytd - 1) * 100 else NA_real_
+  .pctfmt(pct)
+}
+
+```
+
+
+
+```{r}
+# raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\3_datahub.xlsx")
+
+yoY  <- yoy_last_month(raw,  indicator = "TRIP_VOLUME")
+ytd  <- ytd_yoy_last_month(raw, indicator = "TRIP_VOLUME")
+
+
+
+```
+
+
+```{r}
+#| message: false
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(flextable)
+library(stringr)
+library(officer)
+
+make_indicator_table_compact <- function(
+  data,
+  indicator        = "TRIP_VOLUME",
+  region           = "Metro Vancouver Regional District",
+  services         = c("TAXI","TNS"),
+  area_type        = "REGIONAL",
+  digits           = 0,
+  zero_to_blank    = FALSE,
+  currency         = NULL,
+  include_alias_mv = TRUE,
+  font_size        = 9,
+  scale_width      = 0.95
+) {
+  library(dplyr)
+  library(tidyr)
+  library(lubridate)
+  library(flextable)
+  library(stringr)
+
+  # auto decide currency formatting
+  if (is.null(currency)) {
+    currency <- str_detect(indicator, regex("REVENUE|FARE", ignore_case = TRUE))
+  }
+
+  # region alias
+  region_vec <- if (include_alias_mv && region == "Metro Vancouver Regional District") {
+    c(region, "Metro Vancouver")
+  } else region
+
+  # ---- 1) Filter ----
+  df <- data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    transmute(
+      service   = TRIP_SERVICE_TYPE_CODE,
+      year      = as.integer(YEAR_POINT),
+      month_num = as.integer(MONTH_POINT),
+      value     = as.numeric(INDICATOR_VALUE)
+    )
+
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+
+  # ---- 2) Fill missing months ----
+  dfc <- df %>%
+    group_by(service, year) %>%
+    complete(month_num = 1:12, fill = list(value = NA_real_)) %>%
+    ungroup() %>%
+    mutate(month_lab = month(ymd(sprintf("2000-%02d-01", month_num)), label = TRUE, abbr = TRUE))
+
+  # ---- 3) Pivot wider ----
+  month_cols <- as.character(month(1:12, label = TRUE, abbr = TRUE))
+  wide <- dfc %>%
+    select(service, year, month_lab, value) %>%
+    tidyr::pivot_wider(names_from = month_lab, values_from = value) %>%
+    arrange(match(service, services), year)
+
+  for (m in month_cols) if (!m %in% names(wide)) wide[[m]] <- NA_real_
+  wide <- wide[, c("service","year", month_cols)]
+
+  if (isTRUE(zero_to_blank)) {
+    wide <- wide %>% mutate(across(all_of(month_cols), ~ ifelse(.x == 0, NA_real_, .x)))
+  }
+
+  # ---- 4) Add service headers ----
+  add_service_headers <- function(w) {
+    res <- list()
+    for (srv in services) {
+      block <- w %>% filter(service == srv)
+      if (nrow(block) == 0) next
+      header <- tibble(service = srv, year = NA_integer_)
+      for (m in month_cols) header[[m]] <- NA_real_
+      res[[srv]] <- bind_rows(header, block)
+    }
+    bind_rows(res)
+  }
+  wide2 <- add_service_headers(wide)
+
+  display <- ifelse(is.na(wide2$year), wide2$service, format(wide2$year, big.mark = ","))
+  out <- wide2 %>%
+    mutate(Year = display, .before = 1) %>%
+    select(Year, all_of(month_cols))
+
+  # ---- 5) Flextable ----
+  ft <- flextable(out)
+
+  header_idx <- which(is.na(wide2$year))
+  if (length(header_idx) > 0) {
+    for (i in header_idx) {
+      ft <- merge_at(ft, i = i, j = 1:ncol(out))
+    }
+    ft <- bold(ft, i = header_idx, bold = TRUE)
+    ft <- align(ft, i = header_idx, align = "left")
+    ft <- bg(ft, i = header_idx, bg = "#d9ead3")  # green-ish band for service rows
+  }
+
+  # Zebra stripes for year rows (makes table readable)
+  ft <- bg(ft, i = setdiff(seq_len(nrow(out)), header_idx), bg = "#f9f9f9")
+  ft <- bg(ft, i = setdiff(seq_len(nrow(out)), header_idx)[c(TRUE,FALSE)], bg = "#ffffff")
+
+  # bold year numbers
+  ft <- bold(ft, i = setdiff(seq_len(nrow(out)), header_idx), j = 1)
+
+  # format numbers
+  if (currency) {
+    ft <- colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", prefix = "$", na_str = "")
+  } else {
+    ft <- colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", na_str = "")
+  }
+
+  # layout & fit
+  ft <- fontsize(ft, part = "all", size = font_size)
+#  ft <- set_table_properties(ft, width = scale_width, layout = "autofit")
+  ft <- autofit(ft)
+#  ft <- fontsize(ft, part = "all", size = 7)      # reduce text size
+  ft <- fit_to_width(ft, max_width = 9)
+#  ft <- set_table_properties(ft, layout = "autofit", width = .9)  # scale table to 90% of page width
+  
+  # ---- 6) Add dynamic title ----
+# build title string
+time_min <- min(wide2$year, na.rm = TRUE)
+time_max <- max(wide2$year, na.rm = TRUE)
+
+title_txt <- paste(region, indicator, sprintf("(%d–%d)", time_min, time_max))
+
+# add as top row spanning all columns
+ft <- add_header_row(ft, values = title_txt, colwidths = ncol(out))
+ft <- bold(ft, part = "header", i = 1)
+ft <- fontsize(ft, part = "header", i = 1, size = font_size + 2)
+ft <- align(ft, part = "header", i = 1, align = "center")
+
+
+  ft
+}
+
+```
+
+
+
+```{r}
+#| message: false
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+make_indicator_chart_stacked <- function(
+  data,
+  indicator        = "TRIP_VOLUME",
+  region           = "Metro Vancouver Regional District",
+  services         =c("TAXI", "TNS"),                     # first = bottom of stack
+  area_type        = "REGIONAL",
+  title            = "Trip Volume (trips)",
+  caption          = NULL,
+  colors           = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),# light blue TAXI, dark blue TNS
+  date_from        = NULL,                                # e.g. as.Date("2022-01-01")
+  date_to          = NULL,                                # e.g. as.Date("2024-03-01")
+  y_breaks         = waiver(),
+  y_labels         = label_number(accuracy = 0.1, scale_cut = cut_short_scale()),
+  base_size        = 10
+) {
+  region_vec <- if (region == "Metro Vancouver Regional District")
+    c(region, "Metro Vancouver") else region
+
+  df <- data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    transmute(
+      service = factor(TRIP_SERVICE_TYPE_CODE, levels = services),
+      date    = as.Date(sprintf("%04d-%02d-01", YEAR_POINT, MONTH_POINT)),
+      value   = as.numeric(INDICATOR_VALUE)
+    )
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+
+  rng <- seq(floor_date(min(df$date), "month"),
+             floor_date(max(df$date), "month"), by = "month")
+  df_full <- df %>% complete(service, date = rng, fill = list(value = 0))
+  if (!is.null(date_from)) df_full <- dplyr::filter(df_full, date >= date_from)
+  if (!is.null(date_to))   df_full <- dplyr::filter(df_full, date <= date_to)
+
+  ggplot(df_full, aes(x = date, y = value, fill = service)) +
+    geom_col(width = 26, position = "stack") +
+    scale_fill_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = y_labels, breaks = y_breaks, expand = c(0, 0.02)) +
+    scale_x_date(
+      breaks = scales::pretty_breaks(n = 18),
+      date_labels = "%Y\n%b"
+    ) +
+    labs(title = title, subtitle = region, x = NULL, y = NULL, caption = caption) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+```
+
+
+
+
+```{r}
+#YOY, YTD, last month value function
+
+# To read start and end date
+.window_dates <- function() {
+  list(
+    start = lubridate::make_date(get("start_year", .GlobalEnv), get("start_month", .GlobalEnv), 1),
+    end   = lubridate::make_date(get("end_year",   .GlobalEnv), get("end_month",   .GlobalEnv), 1)
+  )
+}
+
+# === (2digits + / -  %)
+pct_fmt <- function(x, digits = 2) {
+  if (is.na(x)) "n/a" else paste0(ifelse(x >= 0, "+", ""), format(round(x, digits), nsmall = digits), "%")
+}
+
+# === format 
+num_fmt <- function(x, digits = 0) {
+  if (is.na(x)) "n/a" else format(round(x, digits), big.mark = ",", trim = TRUE, scientific = FALSE)
+}
+
+
+fetch_indicator_auto <- function(data,
+                                 indicator,
+                                 region,                 
+                                 services  = c("TAXI","TNS"),
+                                 area_type = "REGIONAL",
+                                 windowed  = TRUE) {
+  dates <- .window_dates()
+
+  df <- data %>%
+    dplyr::filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region,           
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE %in% services
+    ) %>%
+    dplyr::mutate(
+      date  = lubridate::make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
+      value = suppressWarnings(as.numeric(INDICATOR_VALUE))
+    ) %>%
+    dplyr::filter(!is.na(value))
+
+  if (isTRUE(windowed)) {
+    df <- dplyr::filter(df, dplyr::between(date, dates$start, dates$end))
+  }
+  df
+}
+
+#COUNT FUNC
+last_value_auto <- function(data,
+                            indicator,
+                            region,
+                            service   = "TNS",          # "TAXI" | "TNS" | "ALL"
+                            area_type = "REGIONAL",
+                            windowed  = TRUE) {
+  srv <- if (identical(service, "ALL")) c("TAXI","TNS") else service
+
+  df <- fetch_indicator_auto(data, indicator, region, srv, area_type, windowed)
+  if (nrow(df) == 0) return(NA_real_)
+
+  last_date <- max(df$date, na.rm = TRUE)
+  df %>%
+    dplyr::filter(date == last_date) %>%
+    dplyr::summarise(v = sum(value, na.rm = TRUE)) %>%
+    dplyr::pull(v)
+}
+
+#YOY FUNC
+last_yoy_auto <- function(data,
+                          indicator,
+                          region,
+                          service   = "TNS",
+                          area_type = "REGIONAL") {
+  df <- fetch_indicator_auto(data, indicator, region, service, area_type, windowed = TRUE)
+  if (nrow(df) == 0) return(NA_real_)
+
+  last_date <- max(df$date, na.rm = TRUE)
+  prev_date <- last_date %m-% lubridate::years(1)
+
+  cur  <- df %>% dplyr::filter(date == last_date) %>% dplyr::summarise(v = sum(value, na.rm = TRUE)) %>% dplyr::pull(v)
+  prev <- df %>% dplyr::filter(date == prev_date) %>% dplyr::summarise(v = sum(value, na.rm = TRUE)) %>% dplyr::pull(v)
+
+  if (is.na(cur) || is.na(prev) || prev == 0) return(NA_real_)
+  (cur/prev - 1) * 100
+}
+
+#YTD FUNC
+ytd_yoy_auto <- function(data,
+                         indicator,
+                         region,
+                         service   = "TNS",
+                         area_type = "REGIONAL") {
+  end_year  <- get("end_year",  .GlobalEnv)
+  end_month <- get("end_month", .GlobalEnv)
+
+  df <- fetch_indicator_auto(data, indicator, region, service, area_type, windowed = FALSE)
+  if (nrow(df) == 0) return(NA_real_)
+
+  cur  <- df %>% dplyr::filter(lubridate::year(date) == end_year,     lubridate::month(date) <= end_month) %>%
+    dplyr::summarise(v = sum(value, na.rm = TRUE)) %>% dplyr::pull(v)
+  prev <- df %>% dplyr::filter(lubridate::year(date) == end_year - 1, lubridate::month(date) <= end_month) %>%
+    dplyr::summarise(v = sum(value, na.rm = TRUE)) %>% dplyr::pull(v)
+
+  if (is.na(cur) || is.na(prev) || prev == 0) return(NA_real_)
+  (cur/prev - 1) * 100
+}
+
+```
+
+
+```{r}
+# for var for every variable
+
+#count
+tns_last_val <- last_value_auto(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+tns_last_val_fmt <- num_fmt(tns_last_val, 0)  # "2,408,838"
+
+# YoY 
+tns_yoy <- last_yoy_auto(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+tns_yoy_fmt <- pct_fmt(tns_yoy, 2)            # "+47.55%"
+
+# YTD YoY 
+tns_ytd <- ytd_yoy_auto(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+tns_ytd_fmt <- pct_fmt(tns_ytd, 2)            # "+47.46%"
+
+tns_ytd_fmt
+tns_yoy_fmt
+tns_last_val_fmt
+
+```
+
+
+
+
+
+
+## Introduction
+
+### Commencing Investigation
+
+
+This economics report has been produced pursuant to a Board investigation under section 27 of the Act ([Policy Manual](#)). The Board investigation was commenced on August 27, 2024, with respect to application #79999-24.
+
+The Board’s letter of instruction to Senior Economist included the application details, outlined below, along with a request for economic analysis pertaining to the following relevant indicators:
+
+|                                                  |     |
+|--------------------------------------------------|-----|
+| Trip Volume:                                     | ✓   |
+| Trip Revenue:                                    | ✓   |
+| Number of Wheelchair Accessible Vehicles (WAVs): | ✓   |
+| Number of Active Vehicles per 1,000 Persons:     | ✓   |
+| Fare per Kilometre:                              | ✓   |
+| Wait Time:                                       | ✓   |
+| Concentration indices:                           | ✓   |
+| Revenue per Active Vehicle:                      | ✓   |
+| Taxi Fleet Utilization Rate:                     | ✓   |
+| Taxi Vehicle Occupancy Rate:                     | ✓   |
+| Peak-Hour Taxi Vehicle Occupancy Rate:           | ✓   |
+
+### Application Details
+
+
+
+This report was produced for the Board regarding a new application for a taxi licence.
+
+The applicant is **MS Taxi Ltd.**, which is doing business as MS Taxi. The application summary states the following:
+
+> There is a need for an additional taxi company servicing West Vancouver, North Vancouver, Vancouver, and YVR. It will positively affect transportation services.
+> As MS Taxi, we will attract new taxi users that will increase the trip volume of all existing and new companies.
+
+Additional details of the application include:
+
+-   Proposed operating area: West Vancouver, North Vancouver, Vancouver, YVR
+-   Proposed fleet size: 30 (25 Conventional; 5 WAV)
+
+## Area of Study
+
+The proposed operating area for this taxi application is mainly within the City of Vancouver, District of West Vancouver, and District of North Vancouver. These municipalities are located in the Greater Vancouver Regional District.
+
+For the purpose of statistical analysis, both taxi and TNS applications are associated with the same Region, as contemplated in the Board’s operating areas policy in the *Policy Manual*, even though taxi businesses do not generally operate at a regional level.
+
+For taxi applicants, the Region is determined based on where the existing or proposed operating area is located. In this case, **this taxi application is located in Region 1**. The Regional District is also determined based on where the existing or proposed operating area is located.
+
+## Existing Licensees
+
+The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (*MoTI*). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
+
+-   At the municipal level,
+    -   Number of taxi licensees operating: 8
+    -   Combined Board-approved maximum fleet size: 1,226
+-   At the Regional District level,
+    -   Number of taxi licensees operating: 29
+    -   Combined Board-approved maximum fleet size: 2,384
+-   At the Region level,
+    -   Number of taxi licensees operating: 49
+    -   Combined Board-approved maximum fleet size: 2,604
+
+## Background
+
+### Section 28 Criteria
+
+Under section 28(1) of the Act, the Board must consider the following factors when determining applications:
+
+-   Whether the applicant is fit, proper, and capable of providing the service applied for (threshold test);
+-   Whether there is a public need for the service; and
+-   Whether the application would promote sound economic conditions in the B.C. passenger transportation business.
+
+This economics report provides the Board with data analysis pertaining only to the “public need” (PN) and “sound economic conditions” (SEC) criteria. It does not speak to the fit, proper, and capable criteria.
+
+### PN and SEC Factors
+
+The Board’s *Policy Manual* provides information on the factors the Board may consider when determining PN and SEC. This economics report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economics report does not determine whether PN and SEC exist.
+
+Under the public need policy in the *Policy Manual*, PN is divided into the following factors:
+
+-   Demand
+-   Accessibility
+-   Affordability
+-   Safety
+-   Service Quality
+
+Under the sound economic conditions policy in the *Policy Manual*, SEC is divided into the following factors:
+
+-   Sustainability
+-   Competition
+-   Innovation
+-   Variety
+
+This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
+
+![](images/Picture1.png)
+
+*Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.*
+
+## Report Constraints
+
+Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established *data requirements* outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
+
+Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economics report *at this time*.
+
+Due to data limitations, only two regions will be analyzed:
+
+-   Region 1 – Lower Mainland including Whistler; and,
+-   Region 2 – Capital Regional District (CRD).
+
+**Regional Districts within these Regions may be analyzed so long as there is adequate data reliability for those Regional Districts.**
+
+At this time, three other regions will not be included in this economics report due to insufficient data coverage, poor data quality, or unreliable trip data submissions: Region 3 (Vancouver Island excluding CRD); Region 4 (Interior); and, Region 5 (Northern B.C. and other).
+
+## Qualifications
+
+This economics report was authored by the Board’s Senior Economist, **Peter Tseng**, who is ultimately responsible for the analysis contained in this report.
+
+Peter Tseng has over a decade of experience in economic analytics, policy evaluation, and statistical reporting. He holds a Ph.D. in Economics from the University of Victoria and has held senior roles with the BC Public Service, including at the Ministry of Finance and Ministry of Health.
+
+## Factors and Their Indicators
+
+All analyses in this report are based on data from the Trip Database unless otherwise specified. Technical details of each indicator can be found in Appendix 1.
+
+### Demand Factor (PN)
+
+#### Trip Volume (Jun)
+
+**Primary Factor:** Demand
+
+**Description:** Trip volume represents, in real terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+
+**Measurement:** Trip volume is calculated as the number of completed trips reported to the Trip Database in an area over a month.
+
+**Interpretation:** Increases in taxi trip volume or TNS trip volume indicate growth in the quantity demanded in the respective markets. Moreover, a shift in trip volume from the taxi sector to the TNS sector suggests evolving consumer preferences and competition between the two types of partially substitutable services.
+
+> *It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.*
+
+::: {custom-style="WarningRed"}
+The Board’s public need policy in the *Policy Manual* lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume:
+
+-   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+:::
+
+-   When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume.
+
+-   The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
+
+-   There are people who would use the proposed service:
+
+    -   If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
+    -   The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
+
+### `r region_name` Regional District Trip Volume Findings
+
+**Table 1: `r region_name` Regional District Trip Volume**
+
+```{r}
+tbl <- make_indicator_table_compact(
+  data      = filtered,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  services  = c("TAXI","TNS"),
+  area_type = "REGIONAL",
+  digits    = 0
+)
+
+tbl  # will now show a title row above the table
+
+```
+
+*Figure 1: `r region_name` Regional District Trip Volume*
+
+```{r}
+#| fig-width: 7.2
+#| fig-height: 3.0
+#| dpi: 220
+chart <- make_indicator_chart_stacked(
+  data      = raw,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  services  = c("TNS", "TAXI"),
+  area_type = "REGIONAL",
+  title     = "TRIP_VOLUME"
+)
+chart
+
+
+```
+```{r}
+# ---- Get single numeric value for last month indicator ----
+get_last_value <- function(data,
+                           indicator,
+                           region    = "Metro Vancouver Regional District",
+                           service   = "TNS",
+                           area_type = "REGIONAL") {
+  region_vec <- if (region == "Metro Vancouver Regional District") c(region, "Metro Vancouver") else region
+  
+  df <- data %>%
+    filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE == service
+    ) %>%
+    mutate(
+      date = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
+      value = as.numeric(INDICATOR_VALUE)
+    ) %>%
+    filter(!is.na(value))
+  
+  if (nrow(df) == 0) return(NA_real_)
+  
+  last_date <- max(df$date, na.rm = TRUE)
+  last_value <- df %>% filter(date == last_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  
+  return(last_value)
+}
+
+
+last_trip_val <- get_last_value(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+
+trip_val_fmt <- format(round(last_trip_val, 0), big.mark = ",")
+
+trip_val_fmt
+
+```
+```{r}
+get_last_yoy_auto <- function(data,
+                              indicator,
+                              region   = "Metro Vancouver Regional District",
+                              service  = "TNS",
+                              area_type = "REGIONAL") {
+ 
+  start_year  <- get("start_year",  envir = .GlobalEnv)
+  start_month <- get("start_month", envir = .GlobalEnv)
+  end_year    <- get("end_year",    envir = .GlobalEnv)
+  end_month   <- get("end_month",   envir = .GlobalEnv)
+  
+  start_date <- make_date(start_year, start_month, 1)
+  end_date   <- make_date(end_year,   end_month,   1)
+  
+  region_vec <- if (region == "Metro Vancouver Regional District") c(region, "Metro Vancouver") else region
+  
+  df <- data %>%
+    filter(GEOSPATIAL_AREA_TYPE_CODE == area_type,
+           PICKUP_AREA %in% region_vec,
+           INDICATOR_TYPE == indicator,
+           TRIP_SERVICE_TYPE_CODE == service) %>%
+    mutate(date = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
+           value = as.numeric(INDICATOR_VALUE)) %>%
+    filter(between(date, start_date, end_date), !is.na(value))
+  
+  if (nrow(df) == 0) return(NA_real_)
+  
+  last_date <- max(df$date, na.rm = TRUE)
+  prev_date <- last_date %m-% years(1)
+  
+  cur_val  <- df %>% filter(date == last_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  prev_val <- df %>% filter(date == prev_date) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  
+  if (is.na(cur_val) || is.na(prev_val) || prev_val == 0) return(NA_real_)
+  ((cur_val / prev_val) - 1) * 100
+}
+
+get_last_yoy_auto(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+
+last_yoy <- get_last_yoy_auto(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+
+# دو رقم اعشار با علامت و درصد
+last_yoy_fmt <- if (is.na(last_yoy)) {
+  "n/a"
+} else {
+  paste0(ifelse(last_yoy >= 0, "+", ""), format(round(last_yoy, 2), nsmall = 2), "%")
+}
+
+last_yoy_fmt
+
+```
+```{r}
+# ---- Get YTD YoY % through the report's end month (auto window) ----
+get_ytd_yoy_auto <- function(data,
+                             indicator,
+                             region    = "Metro Vancouver Regional District",
+                             service   = "TNS",
+                             area_type = "REGIONAL") {
+  # می‌خونه از متغیرهای سراسری گزارش
+  end_year   <- get("end_year",   envir = .GlobalEnv)
+  end_month  <- get("end_month",  envir = .GlobalEnv)
+
+  region_vec <- if (region == "Metro Vancouver Regional District") c(region, "Metro Vancouver") else region
+
+  df <- data %>%
+    dplyr::filter(
+      GEOSPATIAL_AREA_TYPE_CODE == area_type,
+      PICKUP_AREA %in% region_vec,
+      INDICATOR_TYPE == indicator,
+      TRIP_SERVICE_TYPE_CODE == service
+    ) %>%
+    dplyr::mutate(
+      value = suppressWarnings(as.numeric(INDICATOR_VALUE)),
+      y = as.integer(YEAR_POINT),
+      m = as.integer(MONTH_POINT)
+    ) %>%
+    dplyr::filter(!is.na(value))
+
+  if (nrow(df) == 0) return(NA_real_)
+
+  cur_ytd  <- df %>% dplyr::filter(y == end_year,     m <= end_month) %>% dplyr::summarise(v = sum(value, na.rm = TRUE)) %>% dplyr::pull(v)
+  prev_ytd <- df %>% dplyr::filter(y == end_year - 1, m <= end_month) %>% dplyr::summarise(v = sum(value, na.rm = TRUE)) %>% dplyr::pull(v)
+
+  if (is.na(cur_ytd) || is.na(prev_ytd) || prev_ytd == 0) return(NA_real_)
+
+  ((cur_ytd / prev_ytd) - 1) * 100
+}
+ytd_yoy <- get_ytd_yoy_auto(raw, "TRIP_VOLUME", region = region_name, service = "TNS")
+ytd_yoy_fmt <- if (is.na(ytd_yoy)) "n/a" else paste0(ifelse(ytd_yoy >= 0, "+", ""), round(ytd_yoy, 1), "%")
+ytd_yoy_fmt
+
+ytd_yoy_fmt <- if (is.na(ytd_yoy)) {
+  "n/a"
+} else {
+  paste0(ifelse(ytd_yoy >= 0, "+", ""), format(round(ytd_yoy, 2), nsmall = 2), "%")
+}
+ytd_yoy_fmt
+```
+
+
+**Analysis and Conclusions:**
+
+In `r end_label`, `r region_name` Regional District saw a there were **2,408,838 TNS trips**  in the `r region_name`
+
+[^1]: *Year-over-year (YoY)* compares `r end_label` with `r prev_label`, while *year-to-date (YTD)* compares the cumulative data from January to `r end_label` with the same period in `r prev_year`. YoY evaluates specific monthly changes, while YTD assesses trends over a recent period of time.
+
+Meanwhile, in `r end_label`, there were **2,408,838 TNS trips**  in the `r region_name` Regional District. On a year-over-year basis, the total TNS trip volume increased by **47.55%**,  while on a year-to-date basis, the total TNS trip volume increased by **47.46%** `. The increase in TNS trip volume was significant, indicating strong growth in the demand for TNS services.
+
+**Limitations:** Quantity demanded does not equate to demand. Quantity demanded refers to the actual number of trips observed, whereas demand includes all potential trips if there were no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
+
+
+
+
+
+
+
+
+
+
+
+
+
