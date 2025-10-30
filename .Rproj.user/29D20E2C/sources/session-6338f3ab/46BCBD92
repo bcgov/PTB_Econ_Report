@@ -3,7 +3,7 @@
     "path": "C:/Git_Projects/econ_report_1030/Main.R",
     "project_path": "Main.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "1181633333",
     "contents": "",
     "dirty": false,
     "created": 1761863069211.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "29,0",
+        "cursorPosition": "37,29",
         "scrollLine": "11"
     },
     "folds": "",
-    "lastKnownWriteTime": 1761863122,
+    "lastKnownWriteTime": 1761863987,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1761863122462,
+    "last_content_update": 1761863987996,
     "read_only": false,
     "read_only_alternatives": []
 }
