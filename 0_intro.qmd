@@ -478,3 +478,6 @@ This economics report was authored by the Board’s Senior Economist, **Peter Ts
 Peter Tseng has over a decade of experience in economic analytics, policy evaluation, and statistical reporting. He holds a Ph.D. in Economics from the University of Victoria and has held senior roles with the BC Public Service, including at the Ministry of Finance and Ministry of Health.
 
 ## Factors and Their Indicators
+All analyses in this report are based on data from the Trip Database unless otherwise specified. Technical details of each indicator can be found in Appendix 1.
+
+
