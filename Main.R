@@ -28,5 +28,9 @@ use_github()
 ## 3) Add in your IDIR username and government email where it is marked 'x'
 use_git_config(user.name='x', user.email='x')
 
+<<<<<<< HEAD
 ##Beginning of Econ Report Code
 ## peter added code here. 
+=======
+##Beginning of Econ Report Code
+>>>>>>> origin/main
