@@ -29,12 +29,3 @@ use_github()
 use_git_config(user.name='x', user.email='x')
 
 ##Beginning of Econ Report Code
-
-part One
-
-
-peter write something on 3:06. 
-peter write something on 3:17. 
-peter write something on 3:39. 
-
-part two
