@@ -32,6 +32,6 @@ use_git_config(user.name='x', user.email='x')
 
 part One
 
-peter write something on 3:06. 
+peter write something on 3:06.
 
 part two
