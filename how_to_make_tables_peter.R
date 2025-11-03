@@ -46,19 +46,29 @@ ft <- as_flextable(data_g, hide_grouplabel = TRUE) %>%
   autofit()
 
 
+
 # ----------------------------
-# 5) Don’t repeat the RD banner on the second Service; add separators above each RD
+# 5) Show RD once + draw a line ABOVE each RD header row
 # ----------------------------
 bd <- ft$body$dataset
-reg_rows <- which(is.na(bd$Year) & is.na(bd$Service))               # RD header rows
 
-# (a) Blank duplicate RD headers (keep only the first per RD)
+# All RD header rows created by as_grouped_data/as_flextable:
+# (Year is NA on group headers; Region-headers also have Service NA)
+reg_rows <- which(is.na(bd$Year) & is.na(bd$Service))
+
+# (a) Blank duplicate RD headers (keep only the first per Region)
 dup_reg_rows <- reg_rows[duplicated(bd$Region[reg_rows])]
 if (length(dup_reg_rows)) {
-  ft <- compose(ft, i = dup_reg_rows, j = 1, value = as_paragraph("")) %>%
+  ft <- compose(ft, i = dup_reg_rows, j = 1, value = as_paragraph("")) |>
     padding(i = dup_reg_rows, j = 1, padding.top = 0, padding.bottom = 0)
 }
 
-# (b)
-b_top <- officer::fp_border(color = "#9CA3AF", width = 1.5)
-ft <- border(ft, i = row_lines, j = ft$col_keys, border.top = b_top)
+# (b) Draw the separator on TOP of each cell in the FIRST RD header row per Region
+row_lines <- reg_rows[!duplicated(bd$Region[reg_rows])]  # <-- define row_lines
+# If you don't want a line above the very first Region block, uncomment:
+# row_lines <- row_lines[row_lines > 1]
+
+if (length(row_lines)) {
+  b_top <- officer::fp_border(color = "#9CA3AF", width = 1.5)
+  ft <- border(ft, i = row_lines, j = ft$col_keys, border.top = b_top, part = "body")
+}
