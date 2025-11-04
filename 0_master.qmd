@@ -1,0 +1,26 @@
+---
+title: "Economics Report"
+format: docx        # or:
+# format:
+#   docx: default
+#   html: default
+execute:
+  echo: false
+  
+  warning: false
+  message: false
+---
+
+Here I am working  with Nav. 
+
+
+```{r}
+source("setup.R")
+
+
+##
+```
+{{< include 0_intro.qmd >}}
+{{< include 1_trip_volume.qmd >}}
+
+Here I am working with Peter
