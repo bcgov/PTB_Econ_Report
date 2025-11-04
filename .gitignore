@@ -1,9 +1,10 @@
+*.gitignore
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 main_output.docx
-
+*.docx
 *_cache/
 *_files/
 *.html
@@ -14,8 +15,6 @@ main_output.docx
 *.log
 *.aux
 *.out
-
-
 .Rproj.user/
 .Rhistory
 .RData
