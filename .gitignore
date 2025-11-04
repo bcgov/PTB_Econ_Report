@@ -1,5 +1,5 @@
 *.gitignore
-.Rproj.user
+*.Rproj.user
 .Rhistory
 .RData
 .Ruserdata
@@ -19,3 +19,4 @@ main_output.docx
 .Rhistory
 .RData
 .DS_Store
+~$in_output.docx
