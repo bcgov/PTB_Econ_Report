@@ -26,7 +26,7 @@ suppressPackageStartupMessages({
 # -----------------------------
 
 date_from   <- make_date(2023, 1, 1)     # report window start (inclusive)
-date_to     <- make_date(2024, 3, 1)     # report window end   (inclusive)
+date_to     <- make_date(2025, 3, 1)     # report window end   (inclusive)
 region_name <- "Metro Vancouver"          # display name used across report
 
 # Derived labels for narrative text
@@ -65,9 +65,6 @@ raw_norm <- raw %>%
 
 windowed <- raw_norm %>%
   filter(between(date, date_from, date_to))
-
-```
-
 
 
 # ============================================================
@@ -253,7 +250,7 @@ make_indicator_table_compact <- function(
   
   ft <- fontsize(ft, part = "all", size = font_size)
   ft <- autofit(ft)
-  ft <- fit_to_width(ft, max_width = 9)
+  ft <- fit_to_width(ft, max_width = 12)
   
   # dynamic title row
   
@@ -302,6 +299,8 @@ make_indicator_chart_stacked <- function(
     )
 }
 
+
+
 # 8) One-stop metrics helper for inline use
 
 compute_metrics <- function(data, indicator, region, focus_service = "TNS",
@@ -317,31 +316,76 @@ compute_metrics <- function(data, indicator, region, focus_service = "TNS",
 }
 
 
+# ============================================================
 
+# Metrics 
 
 # ============================================================
 
-# Metrics (Trip Volume, TNS focus)
-
-# ============================================================
-
-# last-month / YoY / YTD YoY for TNS trips in the selected region and window
-
-m <- compute_metrics(
-  data          = raw_norm,
-  indicator     = "TRIP_VOLUME",
-  region        = region_name,
-  focus_service = "TNS",
-  area_type     = "REGIONAL",
-  date_from     = date_from,
-  date_to       = date_to
+indicators <- c(
+  "ACCESSIBLE_TRIP",
+  "ACTIVE_VEHICLE",
+  "ACTIVE_WAV",
+  "FARE_PER_5KM",
+  "FLEET_UTILIZATION",
+  "REVENUE_PER_VEHICLE",
+  "TRIP_REVENUE",
+  "TRIP_VOLUME",
+  "VEHICLE_OCCUPANCY_RATE",
+  "VEHICLE_PER_1000_PERSONS",
+  "WAIT_TIME"
 )
 
-tns_last_val      <- m$last_value
-tns_last_val_fmt  <- fmt_num(tns_last_val, 0)
-tns_yoy_fmt       <- fmt_pct(m$yoy_last, 2)
-tns_ytd_yoy_fmt   <- fmt_pct(m$ytd_yoy, 2)
+# واحد/فرمت حداقلی؛ هر جا لازم شد عوضش کن
+ind_units <- list(
+  ACCESSIBLE_TRIP            = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  ACTIVE_VEHICLE             = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  ACTIVE_WAV                 = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  FARE_PER_5KM               = list(unit="currency",digits=2, currency=TRUE,  scale=1),
+  FLEET_UTILIZATION          = list(unit="pct",     digits=1, currency=FALSE, scale=100), # اگر داده‌ات 0..1 است
+  REVENUE_PER_VEHICLE        = list(unit="currency",digits=0, currency=TRUE,  scale=1),
+  TRIP_REVENUE               = list(unit="currency",digits=0, currency=TRUE,  scale=1),
+  TRIP_VOLUME                = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  VEHICLE_OCCUPANCY_RATE     = list(unit="pct",     digits=1, currency=FALSE, scale=100),
+  VEHICLE_PER_1000_PERSONS   = list(unit="count",   digits=2, currency=FALSE, scale=1),
+  WAIT_TIME                  = list(unit="minutes", digits=1, currency=FALSE, scale=1)
+)
 
-# (If you still want combined TAXI+TNS YoY/YTD YoY, just call with services = c("TAXI","TNS"))
+fmt_value <- function(x, meta){
+  if (is.na(x)) return("n/a")
+  x <- x * (meta$scale %||% 1)
+  unit <- meta$unit
+  d    <- meta$digits %||% 0
+  if (isTRUE(meta$currency) || unit == "currency")      return(fmt_num(x, d, currency = TRUE))
+  if (unit == "pct")                                    return(paste0(format(round(x, d), nsmall=d), "%"))
+  if (unit == "minutes")                                return(paste0(fmt_num(x, d), " min"))
+  fmt_num(x, d)
+}
 
-```
+suppressPackageStartupMessages({ library(purrr); library(dplyr) })
+
+metrics <- setNames(vector("list", length(indicators)), indicators)
+
+for (ind in indicators) {
+  meta <- ind_units[[ind]]
+  for (srv in c("TAXI","TNS")) {
+    m <- compute_metrics(
+      data          = raw_norm,
+      indicator     = ind,
+      region        = region_name,
+      focus_service = srv,
+      area_type     = "REGIONAL",
+      date_from     = date_from,
+      date_to       = date_to
+    )
+    
+    metrics[[ind]][[srv]] <- list(
+      last_value      = m$last_value,
+      yoy_last        = m$yoy_last,
+      ytd_yoy         = m$ytd_yoy,
+      last_value_fmt  = fmt_value(m$last_value, meta),
+      yoy_fmt         = fmt_pct(m$yoy_last, 2),
+      ytd_yoy_fmt     = fmt_pct(m$ytd_yoy, 2)
+    )
+  }
+}
