@@ -132,7 +132,7 @@ Peter Tseng has over a decade of experience in economic analytics, policy evalua
 ## Factors and Their Indicators
 All analyses in this report are based on data from the Trip Database unless otherwise specified. Technical details of each indicator can be found in Appendix 1.
 
-{{< include 1_trip_volume.qmd >}}
+
 
 
 
