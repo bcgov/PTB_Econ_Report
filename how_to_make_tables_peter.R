@@ -72,3 +72,5 @@ if (length(row_lines)) {
   b_top <- officer::fp_border(color = "#9CA3AF", width = 1.5)
   ft <- border(ft, i = row_lines, j = ft$col_keys, border.top = b_top, part = "body")
 }
+
+ft
