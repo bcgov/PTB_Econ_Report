@@ -1,26 +1,119 @@
----
-title: "1_trip_volume"
-format: html
-editor: visual
----
+### Demand Factor (PN)
 
-## Quarto
+#### Trip Volume (Jun)
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+**Primary Factor:** Demand
 
-## Running Code
+**Description:** Trip volume represents, in real terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+**Measurement:** Trip volume is calculated as the number of completed trips reported to the Trip Database in an area over a month.
+
+**Interpretation:** Increases in taxi trip volume or TNS trip volume indicate growth in the quantity demanded in the respective markets. Moreover, a shift in trip volume from the taxi sector to the TNS sector suggests evolving consumer preferences and competition between the two types of partially substitutable services.
+
+> *It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.*
+
+::: {custom-style="WarningRed"}
+The Board’s public need policy in the *Policy Manual* lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume:
+
+-   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+:::
+
+-   When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume.
+
+-   The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
+
+-   There are people who would use the proposed service:
+
+    -   If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
+    -   The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
+
+### `r region_name` Regional District Trip Volume Findings
 
 ```{r}
-1 + 1
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "ACTIVE_VEHICLE",
+region     = region_name,
+services   = c("TAXI","TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 0
+)
+tbl
+
 ```
 
-You can add options to executable code like this
+**Table 1: `r region_name` Regional District Trip Volume**
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_stacked(
+data       = raw_norm,
+indicator  = "ACTIVE_VEHICLE",
+region     = region_name,
+services   = c("TNS","TAXI"),  # first = bottom of stack
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "TRIP_VOLUME"
+)
+chart
+
+```
+
+*Figure 1: `r region_name` Regional District Trip Volume*
 
 ```{r}
-#| echo: false
-2 * 2
+
+
+# metric("TRIP_VOLUME","TAXI","last_value_fmt")
+metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
+  service <- match.arg(service)
+  field   <- match.arg(field)
+  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
+  if (is.null(out)) "n/a" else out
+}
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_VOLUME","TAXI","last_value_fmt")` taxi trips. On a year-over-year (YoY) basis, the total taxi trip volume was `r metric("TRIP_VOLUME","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_VOLUME","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TAXI services in the region.
+
+
+In `r end_label`, the **`r region_name`** Regional District recorded `r metric("TRIP_VOLUME","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip volume was `r metric("TRIP_VOLUME","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip volume was `r metric("TRIP_VOLUME","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region.
+
+[^1]: *Year-over-year (YoY)* compares `r end_label` with `r prev_label`, while *year-to-date (YTD)* compares the cumulative data from January to `r end_label` with the same period in `r prev_year`. YoY evaluates a specific monthly change; YTD assesses the broader trend.
+
+
+**Limitations.** Quantity demanded does not equate to demand. Quantity demanded refers to the actual number of trips observed, whereas demand includes all potential trips if there were no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service. .
+
+```{r}
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "TRIP_REVENUE",
+region     = region_name,
+services   = c("TAXI","TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 0
+)
+tbl
+
+```
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_stacked(
+data       = raw_norm,
+indicator  = "ACTIVE_WAV",
+region     = region_name,
+services   = c("TNS","TAXI"),  # first = bottom of stack
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "TRIP_VOLUME"
+)
+chart
+
+```
