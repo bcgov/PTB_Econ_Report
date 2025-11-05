@@ -32,7 +32,7 @@ The Board’s public need policy in the *Policy Manual* lists examples of the de
 ```{r}
 tbl <- make_indicator_table_compact(
 data       = raw_norm,
-indicator  = "TRIP_VOLUME",
+# indicator  = "TRIP_VOLUME",
 region     = region_name,
 services   = c("TAXI","TNS"),
 area_type  = "REGIONAL",
