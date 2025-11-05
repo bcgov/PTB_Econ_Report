@@ -32,7 +32,7 @@ The Board’s public need policy in the *Policy Manual* lists examples of the de
 ```{r}
 tbl <- make_indicator_table_compact(
 data       = raw_norm,
-indicator  = "ACTIVE_VEHICLE",
+indicator  = "TRIP_VOLUME",
 region     = region_name,
 services   = c("TAXI","TNS"),
 area_type  = "REGIONAL",
@@ -49,7 +49,7 @@ tbl
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked(
 data       = raw_norm,
-indicator  = "ACTIVE_VEHICLE",
+indicator  = "TRIP_VOLUME",
 region     = region_name,
 services   = c("TNS","TAXI"),  # first = bottom of stack
 area_type  = "REGIONAL",
