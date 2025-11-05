@@ -86,8 +86,9 @@ In `r end_label`, the **`r region_name`** Regional District recorded `r metric("
 [^1]: *Year-over-year (YoY)* compares `r end_label` with `r prev_label`, while *year-to-date (YTD)* compares the cumulative data from January to `r end_label` with the same period in `r prev_year`. YoY evaluates a specific monthly change; YTD assesses the broader trend.
 
 
-**Limitations.** Quantity demanded does not equate to demand. Quantity demanded refers to the actual number of trips observed, whereas demand includes all potential trips if there were no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service. .
+**Limitations:** Quantity demanded does not equate to demand. Quantity demanded refers to the actual number of trips observed, whereas demand includes all potential trips if there were no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service. .
 
+<<<<<<< HEAD
 ```{r}
 tbl <- make_indicator_table_compact(
 data       = raw_norm,
@@ -117,3 +118,5 @@ title      = "TRIP_VOLUME"
 chart
 
 ```
+=======
+>>>>>>> 4116b92fa114c1f0d521a77f40979664b902c8ad
