@@ -3,6 +3,10 @@
         {
             "columnIndex": 2,
             "ascending": true
+        },
+        {
+            "columnIndex": 4,
+            "ascending": true
         }
     ],
     "path": "C:/Git_Projects/econ_1030_"
