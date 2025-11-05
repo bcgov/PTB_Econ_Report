@@ -26,7 +26,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 ### `r region_name` Regional District Trip Revenue Findings
 
-```{r, fig.width=10, fig.height=5}
+```{r}
 tbl <- make_indicator_table_compact(
 data       = raw_norm,
 indicator  = "TRIP_REVENUE",
