@@ -54,7 +54,7 @@ raw_norm <- raw %>%
   transmute(
     date   = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
     area   = PICKUP_AREA,
-    area_type = GEOSPATIAL_AREA_TYPE_CODE,
+    area_type = LEVEL_NAME,
     indicator = INDICATOR_TYPE,
     service   = TRIP_SERVICE_TYPE_CODE,
     value     = suppressWarnings(as.numeric(INDICATOR_VALUE))
@@ -314,6 +314,73 @@ compute_metrics <- function(data, indicator, region, focus_service = "TNS",
                          services = focus_service, area_type = area_type)
   )
 }
+
+# 9) Dual-line chart (Taxi vs TNS) — e.g., Wait Time (minutes)
+
+make_indicator_chart_lines <- function(
+    data,
+    indicator  = "WAIT_TIME",
+    region,
+    services   = c("TAXI", "TNS"),
+    area_type  = "REGIONAL",
+    date_from  = NULL,
+    date_to    = NULL,
+    title      = NULL,
+    caption    = NULL,
+    colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
+    base_size  = 10
+) {
+  # get + tidy
+  df <- filter_indicator(
+    data        = data,
+    indicator   = indicator,
+    region      = region,
+    services    = services,
+    area_type   = area_type,
+    date_from   = date_from,
+    date_to     = date_to
+  ) %>%
+    mutate(service = factor(service, levels = services)) %>%
+    group_by(date, service) %>%
+    summarise(value = sum(value, na.rm = TRUE), .groups = "drop")
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  # auto title/y label
+  if (is.null(title)) {
+    pretty_ind <- gsub("_", " ", indicator)
+    title <- paste0(stringr::str_to_title(pretty_ind))
+  }
+  y_lab <- if (indicator == "WAIT_TIME") "minutes" else NULL
+  
+  ggplot(df, aes(x = date, y = value, color = service)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 1.8, stroke = 0.2) +
+    scale_color_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = label_number(accuracy = 0.1)) +
+    scale_x_date(breaks = pretty_breaks(n = 18), date_labels = "%b\n%Y") +
+    labs(
+      title    = title,
+      subtitle = region,
+      x        = NULL,
+      y        = y_lab,
+      caption  = caption
+    ) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+
 
 
 # ============================================================
