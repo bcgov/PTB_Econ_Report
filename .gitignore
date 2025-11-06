@@ -35,5 +35,9 @@ _site/
 
 # OS cruft
 .DS_Store
+<<<<<<< HEAD
 Thumbs.db
 
+=======
+.Rproj.user/
+>>>>>>> 6dbe29332648c48998d59db3385f3f0f28cd9ea4
