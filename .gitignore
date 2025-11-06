@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+\n+# Ignore Microsoft Word temporary lock files
+~$*.docx
