@@ -1,12 +1,27 @@
+
 *.gitignore
-.Rproj.user
+
+main_output.docx
+
+
+# R / RStudio
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
-main_output.docx
-*.docx
+.Rprofile
+.Rproj.user/shared/notebooks/paths
+.Rproj.user/29D20E2C/pcs/files-pane.pper
+.Rproj.user/29D20E2C/pcs/windowlayoutstate.pper
+.Rproj.user/29D20E2C/sources/prop/INDEX
+
+# Quarto / R Markdown build artifacts
 *_cache/
 *_files/
+.quarto/
+_site/
+
+# Rendered outputs (ignore all; uncomment only what you need)
 *.html
 *.docx
 *.pdf
@@ -15,8 +30,10 @@ main_output.docx
 *.log
 *.aux
 *.out
-.Rproj.user/
-.Rhistory
-.RData
+
+
+
+# OS cruft
 .DS_Store
-.Rproj.user/shared/notebooks/paths
+Thumbs.db
+
