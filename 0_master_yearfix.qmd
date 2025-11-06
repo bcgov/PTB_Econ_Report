@@ -3,6 +3,8 @@ title: "Economics Report"
 format:
   docx:
     reference-doc: "Economics Report (Region 2).docx"
+filters:
+  - set_output_name.lua
 execute:
   echo: false
   warning: false
