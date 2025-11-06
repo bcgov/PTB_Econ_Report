@@ -3,10 +3,27 @@ title: "Economics Report"
 format:
   docx:
     reference-doc: "Economics Report (Region 2).docx"
+filters: []
 execute:
   echo: false
   warning: false
   message: false
+---
+```{r, include=FALSE}
+# Self-invoking render to dynamic output path (results/report_<user>_<timestamp>.docx)
+if (Sys.getenv("QUARTO_SELF_RENDER") != "1") {
+  user <- Sys.getenv("USERNAME", unset = Sys.getenv("USER", unset = "user"))
+  ts <- format(Sys.time(), "%Y%m%d_%H%M%S")
+  out <- file.path("results", sprintf("report_%s_%s.docx", user, ts))
+  if (!dir.exists("results")) dir.create("results", recursive = TRUE)
+  system2(
+    command = "quarto",
+    args = c("render", knitr::current_input(), "--output", out),
+    env = c("QUARTO_SELF_RENDER=1")
+  )
+  knitr::knit_exit()
+}
+```
 ---
 ```{r}
 source("setup_peter.R")
