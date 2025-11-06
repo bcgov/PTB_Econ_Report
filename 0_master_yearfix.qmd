@@ -1,0 +1,17 @@
+---
+title: "Economics Report"
+format:
+  docx:
+    reference-doc: "Economics Report (Region 2).docx"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+```{r}
+source("setup_yearfix.R")
+```
+{{< include 0_intro.qmd >}}
+{{< include 1_trip_volume.qmd >}}
+{{< include 2_trip_revenue_thousands.qmd >}}
+
