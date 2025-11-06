@@ -1,19 +1,26 @@
 ---
 title: "Economics Report"
-format:
-  docx:
-    reference-doc: "Economics Report (Region 2).docx"
+format: docx        # or:
+# format:
+#   docx: default
+#   html: default
 execute:
   echo: false
+  
   warning: false
   message: false
 ---
+
+Here I am working  with Nav. 
+
+3:05
+
+
 ```{r}
 source("setup.R")
+
+
+##
 ```
 {{< include 0_intro.qmd >}}
 {{< include 1_trip_volume.qmd >}}
-{{< include 2_trip_revenue_thousands.qmd >}}
-
-
-

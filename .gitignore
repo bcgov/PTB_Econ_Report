@@ -1,6 +1,22 @@
+*.gitignore
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-\n+# Ignore Microsoft Word temporary lock files
-~$*.docx
+main_output.docx
+*.docx
+*_cache/
+*_files/
+*.html
+*.docx
+*.pdf
+*.knit.md
+*.utf8.md
+*.log
+*.aux
+*.out
+.Rproj.user/
+.Rhistory
+.RData
+.DS_Store
+.Rproj.user/
