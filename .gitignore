@@ -23,3 +23,7 @@ main_output.docx
 
 /.quarto/
 **/*.quarto_ipynb
+
+# Track generated Word outputs in results (but keep Word lock files ignored)
+!results/*.docx
+results/~$*.docx

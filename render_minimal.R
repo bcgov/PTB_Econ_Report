@@ -20,3 +20,17 @@ dest <- file.path(output_dir, sprintf("report_%s_%s.%s", user, ts, output_type))
 if (!file.copy(src, dest, overwrite = TRUE)) stop("Failed to write ", dest)
 message("Saved: ", dest)
 
+# Keep only the most recent 10 results
+keep_n <- 10L
+files <- list.files(output_dir, pattern = "^report_.*\\.docx$", full.names = TRUE)
+if (length(files) > keep_n) {
+  finfo <- file.info(files)
+  ord <- order(finfo$mtime, decreasing = TRUE)
+  files_ord <- files[ord]
+  to_remove <- files_ord[(keep_n + 1):length(files_ord)]
+  for (f in to_remove) {
+    ok <- FALSE
+    suppressWarnings({ ok <- file.remove(f) })
+    if (!ok) message("WARN: Could not remove old result: ", f)
+  }
+}
