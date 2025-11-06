@@ -27,7 +27,13 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 ### `r region_name` Regional District Trip Revenue Findings
 
 ```{r}
-raw_norm_k <- raw_norm %>% dplyr::mutate(value = ifelse(indicator == "TRIP_REVENUE", value/1000, value))
+raw_norm_k <- raw_norm %>% dplyr::mutate(
+  value = ifelse(
+    indicator == "TRIP_REVENUE",
+    round(value/1000, 0),  # round to nearest thousand dollars
+    value
+  )
+)
 tbl <- make_indicator_table_compact(
 data       = raw_norm_k,
 indicator  = "TRIP_REVENUE",
