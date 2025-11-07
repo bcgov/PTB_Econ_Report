@@ -1,7 +1,7 @@
 ## Minimal renderer: no functions, no git
 ## Usage (terminal): quarto run render_minimal.R
 
-input_file  <- "0_master_yearfix.qmd"
+input_file  <- "0_master_peter.qmd"
 output_dir  <- "results"
 output_type <- "docx"
 
