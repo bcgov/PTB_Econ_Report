@@ -1,4 +1,4 @@
-##Trip Revenue
+## Trip Revenue
 
 ## Primary Factor: Demand
 
@@ -28,6 +28,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 **Table 1: `r region_name` Regional District Trip Revenue (thousands of dollars)**
 
+
 ```{r}
 raw_norm_k <- raw_norm %>% dplyr::mutate(
   value = ifelse(
@@ -49,8 +50,8 @@ digits     = 0
 tbl
 
 ```
-*Figure 1: `r region_name` Regional District Trip Revenue*
 
+*Figure 1: `r region_name` Regional District Trip Revenue*
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked(
 data       = raw_norm,
@@ -65,6 +66,8 @@ title      = "TRIP_REVENUE"
 chart
 
 ```
+
+
 ```{r}
 
 
@@ -82,7 +85,7 @@ metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","y
 In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TAXI services in the region.
 
 
-In `r end_label`, the **`r region_name`** Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region.
+In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region.
 
 
 **Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.

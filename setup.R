@@ -174,7 +174,7 @@ ytd_yoy <- function(data, indicator, region, end_date,
 make_indicator_table_compact <- function(
     data, indicator, region, services = c("TAXI","TNS"), area_type = "REGIONAL",
     date_from = NULL, date_to = NULL, digits = 0, zero_to_blank = FALSE,
-    currency = NULL, font_size = 7
+    currency = NULL, font_size = 6
 ) {
   # auto-detect currency style if not set
   if (is.null(currency)) {
