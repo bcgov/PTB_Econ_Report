@@ -1,4 +1,4 @@
-###Trip Revenue
+##Trip Revenue
 
 ## Primary Factor: Demand
 
@@ -26,9 +26,18 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 ### `r region_name` Regional District Trip Revenue Findings
 
+**Table 1: `r region_name` Regional District Trip Revenue (thousands of dollars)**
+
 ```{r}
+raw_norm_k <- raw_norm %>% dplyr::mutate(
+  value = ifelse(
+    indicator == "TRIP_REVENUE",
+    round(value/1000, 0),  # round to nearest thousand dollars
+    value
+  )
+)
 tbl <- make_indicator_table_compact(
-data       = raw_norm,
+data       = raw_norm_k,
 indicator  = "TRIP_REVENUE",
 region     = region_name,
 services   = c("TAXI","TNS"),
@@ -40,7 +49,7 @@ digits     = 0
 tbl
 
 ```
-**Table 1: `r region_name` Regional District Trip Revenue**
+*Figure 1: `r region_name` Regional District Trip Revenue*
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked(
@@ -56,7 +65,6 @@ title      = "TRIP_REVENUE"
 chart
 
 ```
-*Figure 1: `r region_name` Regional District Trip Revenue*
 ```{r}
 
 

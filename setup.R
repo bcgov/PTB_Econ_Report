@@ -169,106 +169,127 @@ ytd_yoy <- function(data, indicator, region, end_date,
 }
 
 # 6) Compact monthly table (Taxi/TNS) with service headers; accepts window explicitly
+#    Override: Year column plain (no comma formatting), no table title row
 
 make_indicator_table_compact <- function(
     data, indicator, region, services = c("TAXI","TNS"), area_type = "REGIONAL",
     date_from = NULL, date_to = NULL, digits = 0, zero_to_blank = FALSE,
-    currency = NULL, font_size = 10
+    currency = NULL, font_size = 7
 ) {
-  
   # auto-detect currency style if not set
+  if (is.null(currency)) {
+    currency <- stringr::str_detect(
+      indicator,
+      stringr::regex("REVENUE|FARE", ignore_case = TRUE)
+    )
+  }
   
-  if (is.null(currency)) currency <- str_detect(indicator, regex("REVENUE|FARE", ignore_case = TRUE))
-  
-  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to) %>%
-    transmute(service, y = year(date), m = month(date), value)
+  df <- filter_indicator(
+    data      = data,
+    indicator = indicator,
+    region    = region,
+    services  = services,
+    area_type = area_type,
+    date_from = date_from,
+    date_to   = date_to
+  ) %>%
+    dplyr::transmute(
+      service,
+      y = lubridate::year(date),
+      m = lubridate::month(date),
+      value
+    )
   
   if (nrow(df) == 0) stop("No rows matched your filters.")
   
-  # ensure all months exist per service/year
-  
   dfc <- df %>%
-    group_by(service, y) %>%
-    complete(m = 1:12, fill = list(value = NA_real_)) %>%
-    ungroup() %>%
-    mutate(m_lab = month(m, label = TRUE, abbr = TRUE))
+    dplyr::group_by(service, y) %>%
+    tidyr::complete(m = 1:12, fill = list(value = NA_real_)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(m_lab = lubridate::month(m, label = TRUE, abbr = TRUE))
   
-  month_cols <- as.character(month(1:12, label = TRUE, abbr = TRUE))
+  month_cols <- as.character(lubridate::month(1:12, label = TRUE, abbr = TRUE))
   
   wide <- dfc %>%
-    select(service, y, m_lab, value) %>%
-    pivot_wider(names_from = m_lab, values_from = value) %>%
-    arrange(match(service, services), y)
+    dplyr::select(service, y, m_lab, value) %>%
+    tidyr::pivot_wider(names_from = m_lab, values_from = value) %>%
+    dplyr::arrange(match(service, services), y)
   
   # optional blank zeros to reduce noise
-  
   if (isTRUE(zero_to_blank)) {
-    wide <- wide %>% mutate(across(all_of(month_cols), ~ ifelse(.x == 0, NA_real_, .x)))
+    wide <- wide %>%
+      dplyr::mutate(dplyr::across(
+        dplyr::all_of(month_cols),
+        ~ ifelse(.x == 0, NA_real_, .x)
+      ))
   }
   
   # insert service header rows
-  
   add_headers <- function(w, services) {
     out <- list()
     for (srv in services) {
-      block <- w %>% filter(service == srv)
+      block <- w %>% dplyr::filter(service == srv)
       if (nrow(block) == 0) next
-      header <- tibble(service = srv, y = NA_integer_)
+      header <- tibble::tibble(service = srv, y = NA_integer_)
       for (m in month_cols) header[[m]] <- NA_real_
-      out[[srv]] <- bind_rows(header, block)
+      out[[srv]] <- dplyr::bind_rows(header, block)
     }
-    bind_rows(out)
+    dplyr::bind_rows(out)
   }
   
   wide2 <- add_headers(wide, services)
-  out   <- wide2 %>% mutate(Year = ifelse(is.na(y), service, format(y, big.mark = ","))) %>%
-    select(Year, all_of(month_cols))
   
-  ft <- flextable(out)
+  # Year as plain string (no big.mark commas);
+  # header rows use service label in Year column
+  out <- wide2 %>%
+    dplyr::mutate(
+      Year = ifelse(is.na(y), service, as.character(y))
+    ) %>%
+    dplyr::select(Year, dplyr::all_of(month_cols))
+  
+  ft <- flextable::flextable(out)
   
   # style service header rows
-  
   hdr_idx <- which(is.na(wide2$y))
   if (length(hdr_idx)) {
-    for (i in hdr_idx) ft <- merge_at(ft, i = i, j = 1:ncol(out))
-    ft <- bold(ft, i = hdr_idx, bold = TRUE)
-    ft <- align(ft, i = hdr_idx, align = "left")
-    ft <- bg(ft, i = hdr_idx, bg = "#d9ead3")
+    for (i in hdr_idx) {
+      ft <- flextable::merge_at(ft, i = i, j = 1:ncol(out))
+    }
+    ft <- flextable::bold(ft, i = hdr_idx, bold = TRUE)
+    ft <- flextable::align(ft, i = hdr_idx, align = "left")
+    ft <- flextable::bg(ft, i = hdr_idx, bg = "#d9ead3")
   }
   
   # zebra for year rows
-  
   yr_idx <- setdiff(seq_len(nrow(out)), hdr_idx)
-  ft <- bg(ft, i = yr_idx, bg = "#ffffff")
-  ft <- bg(ft, i = yr_idx[c(TRUE, FALSE)], bg = "#f7f7f7")
-  ft <- bold(ft, i = yr_idx, j = 1)
+  ft <- flextable::bg(ft, i = yr_idx, bg = "#ffffff")
+  ft <- flextable::bg(ft, i = yr_idx[c(TRUE, FALSE)], bg = "#f7f7f7")
+  ft <- flextable::bold(ft, i = yr_idx, j = 1)
   
   # number/currency format
-  
   if (isTRUE(currency)) {
-    ft <- colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", prefix = "$", na_str = "")
+    ft <- flextable::colformat_num(
+      ft, j = month_cols, digits = digits,
+      big.mark = ",", prefix = "$", na_str = ""
+    )
   } else {
-    ft <- colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", na_str = "")
+    ft <- flextable::colformat_num(
+      ft, j = month_cols, digits = digits,
+      big.mark = ",", na_str = ""
+    )
   }
   
   # layout
+  ft <- flextable::fontsize(ft, part = "all", size = font_size)
+  ft <- flextable::autofit(ft)
+  ft <- flextable::set_table_properties(ft, width = 0.1, layout = "autofit")
+  ft <- flextable::width(ft, width = 0.1)
   
-  ft <- fontsize(ft, part = "all", size = font_size)
-  ft <- autofit(ft)
-  ft <- set_table_properties(ft, width = 0.1, layout = "autofit")
-  ft <- width(ft, width = 0.1)
-  
-  # dynamic title row
-  
-  rng <- df %>% summarise(min_y = min(y, na.rm = TRUE), max_y = max(y, na.rm = TRUE))
-  title_txt <- paste(region, indicator, sprintf("(%d–%d)", rng$min_y, rng$max_y))
-  ft <- add_header_row(ft, values = title_txt, colwidths = ncol(out))
-  ft <- bold(ft, part = "header", i = 1)
-  ft <- fontsize(ft, part = "header", i = 1, size = font_size + 2)
-  ft <- align(ft, part = "header", i = 1, align = "center")
-
+  # no title header row added
   ft
 }
+
+
 
 # 7) Stacked column chart (Taxi over TNS or vice versa)
 
