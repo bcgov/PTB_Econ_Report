@@ -23,7 +23,7 @@ There are people who would use the proposed service:
   - If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
   - The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
 
-### `r region_name` Regional District Trip Volume Findings
+##### `r region_name` Regional District Trip Volume Findings
 *Table 1: `r region_name` Regional District Trip Volume*
 
 ```{r}
@@ -73,7 +73,7 @@ metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","y
 
 ```
 
-## Analysis and Conclusions
+Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_VOLUME","TAXI","last_value_fmt")` taxi trips. On a year-over-year (YoY) basis, the total taxi trip volume was `r metric("TRIP_VOLUME","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_VOLUME","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`.[^1_trip_volume-1] These results indicate strong momentum in demand for TAXI services in the region.
 

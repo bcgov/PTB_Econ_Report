@@ -49,7 +49,7 @@ Additional details of the application include:
 -   Proposed operating area: West Vancouver, North Vancouver, Vancouver, YVR
 -   Proposed fleet size: 30 (25 Conventional; 5 WAV)
 
-## Area of Study
+### Area of Study
 
 The proposed operating area for this taxi application is mainly within the City of Vancouver, District of West Vancouver, and District of North Vancouver. These municipalities are located in the Greater Vancouver Regional District.
 
@@ -57,7 +57,7 @@ For the purpose of statistical analysis, both taxi and TNS applications are asso
 
 For taxi applicants, the Region is determined based on where the existing or proposed operating area is located. In this case, **this taxi application is located in Region 1**. The Regional District is also determined based on where the existing or proposed operating area is located.
 
-## Existing Licensees
+### Existing Licensees
 
 The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (*MoTI*). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
 
@@ -108,7 +108,7 @@ This economics report examines key indicators of the taxi and TNS sectors in B.C
 
 *Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.*
 
-## Report Constraints
+### Report Constraints
 
 Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established *data requirements* outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
 
@@ -123,7 +123,7 @@ Due to data limitations, only two regions will be analyzed:
 
 At this time, three other regions will not be included in this economics report due to insufficient data coverage, poor data quality, or unreliable trip data submissions: Region 3 (Vancouver Island excluding CRD); Region 4 (Interior); and, Region 5 (Northern B.C. and other).
 
-## Qualifications
+### Qualifications
 
 This economics report was authored by the Board’s Senior Economist, **Peter Tseng**, who is ultimately responsible for the analysis contained in this report.
 

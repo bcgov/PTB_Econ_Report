@@ -1,6 +1,4 @@
-## Trip Revenue
-
-## Primary Factor: Demand
+#### Trip Revenue
 
 **Description:**  
 Trip revenue represents, in nominal terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
@@ -15,7 +13,7 @@ As stated previously, it is helpful to note that although taxis and TNS are simi
 
 ---
 
-## Policy Context: Public Need and Demand Factor
+Policy Context: Public Need and Demand Factor
 
 The Board’s *Public Need Policy* in the **Policy Manual** lists examples of the demand factor, which are set out below alongside their corresponding implications on trip revenue:
 
@@ -24,7 +22,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
   - If the proposed service attracts current taxi or TNS users, it will result in a redistribution of market share as measured by trip revenue among existing providers.
   - The redistribution can only be observed after the proposed service is introduced. However, historical trends can provide valuable indications. For instance, ongoing shifts in market shares of sectors can indicate changes in customer preference.
 
-### `r region_name` Regional District Trip Revenue Findings
+##### `r region_name` Regional District Trip Revenue Findings
 
 **Table 1: `r region_name` Regional District Trip Revenue (thousands of dollars)**
 
@@ -80,7 +78,7 @@ metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","y
 }
 
 ```
-## Analysis and Conclusions
+Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TAXI services in the region.
 
