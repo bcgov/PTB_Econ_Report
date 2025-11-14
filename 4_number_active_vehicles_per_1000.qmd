@@ -1,26 +1,39 @@
----
-title: "4_number_active_vehicles_per_1000"
-format: html
-editor: visual
----
+### Number of Active Vehicles per 1,000 Persons (Mohsen)
 
-## Quarto
+## Primary Factor: Accessibility
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+**Description:**\
+The number of active vehicles per 1,000 persons represents the total number of vehicles serving every 1,000 persons in an area over a month.
 
-## Running Code
+**Measurement:**\
+The number of active vehicles per 1,000 persons is calculated as the ratio of the total number of active vehicles (including both taxis and TNS) in an area relative to its population, normalized to a per 1,000 persons basis.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+**Interpretation:**\
+A higher number of active vehicles per 1,000 persons indicates higher accessibility to services in the area, as more taxis and TNS vehicles are available to serve every 1,000 persons.
 
-```{r}
-1 + 1
+------------------------------------------------------------------------
+
+## Policy Context: Public Need and Accessibility Factor
+
+The Board’s *Public Need Policy* in the **Policy Manual** lists examples of the accessibility factor, which are set out below alongside their corresponding implications on the number of active vehicles per 1,000 persons:
+
+-   **The proposed service enhances availability of passenger transportation services to everyone in the province, including in low-density areas, such as rural and remote communities.**
+    -   A higher number of active vehicles per 1,000 persons directly and positively correlates with greater service availability.\
+    -   The number of vehicles per 1,000 persons in low-density areas provides an area-specific assessment of overall service availability.
+    
+### `r region_name` Regional District Number of Active Vehicles per 1,000 Persons
+
+```{r, fig.width=10, fig.height=5}
+tbl <- make_indicator_table_compact(
+  data       = raw_norm,
+  indicator  = "ACTIVE_VEHICLE",
+  region     = region_name,
+  services   = c("TAXI","TNS"),
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  digits     = 1
+)
+tbl
 ```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
+Table 1: `r region_name Regional District Number of Active Vehicles per 1,000 Persons

@@ -9,13 +9,8 @@ execute:
   message: false
 ---
 ```{r}
-source("0_setup_peter.R")
+source("setup.R")
 ```
 {{< include 0_intro.qmd >}}
 {{< include 1_trip_volume.qmd >}}
-<<<<<<< HEAD:0_master.qmd
-
-Here I am working with Peter
-=======
 {{< include 2_trip_revenue_thousands.qmd >}}
->>>>>>> 87931a5931b57330c030aaf3fda3e2b7c4a73417:0_master_peter.qmd
