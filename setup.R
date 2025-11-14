@@ -5,6 +5,7 @@
 
 # ============================================================
 
+
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 suppressPackageStartupMessages({
@@ -17,6 +18,10 @@ suppressPackageStartupMessages({
   library(scales)
   library(flextable)
   library(officer)
+  library(stringr) 
+  library(knitr)
+  library(kableExtra)
+  
 })
 
 # -----------------------------
@@ -168,7 +173,7 @@ ytd_yoy <- function(data, indicator, region, end_date,
 make_indicator_table_compact <- function(
     data, indicator, region, services = c("TAXI","TNS"), area_type = "REGIONAL",
     date_from = NULL, date_to = NULL, digits = 0, zero_to_blank = FALSE,
-    currency = NULL, font_size = 9
+    currency = NULL, font_size = 4.5
 ) {
   
   # auto-detect currency style if not set
@@ -250,7 +255,8 @@ make_indicator_table_compact <- function(
   
   ft <- fontsize(ft, part = "all", size = font_size)
   ft <- autofit(ft)
-  ft <- fit_to_width(ft, max_width = 12)
+  ft <- set_table_properties(ft, width = 0.1, layout = "autofit")
+  ft <- width(ft, width = 0.1)
   
   # dynamic title row
   
@@ -260,7 +266,7 @@ make_indicator_table_compact <- function(
   ft <- bold(ft, part = "header", i = 1)
   ft <- fontsize(ft, part = "header", i = 1, size = font_size + 2)
   ft <- align(ft, part = "header", i = 1, align = "center")
-  
+
   ft
 }
 

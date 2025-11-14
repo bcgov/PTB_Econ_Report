@@ -19,4 +19,15 @@ main_output.docx
 .Rhistory
 .RData
 .DS_Store
+<<<<<<< HEAD
 .Rproj.user/shared/notebooks/paths
+=======
+.Rproj.user/
+
+/.quarto/
+**/*.quarto_ipynb
+
+# Track generated Word outputs in results (but keep Word lock files ignored)
+!results/*.docx
+results/~$*.docx
+>>>>>>> 87931a5931b57330c030aaf3fda3e2b7c4a73417
