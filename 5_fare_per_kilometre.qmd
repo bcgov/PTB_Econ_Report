@@ -4,13 +4,23 @@ format: html
 editor: visual
 ---
 
-## Quarto
+### Affordability Factor (PN)
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+#### Fare per kilometer
 
-## Running Code
+**Primary factor:** Affordability
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+**Description:** Fare per kilometre reflects the typical trip revenue that service providers earn per kilometre during a trip.
+
+**Measurement:** Fare per kilometre is measured by the median (i.e., the 50th percentile) of the fare per kilometre distribution in an area over a month. As there is variation in fare per kilometre, the 10th and 90th percentiles of the fare per kilometre distribution are also reported.
+
+**Interpretation:** Fare per kilometre serves as an indicator of the affordability of passenger transportation services. In general, a higher fare per kilometre indicates reduced affordability, as it suggests higher costs for passengers. Specifically, if the fare per kilometre increases more rapidly than B.C.'s average hourly wage rate, affordability would decrease as the rising costs outpace the passengers' ability to pay.[^1]
+
+[^1]: Statistics Canada. (2024). Table 14-10-0222-01 Employment, average hourly and weekly earnings (including overtime), and average weekly hours for the industrial aggregate excluding unclassified businesses, monthly, seasonally adjusted \[Data table\]. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022201&pickMembers%5B0%5D=1.11&cubeTimeFrame.startMonth=01&cubeTimeFrame.startYear=2022&cubeTimeFrame.endMonth=07&cubeTimeFrame.endYear=2024&referencePeriods=20220101%2C20240701
+
+The Board's public need policy in the Policy Manual lists examples of the affordability factor, which are set out below alongside their corresponding implications on fare per kilometre:
+
+-   \[adjust bullepoint content?\]
 
 ```{r}
 1 + 1
@@ -22,5 +32,3 @@ You can add options to executable code like this
 #| echo: false
 2 * 2
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
