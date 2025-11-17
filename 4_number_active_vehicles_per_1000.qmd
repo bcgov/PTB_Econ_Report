@@ -11,7 +11,6 @@ The number of active vehicles per 1,000 persons is calculated as the ratio of th
 **Interpretation:**\
 A higher number of active vehicles per 1,000 persons indicates higher accessibility to services in the area, as more taxis and TNS vehicles are available to serve every 1,000 persons.
 
-------------------------------------------------------------------------
 
 ## Policy Context: Public Need and Accessibility Factor
 
@@ -74,9 +73,9 @@ metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","y
 ```
 Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District saw a total of `r metric("VEHICLE_PER_1000_PERSONS","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("VEHICLE_PER_1000_PERSONS","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("VEHICLE_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for taxi services in the region.
+In `r end_label`, `r region_name` Regional District had `r metric("VEHICLE_PER_1000_PERSONS","TAXI","last_value_fmt")` active taxi vehicles per 1000 persons. On a year-over-year (YoY) basis, the active taxi vehicles per 1000 persons changed by `r metric("VEHICLE_PER_1000_PERSONS","TAXI","yoy_fmt")`, while year-to-date (YTD), the figure was `r metric("VEHICLE_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` compared to the same period in `r prev_year`.
 
-In `r end_label`, `r region_name` Regional District recorded `r metric("VEHICLE_PER_1000_PERSONS","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("VEHICLE_PER_1000_PERSONS","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("VEHICLE_PER_1000_PERSONS","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region.
+In `r end_label`, `r region_name` Regional District had `r metric("VEHICLE_PER_1000_PERSONS","TNS","last_value_fmt")` active TNS vehicles per 1000 persons. Compared with `r prev_label`, TNS active vehicles per 1000 persons changed by `r metric("VEHICLE_PER_1000_PERSONS","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, the active TNS vehicles per 1000 persons was `r metric("VEHICLE_PER_1000_PERSONS","TNS","ytd_yoy_fmt")` compared to the same period in `r prev_year`
 
 
 **Limitations:** The number of active vehicles per 1,000 persons does not address the Board’s other examples of accessibility, including accessibility for people with other disabilities or underserved groups and communities. In addition, it does not reflect the reduction in the barriers to inclusion.

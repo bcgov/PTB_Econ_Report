@@ -311,7 +311,7 @@ make_indicator_chart_stacked <- function(
     scale_fill_manual(values = colors, name = "Service Type") +
     scale_y_continuous(labels = label_number(accuracy = 0.1, scale_cut = cut_short_scale()), expand = c(0, 0.02)) +
     scale_x_date(breaks = pretty_breaks(n = 18), date_labels = "%Y\n%b") +
-    labs(title = title, subtitle = region, x = NULL, y = NULL, caption = caption) +
+    labs(title = title, subtitle = paste(region, "Regional District"), x = NULL, y = NULL, caption = caption) +
     theme_minimal(base_size = base_size) +
     theme(
       plot.title.position = "plot",
@@ -388,7 +388,7 @@ make_indicator_chart_lines <- function(
     scale_x_date(breaks = pretty_breaks(n = 18), date_labels = "%b\n%Y") +
     labs(
       title    = title,
-      subtitle = region,
+      subtitle = paste(region, "Regional District"),
       x        = NULL,
       y        = y_lab,
       caption  = caption

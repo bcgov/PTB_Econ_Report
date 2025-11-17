@@ -1,34 +1,78 @@
----
-title: "5_fare_per_kilometre"
-format: html
-editor: visual
----
-
 ### Affordability Factor (PN)
 
-#### Fare per kilometer
+#### Fare for a 5-Kilometre Trip
 
 **Primary factor:** Affordability
 
-**Description:** Fare per kilometre reflects the typical trip revenue that service providers earn per kilometre during a trip.
+**Description:** Fare for a 5-kilometre trip reflects the trip revenue that service providers earn during a trip with a length of 5 kilometres.
 
-**Measurement:** Fare per kilometre is measured by the median (i.e., the 50th percentile) of the fare per kilometre distribution in an area over a month. As there is variation in fare per kilometre, the 10th and 90th percentiles of the fare per kilometre distribution are also reported.
+**Measurement:** : Fare for a 5-kilometre trip is measured by the median (i.e., the 50th percentile) of the 5-kilometre trip fare distribution in an area over a month from the Trip Database. It is also measured by operating companies’ fares for a 5-kilometer trip in an area over the most recent month. Specifically, for taxi service in an area with a common rate, an operating company’s fare for a 5-kilometre trip is calculated as the common flag rate plus the product of 5 kilometres and the common distance rate. For taxi service in an area without a common rate, an operating company’s fare for a 5-kilometre trip is measured by the median of its 5-kilometre trip fare distribution. For TNS service in any area, an operating company’s fare for a 5-kilometre trip is measured by the median of its 5-kilometre trip fare distribution.
 
-**Interpretation:** Fare per kilometre serves as an indicator of the affordability of passenger transportation services. In general, a higher fare per kilometre indicates reduced affordability, as it suggests higher costs for passengers. Specifically, if the fare per kilometre increases more rapidly than B.C.'s average hourly wage rate, affordability would decrease as the rising costs outpace the passengers' ability to pay.[^1]
+**Interpretation:** : For some areas, the average distance of trips approximates 5 kilometres in most months. For other areas, a majority of trips are shorter than 5 kilometres in most months. Hence, fare for a 5-kilometre trip can serve as indicators of the affordability of passenger transportation services. In general, a higher fare for a 5-kilometre trip indicates reduced affordability, as it suggests higher costs for passengers. Specifically, if the fare for a 5-kilometre trip increases more rapidly than B.C.’s average hourly wage rate, affordability would decrease as the rising costs outpace the passengers' ability to pay.[^5_fare_per_kilometre-1]
 
-[^1]: Statistics Canada. (2024). Table 14-10-0222-01 Employment, average hourly and weekly earnings (including overtime), and average weekly hours for the industrial aggregate excluding unclassified businesses, monthly, seasonally adjusted \[Data table\]. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022201&pickMembers%5B0%5D=1.11&cubeTimeFrame.startMonth=01&cubeTimeFrame.startYear=2022&cubeTimeFrame.endMonth=07&cubeTimeFrame.endYear=2024&referencePeriods=20220101%2C20240701
+[^5_fare_per_kilometre-1]: Statistics Canada. (2024). Table 14-10-0222-01 Employment, average hourly and weekly earnings (including overtime), and average weekly hours for the industrial aggregate excluding unclassified businesses, monthly.
 
-The Board's public need policy in the Policy Manual lists examples of the affordability factor, which are set out below alongside their corresponding implications on fare per kilometre:
+The Board’s public need policy in the Policy Manual lists examples of the affordability factor, which are set out below alongside their corresponding implications on fare for a 5-kilometre trip:
 
--   \[adjust bullepoint content?\]
+\-**The proposed service provides more affordable options or services for consumers.** -In general, a lower fare for a 5-kilometre trip leads to improved affordability of service. On the other hand, the ratio of fare for a 5-kilometre trip to personal hourly wage rate can more accurately reflect affordability, with a lower ratio indicating better affordability.
 
-```{r}
-1 + 1
-```
+##### `r region_name` Regional District Fare for a 5-Kilometre Trip Findings
 
-You can add options to executable code like this
+**Table 1: `r region_name` Regional District Fare for a 5-Kilometre Trip**
 
 ```{r}
-#| echo: false
-2 * 2
+source("setup.R")
 ```
+
+```{r}
+tbl <- make_indicator_table_compact(
+  data       = raw_norm,
+  indicator  = "FARE_PER_5KM",
+  region     = region_name,
+  services   = c("TAXI","TNS"),
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  digits     = 2
+)
+tbl
+```
+
+*Figure 1: `r region_name` Regional District Fare for a 5-Kilometre Trip*
+
+```{r}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "FARE_PER_5KM",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Fare for a 5-Kilometre Trip ($)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+```{r}
+
+
+# metric("FARE_PER_5KM","TAXI","last_value_fmt")
+metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
+  service <- match.arg(service)
+  field   <- match.arg(field)
+  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
+  if (is.null(out)) "n/a" else out
+}
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TAXI","last_value_fmt")` in fare per 5 km for taxi trips. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FARE_PER_5KM","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FARE_PER_5KM","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TNS","last_value_fmt")` in fare per 5 km for TNS trips. Compared with `r prev_label`, the fare per 5 km for TNS trips was `r metric("FARE_PER_5KM","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the fare per 5 km for TNS trips was `r metric("FARE_PER_5KM","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+**Limitations:** The number of Fare for a 5-Kilometre Trip does not address the Board’s other examples of accessibility, including accessibility for people with other disabilities or underserved groups and communities. In addition, it does not reflect the reduction in the barriers to inclusion.
