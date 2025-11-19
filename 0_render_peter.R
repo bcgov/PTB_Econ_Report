@@ -1,8 +1,31 @@
 ## Minimal renderer: no functions, no git
-## Usage (terminal): quarto run render_minimal.R
+## Usage (terminal): Rscript 0_render_peter.R
 
-input_file  <- "0_master_peter.qmd"
-output_dir  <- "results"
+## Determine the directory where this script lives so that
+## relative paths work no matter the current working directory.
+get_script_dir <- function() {
+  # When run with Rscript
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- "--file="
+  idx <- grep(file_arg, cmd_args)
+  if (length(idx) > 0) {
+    return(dirname(normalizePath(sub(file_arg, "", cmd_args[idx[1]]))))
+  }
+
+  # When sourced from another R session
+  frame1 <- sys.frames()[[1]]
+  if (!is.null(frame1$ofile)) {
+    return(dirname(normalizePath(frame1$ofile)))
+  }
+
+  # Fallback: current working directory
+  getwd()
+}
+
+script_dir <- get_script_dir()
+
+input_file  <- file.path(script_dir, "0_master_peter.qmd")
+output_dir  <- file.path(script_dir, "results")
 output_type <- "docx"
 
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)

@@ -21,9 +21,6 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 **Table 1: `r region_name` Regional District Active Vehicles per 1,000 Persons**
 
-```{r}
-source("setup.R")
-```
 
 ```{r}
 tbl <- make_indicator_table_compact(
@@ -50,7 +47,7 @@ services   = c("TNS","TAXI"),  # first = bottom of stack
 area_type  = "REGIONAL",
 date_from  = date_from,
 date_to    = date_to,
-title      = " Active Vehicles per 1,000 Persons"
+title      = "Active Vehicles per 1,000 Persons"
 )
 chart
 
