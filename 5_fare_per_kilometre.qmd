@@ -20,11 +20,11 @@ The Board's public need policy in the Policy Manual lists examples of the afford
 
 ##### `r region_name` Regional District Fare for a 5-Kilometre Trip Findings
 
-**Table 1: `r region_name` Regional District Fare for a 5-Kilometre Trip**
+**Table 8: `r region_name` Regional District Fare for a 5-Kilometre Trip**
 
 
 ```{r}
-tbl <- make_indicator_table_compact(
+tb8 <- make_indicator_table_compact(
   data       = raw_norm,
   indicator  = "FARE_PER_5KM",
   region     = region_name,
@@ -34,10 +34,10 @@ tbl <- make_indicator_table_compact(
   date_to    = date_to,
   digits     = 2
 )
-tbl
+tb8
 ```
 
-*Figure 1: `r region_name` Regional District Fare for a 5-Kilometre Trip*
+*Figure 5: `r region_name` Regional District Fare for a 5-Kilometre Trip*
 
 ```{r}
 chart <- make_indicator_chart_lines(
