@@ -1,13 +1,13 @@
 #### Trip Revenue
 
-**Description:**  
-Trip revenue represents, in nominal terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+**Primary Factor:** Demand
 
-**Measurement:**  
-Trip revenue is calculated as the total fare amount of all completed trips reported to the Trip Database in an area over a month.
 
-**Interpretations:**  
-Increases in taxi trip revenue or TNS trip revenue indicate growth of quantity demanded in the respective markets. Moreover, a shift in trip revenue from the taxi sector to the TNS sector can signify a structural change in market dynamics, suggesting evolving consumer preferences or competition between the two types of partially substitutable services.
+**Description:**Trip revenue represents, in nominal terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+
+**Measurement:**Trip revenue is calculated as the total fare amount of all completed trips reported to the Trip Database in an area over a month.
+
+**Interpretations:**Increases in taxi trip revenue or TNS trip revenue indicate growth of quantity demanded in the respective markets. Moreover, a shift in trip revenue from the taxi sector to the TNS sector can signify a structural change in market dynamics, suggesting evolving consumer preferences or competition between the two types of partially substitutable services.
 
 As stated previously, it is helpful to note that although taxis and TNS are similar, they are not the same. Taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined revenue of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
 
@@ -59,7 +59,7 @@ services   = c("TNS","TAXI"),  # first = bottom of stack
 area_type  = "REGIONAL",
 date_from  = date_from,
 date_to    = date_to,
-title      = "Trip Revenue($)"
+title      = "Trip Revenue ($)"
 )
 chart
 

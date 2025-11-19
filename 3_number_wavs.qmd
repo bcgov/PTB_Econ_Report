@@ -1,12 +1,39 @@
+### Accessibility Factor (PN)
+
+#### Number of Wheelchair Accessible Vehicles 
+
+**Primary Factor:** Accessibility
+
+**Description:**The number of wheelchair accessible vehicles can be further divided into two sub-metrics: (1) the number of active wheelchair accessible vehicles and (2) the number of active wheelchair accessible vehicles providing at least one accessible trip. The number of active wheelchair accessible vehicles (WAVs) refers to the total number of vehicles equipped to accommodate passengers who use wheelchairs and that have been in operation in an area over a month. On the other hand, the number of active wheelchair accessible vehicles (WAVs) providing at least one accessible trip refers to the number of active WAVs that have recorded at least one accessible trip in the Trip Database.
+
+**Measurement:** The number of active WAVs is determined by cross-referencing the list of WAVs reported to the Registrar’s Office during licence renewal with the list of active vehicles (which may not necessarily have provided accessible trips) reported to the Trip Database. Then, the number of active wheelchair accessible vehicles providing at least one accessible trip is determined by limiting the list of active WAVs to those reported as having provided accessible trips. Both metrics can be further normalized per 1,000 persons to indicate their growth relative to the population.
+
+**Interpretations:** The number of active WAVs indicates the accessibility and inclusiveness of passenger transportation services for individuals who use wheelchairs. Generally, a higher number of active WAVs, especially compared to growth in overall demand (proxied by the number of WAVs per 1,000 persons), indicates a greater level of availability for these individuals. A lack of growth in the number of WAVs (both sub-metrics) would indicate suppliers’ unwillingness to match the demand, potentially due to the high costs associated with WAVs. 
+
+The Board’s public need policy in the Policy Manual lists examples of the accessibility  factor, which are set out below alongside their corresponding implications on the number of active wheelchair vehicles:
+
+- **The proposed service provides more or improved service to persons with mobility disabilities, including WAVs.**  
+  There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+  - The number of WAVs on the road directly and positively correlates with the extent and quality of service provided to individuals with mobility disabilities.
+  
+##### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
+
+**Table 1: `r region_name` Regional District Number of Active Wheelchair Accessible Vehicles**
+
 ```{r}
-# Example usage:
-chart <-make_indicator_chart_lines(
-   data       = raw_norm,
-   indicator  = "TRIP_VOLUME",
-   region     = region_name,
-   date_from  = date_from,
-   date_to    = date_to,
-   title      = "Wait Time (minutes)"
- )
-chart
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "ACTIVE_WAV",
+region     = region_name,
+services   = c("TAXI","TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 0
+)
+tbl
+
 ```
+
+
+
