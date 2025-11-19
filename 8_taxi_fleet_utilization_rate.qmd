@@ -37,3 +37,60 @@ The Board's sound economic conditions policy in the Policy Manual lists examples
     -   Close-to-full fleet utilization rates can indicate licencees are unable meet demand to maintain and grow their profit margin
 
     -   A consistent reduction in the fleet utilization rate can indicate deteriorating profit margins.
+
+##### `r region_name` Regional District Taxi Fleet Utilization Rate Findings
+
+**Table 12: `r region_name` Regional District Taxi Fleet Utilization Rate**
+
+```{r}
+source("setup.R")
+```
+
+```{r}
+tb12 <- make_indicator_table_compact(
+  data       = raw_norm,
+  indicator  = "FLEET_UTILIZATION",
+  region     = region_name,
+  services   = c("TAXI"),
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  digits     = 2
+)
+tb12
+```
+
+*Figure 10: `r region_name` Regional District Taxi Fleet Utilization Rate*
+
+```{r}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "FLEET_UTILIZATION",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI"),
+area_type  = "TNS_ZONE",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Taxi Fleet Utilization Rate (%)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+```{r}
+# metric("FLEET_UTILIZATION","TAXI","last_value_fmt")
+metric <- function(ind, service = c("TAXI"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
+  service <- match.arg(service)
+  field   <- match.arg(field)
+  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
+  if (is.null(out)) "n/a" else out
+}
+
+```
+
+**Analysis and Conclusions:** In `r end_label`, `r region_name` Regional District recorded a taxi fleet utilization rate of `r metric("FLEET_UTILIZATION","TAXI","last_value_fmt")`. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FLEET_UTILIZATION","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FLEET_UTILIZATION","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+Overall, taxi fleet utilization did not significantly change in the reporting period in Region 1 and stayed above 60.0 per cent. However, under-utilizing the full capacity suggests potential risks to the market's sustainability should there be a significant rise in the fleet size without a corresponding increase in demand. The likelihood of this risk materializing, however, remains uncertain.
+
+**Limitations:**The taxi fleet utilization rate does not provide insight into the equitability of opportunities in the industry, the impact on Public Transportation, the industry's sustainable profitability levels, or driver incomes, nor does it address the environmental aspects of sustainability.
