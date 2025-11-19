@@ -4,23 +4,36 @@ format: html
 editor: visual
 ---
 
-## Quarto
+#### Taxi Fleet Utilization Rate
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+**Primary factor:** Sustainability
 
-## Running Code
+**Description:** Taxi fleet utilization rate represents the proportion of licensed vehicles that are active in an area over a month.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+**Measurement:** The taxi fleet utilization rate is determined by dividing the number of average active vehicles by the total number of licensed vehicles in a given area during the reporting period. The number of average active vehicles is determined by data reported to the Trip Database, while the total number of licensed vehicles is the maximum fleet size approved by the Board.
 
-```{r}
-1 + 1
-```
+**Interpretation:** A relatively stable taxi fleet utilization rate over time can indicate long-term stability for the taxi industry. On the other hand, a decline in utilization rates, other things being equal, suggests unsustainable economic conditions as licensees choose to operate fewer vehicles in their fleet.
 
-You can add options to executable code like this
+The Board's sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on taxi fleet utilization rate:
 
-```{r}
-#| echo: false
-2 * 2
-```
+-   The proposed service promotes long-term stability for the passenger transportation industry.
 
-The `echo: false` option disables the printing of code (only output is displayed).
+    -   Significant changes in the fleet utilization rate can be signal instability of the passenger transportation industry.
+
+-   The proposed service encourages resiliency in the passenger transportation industry.
+
+    -   A consistently close-to-full fleet utilization rate indicates the industry is at its supply capacity, and unable to meet further demand growth. A consistently low fleet utilization can indicate a lack of growth of the industry.
+
+-   The proposed service minimizes significant market disruption.
+
+    -   A significant change in the fleet utilization rate can signal market disruption.
+
+-   The proposed service protects the taxi sector from rapid disruption to ensure its long-term stability as an essential service.
+
+    -   Frequent spikes to close-to-full fleet utilization indicates the supply of the industry is unable to adapt to market disruptions.
+
+-   The proposed service promotes overall profitability and economic sustainability of the industry.
+
+    -   Close-to-full fleet utilization rates can indicate licencees are unable meet demand to maintain and grow their profit margin
+
+    -   A consistent reduction in the fleet utilization rate can indicate deteriorating profit margins.
