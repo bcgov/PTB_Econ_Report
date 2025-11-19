@@ -1,26 +1,85 @@
----
-title: "6_wait_time"
-format: html
-editor: visual
----
+### Safety Factor (PN)
 
-## Quarto
+There is no analysis related to this factor.
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+### Service Quality Factor (PN)
 
-## Running Code
+#### Wait Time
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+Primary Factor: Service Quality
+
+**Description:** Wait time reflects the duration passengers wait for vehicles to arrive for pick up.
+
+**Measurement:** Wait time for each trip is calculated as the difference between the pick-up arrival time and the hail time. Wait time is measured by the median (i.e., the 50th percentile) of the monthly wait time distribution in an area, and different percentiles of the monthly wait time distribution are also calculated.
+
+**Interpretation:** Wait time serves as an indicator of the quality of passenger transportation services. It acts as a market-clearing variable, influenced by factors such as demand, supply, and the efficiency of the technology used to match passengers with vehicles. A longer wait time indicates reduced service quality, as it suggests longer delays for passengers and higher operating costs for licensees.
+
+Policy Context: Public Need and Accessibility Factor
+
+The Board’s *Public Need Policy* in the **Policy Manual** lists examples of the service quality factor, which are set out below alongside their corresponding implications on wait times:
+
+-   **The proposed service provides more or improved service where there is currently inadequate service.**\
+    -A long wait time suggests an inadequate level of service supplied.
+-   **The proposed service provides more reliable service.**\
+    -Consistent short wait times suggest that the service is reliable. -Significant changes in wait times can suggest that the service is not reliable. -Consistently long wait times suggest that the service is not reliable.
+-   **The proposed service encourages more efficient service to the public, including trip speed.**\
+    -A long wait time suggests an inadequate level of service supplied.
+-   **The proposed service provides a service that is comfortable and convenient.**\
+    -A short wait time contributes to a more comfortable and convenient service. -The proposed service supports better customer service and customer satisfaction. A short wait time contributes to better customer service and customer satisfaction.
+
+##### `r region_name` Regional District Wait Time Findings
+
+**Table 1: `r region_name` Regional District Wait Time (minutes)**
 
 ```{r}
-1 + 1
+tbl <- make_indicator_table_compact(
+  data       = raw_norm,
+  indicator  = "WAIT_TIME",
+  region     = region_name,
+  services   = c("TAXI","TNS"),
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  digits     = 2
+)
+tbl
 ```
 
-You can add options to executable code like this
+*Figure 1: `r region_name` Regional District Wait Time*
 
 ```{r}
-#| echo: false
-2 * 2
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "WAIT_TIME",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Wait Time (minutes)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+
+
+# metric("WAIT_TIME","TAXI","last_value_fmt")
+metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
+  service <- match.arg(service)
+  field   <- match.arg(field)
+  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
+  if (is.null(out)) "n/a" else out
+}
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TAXI","last_value_fmt")` in wait time for taxi trips. On a year-over-year (YoY) basis, the wait time for taxi trips was `r metric("WAIT_TIME","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("WAIT_TIME","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TNS","last_value_fmt")` in wait time for TNS trips. Compared with `r prev_label`, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+**Limitations:** In calculating the median wait time, trips with unreasonably long wait times due to data errors were not included. Extreme outlier  wait times are not reported in the figure on cumulative distribution as they are unusually long, which may be due to data errors.

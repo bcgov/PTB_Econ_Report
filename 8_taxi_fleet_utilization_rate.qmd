@@ -1,9 +1,3 @@
----
-title: "8_taxi_fleet_utilization_rate"
-format: html
-editor: visual
----
-
 #### Taxi Fleet Utilization Rate
 
 **Primary factor:** Sustainability
