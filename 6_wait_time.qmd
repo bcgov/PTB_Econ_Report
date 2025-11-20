@@ -31,6 +31,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 **Table 1: `r region_name` Regional District Wait Time (minutes)**
 
+
 ```{r}
 tbl <- make_indicator_table_compact(
   data       = raw_norm,

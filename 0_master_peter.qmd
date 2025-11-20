@@ -18,5 +18,4 @@ source("setup.R")
 {{< include 4_number_active_vehicles_per_1000.qmd >}}
 {{< include 5_fare_per_kilometre.qmd >}}
 {{< include 6_wait_time.qmd >}}
-{{< include 8_taxi_fleet_utilization_rate.qmd >}}
 
