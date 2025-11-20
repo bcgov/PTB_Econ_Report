@@ -48,7 +48,7 @@ tbl
 
 *Figure 1: `r region_name` Regional District Wait Time*
 
-```{r}
+```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(
 data       = raw_norm,
 indicator  = "WAIT_TIME",  # Adjust indicator if needed

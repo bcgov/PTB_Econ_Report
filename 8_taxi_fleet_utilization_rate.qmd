@@ -35,7 +35,7 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
 **Table 1: `r region_name` Regional District Taxi Fleet Utilization Rate **
 
 
-```{r}
+```{r, fig.width=10, fig.height=5}
 tbl <- make_indicator_table_compact(
   data       = raw_norm,
   indicator  = "FLEET_UTILIZATION",

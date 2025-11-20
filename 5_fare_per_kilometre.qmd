@@ -39,7 +39,7 @@ tb8
 
 *Figure 5: `r region_name` Regional District Fare for a 5-Kilometre Trip*
 
-```{r}
+```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(
 data       = raw_norm,
 indicator  = "FARE_PER_5KM",  # Adjust indicator if needed
