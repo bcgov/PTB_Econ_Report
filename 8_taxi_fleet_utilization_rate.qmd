@@ -4,68 +4,63 @@
 
 **Description:** Taxi fleet utilization rate represents the proportion of licensed vehicles that are active in an area over a month.
 
-**Measurement:** The taxi fleet utilization rate is determined by dividing the number of average active vehicles by the total number of licensed vehicles in a given area during the reporting period. The number of average active vehicles is determined by data reported to the Trip Database, while the total number of licensed vehicles is the maximum fleet size approved by the Board.
+**Measurement:** The taxi fleet utilization rate is determined by dividing the number of active vehicles by the total number of licensed vehicles in a given area during the reporting period. The number of active vehicles is determined by data reported to the Trip Database, while the maximum fleet size is based on the 
 
-**Interpretation:** A relatively stable taxi fleet utilization rate over time can indicate long-term stability for the taxi industry. On the other hand, a decline in utilization rates, other things being equal, suggests unsustainable economic conditions as licensees choose to operate fewer vehicles in their fleet.
+**Interpretation:** A relatively stable taxi fleet utilization rate over time can indicate long-term stability for the taxi and TNS industry . On the other hand, a decline in utilization rates, other things being equal, suggests unsustainable economic conditions as licensees choose to operate fewer vehicles in their fleet.
 
-The Board's sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on taxi fleet utilization rate:
+The Board’s sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on taxi fleet utilization rate:
 
 -   The proposed service promotes long-term stability for the passenger transportation industry.
 
-    -   Significant changes in the fleet utilization rate can be signal instability of the passenger transportation industry.
+    -   Stability in taxi fleet utilization rate can indicate the long-term stability of the industry.
 
--   The proposed service encourages resiliency in the passenger transportation industry.
+-   A higher taxi fleet utilization rate indicates greater resiliency in the passenger transportation industry.
 
     -   A consistently close-to-full fleet utilization rate indicates the industry is at its supply capacity, and unable to meet further demand growth. A consistently low fleet utilization can indicate a lack of growth of the industry.
 
 -   The proposed service minimizes significant market disruption.
 
-    -   A significant change in the fleet utilization rate can signal market disruption.
+    -   A low taxi fleet utilization rate increases the risk of market oversupply.
 
 -   The proposed service protects the taxi sector from rapid disruption to ensure its long-term stability as an essential service.
 
-    -   Frequent spikes to close-to-full fleet utilization indicates the supply of the industry is unable to adapt to market disruptions.
+    -   A low taxi fleet utilization rate increases the risk of rapid disruption in the taxi sector.
 
 -   The proposed service promotes overall profitability and economic sustainability of the industry.
 
-    -   Close-to-full fleet utilization rates can indicate licencees are unable meet demand to maintain and grow their profit margin
+    -   A low taxi fleet utilization rate suggests lower profitability or economic unsustainability in the market. 
 
-    -   A consistent reduction in the fleet utilization rate can indicate deteriorating profit margins.
 
-##### `r region_name` Regional District Taxi Fleet Utilization Rate Findings
 
-**Table 12: `r region_name` Regional District Taxi Fleet Utilization Rate**
+**Table 1: `r region_name` Regional District Taxi Fleet Utilization Rate **
 
-```{r}
-source("setup.R")
-```
 
 ```{r}
-tb12 <- make_indicator_table_compact(
+tbl <- make_indicator_table_compact(
   data       = raw_norm,
   indicator  = "FLEET_UTILIZATION",
   region     = region_name,
-  services   = c("TAXI"),
+  services   = c("TAXI","TNS"),
   area_type  = "REGIONAL",
   date_from  = date_from,
   date_to    = date_to,
   digits     = 2
 )
-tb12
+tbl
 ```
 
-*Figure 10: `r region_name` Regional District Taxi Fleet Utilization Rate*
+*Figure 1: `r region_name` Regional District taxi fleet utilization rate *
 
 ```{r}
 chart <- make_indicator_chart_lines(
 data       = raw_norm,
 indicator  = "FLEET_UTILIZATION",  # Adjust indicator if needed
 region     = region_name,
-services   = c("TAXI"),
-area_type  = "TNS_ZONE",
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
 date_from  = date_from,
 date_to    = date_to,
-title      = "Taxi Fleet Utilization Rate (%)",
+title      = "Taxi Fleet Utilization Rate",
 colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
 )
 chart
@@ -73,8 +68,10 @@ chart
 ```
 
 ```{r}
+
+
 # metric("FLEET_UTILIZATION","TAXI","last_value_fmt")
-metric <- function(ind, service = c("TAXI"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
+metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
   service <- match.arg(service)
   field   <- match.arg(field)
   out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
@@ -83,8 +80,10 @@ metric <- function(ind, service = c("TAXI"), field = c("last_value_fmt","yoy_fmt
 
 ```
 
-**Analysis and Conclusions:** In `r end_label`, `r region_name` Regional District recorded a taxi fleet utilization rate of `r metric("FLEET_UTILIZATION","TAXI","last_value_fmt")`. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FLEET_UTILIZATION","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FLEET_UTILIZATION","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+Analysis and Conclusions
 
-Overall, taxi fleet utilization did not significantly change in the reporting period in Region 1 and stayed above 60.0 per cent. However, under-utilizing the full capacity suggests potential risks to the market's sustainability should there be a significant rise in the fleet size without a corresponding increase in demand. The likelihood of this risk materializing, however, remains uncertain.
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FLEET_UTILIZATION","TAXI","last_value_fmt")` in taxi fleet utilization rate  trips. On a year-over-year (YoY) basis, the taxi fleet utilization rate  trips was `r metric("FLEET_UTILIZATION","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FLEET_UTILIZATION","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
 
-**Limitations:**The taxi fleet utilization rate does not provide insight into the equitability of opportunities in the industry, the impact on Public Transportation, the industry's sustainable profitability levels, or driver incomes, nor does it address the environmental aspects of sustainability.
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("FLEET_UTILIZATION","TNS","last_value_fmt")` in fleet utilization rate for TNS trips. Compared with `r prev_label`, the taxi fleet utilization rate  for TNS trips was `r metric("FLEET_UTILIZATION","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the taxi fleet utilization rate  for TNS trips was `r metric("FLEET_UTILIZATION","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+**Limitations:** The taxi fleet utilization rate does not provide insight into the equitability of opportunities in the industry, the impact on Public Transportation, the industry's sustainable profitability levels, or driver incomes, nor does it address the environmental aspects of sustainability.
