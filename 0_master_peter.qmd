@@ -18,4 +18,6 @@ source("setup.R")
 {{< include 4_number_active_vehicles_per_1000.qmd >}}
 {{< include 5_fare_per_kilometre.qmd >}}
 {{< include 6_wait_time.qmd >}}
+{{< include 7_revenue_per_active_vehicle.qmd >}}
+
 
