@@ -1,26 +1,86 @@
----
-title: "9_taxi_vehicle_occupancy_rate"
-format: html
-editor: visual
----
+### Sustainability Factor (SEC)
 
-## Quarto
+#### Vehicle Occupancy Rate
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Primary Factor: Sustainability
 
-## Running Code
+**Description:** The vehicle occupancy rate represents the proportion of working time during which a taxi or TNS vehicle carries passengers over the total working time over a month in an area.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+**Measurement:** The vehicle occupancy rate is calculated as the median (50th percentile) of the ratio of the total duration of all trips to the total working hours of all taxi vehicles in an area over a month.
+
+**Interpretation:** A high vehicle occupancy rate indicates frequent passenger occupancy and low wasted time waiting for new trip requests. In contrast, a low taxi vehicle occupancy rate suggests that vehicles are driving longer times to pick up passengers or the wait time to receive new trips is long. A low vehicle occupancy rate is unfavourable as it negatively impacts sustainable profitability. Additionally, significant changes in the vehicle occupancy rate can signal shifts in market stability and potential sustainability challenges. 
+
+Policy Context: Public Need and Accessibility Factor
+
+The Board’s sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on the taxi vehicle occupancy rate:
+
+-   **The proposed service promotes long-term stability for the passenger transportation industry.**\
+    -Stability in the vehicle occupancy rate can reflect long-term stability in the industry.
+-   **The proposed service encourages resiliency in the passenger transportation industry.**\
+    -Higher vehicle occupancy rates can reflect higher resiliency levels in the passenger transportation industry.
+-   **The proposed service minimizes significant market disruption**\
+    -Large shifts in the vehicle occupancy rate can indicate a significant market disruption.
+-   **The proposed service protects the passenger transportation sector from rapid disruption to ensure its long-term stability as an essential service.**\
+    -Large shifts in the vehicle occupancy rate can indicate a rapid disruption, leading to challenges for long-term stability as an essential service.
+-   *The proposed service promotes the overall profitability and economic sustainability of the industry.**\
+    -A low vehicle occupancy rate indicates unsustainable profitability and economic instability in the industry.
+-   **The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.**\
+    -A low vehicle occupancy rate can signal inadequate driver incomes.
+
+##### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings Findings
+
+**Table 1: `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings**
+
 
 ```{r}
-1 + 1
+tbl <- make_indicator_table_compact(
+  data       = raw_norm,
+  indicator  = "VEHICLE_OCCUPANCY_RATE",
+  region     = region_name,
+  services   = c("TAXI","TNS"),
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  digits     = 2
+)
+tbl
 ```
 
-You can add options to executable code like this
+*Figure 1: `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings*
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "VEHICLE_OCCUPANCY_RATE",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Taxi and TNS Vehicle Occupancy Rate Findings",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
 
 ```{r}
-#| echo: false
-2 * 2
+
+
+# metric("VEHICLE_OCCUPANCY_RATE","TAXI","last_value_fmt")
+metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
+  service <- match.arg(service)
+  field   <- match.arg(field)
+  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
+  if (is.null(out)) "n/a" else out
+}
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","last_value_fmt")` in Vehicle Occupancy Rate Findings for taxi trips. On a year-over-year (YoY) basis, the Vehicle Occupancy Rate Findings for taxi trips was `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("VEHICLE_OCCUPANCY_RATE","TNS","last_value_fmt")` in Vehicle Occupancy Rate Findings for TNS trips. Compared with `r prev_label`, the Vehicle Occupancy Rate Findings for TNS trips was `r metric("VEHICLE_OCCUPANCY_RATE","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the Vehicle Occupancy Rate Findings for TNS trips was `r metric("VEHICLE_OCCUPANCY_RATE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+
+**Limitations:** 

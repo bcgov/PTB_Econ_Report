@@ -20,3 +20,4 @@ source("setup.R")
 {{< include 6_wait_time.qmd >}}
 {{< include 7_revenue_per_active_vehicle.qmd >}}
 {{< include 8_taxi_fleet_utilization_rate.qmd >}}
+{{< include 9_taxi_vehicle_occupancy_rate.qmd >}}
