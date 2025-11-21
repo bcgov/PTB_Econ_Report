@@ -327,6 +327,51 @@ make_indicator_chart_stacked <- function(
 }
 
 
+# 7.1) Stacked column chart (Taxi over TNS or vice versa) with lable
+make_indicator_chart_stacked_2 <- function(
+    data, indicator, region, services = c("TNS","TAXI"), area_type = "REGIONAL",
+    date_from = NULL, date_to = NULL,
+    title = "Trip Volume (trips)",
+    caption = NULL,
+    colors = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
+    base_size = 10
+) {
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to) %>%
+    mutate(service = factor(service, levels = services))
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  ggplot(df, aes(x = date, y = value, fill = service)) +
+    geom_col(width = 26, position = "stack") +
+    
+    # ADD LABELS
+    geom_text(
+      aes(label = scales::number(value, accuracy = 0.01)),
+      position = position_stack(vjust = 0.5),
+      size = 3,
+      color = "white"
+    ) +
+    
+    scale_fill_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = label_number(accuracy = 0.1, scale_cut = cut_short_scale()), expand = c(0, 0.02)) +
+    scale_x_date(breaks = pretty_breaks(n = 18), date_labels = "%Y\n%b") +
+    labs(title = title, subtitle = paste(region, "Regional District"), x = NULL, y = NULL, caption = caption) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+
 
 # 8) One-stop metrics helper for inline use
 

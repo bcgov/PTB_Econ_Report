@@ -35,16 +35,19 @@ tbl
 
 *Figure 1: `r region_name` Regional District Active Vehicles per 1,000 Persons*
 
+
+
 ```{r, fig.width=10, fig.height=5}
-chart <- make_indicator_chart_stacked(
-data       = raw_norm,
-indicator  = "VEHICLE_PER_1000_PERSONS",
-region     = region_name,
-services   = c("TNS","TAXI"),  # first = bottom of stack
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-title      = "Active Vehicles per 1,000 Persons"
+chart <- make_indicator_chart_stacked_2(
+  data       = raw_norm,
+  indicator  = "VEHICLE_PER_1000_PERSONS",
+  region     = region_name,
+  services   = c("TNS","TAXI"),   # first = bottom of stack
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  title      = "Active Vehicles per 1,000 Persons",
+  caption    = NULL
 )
 chart
 
