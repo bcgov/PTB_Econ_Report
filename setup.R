@@ -257,7 +257,7 @@ make_indicator_table_compact <- function(
     }
     ft <- flextable::bold(ft, i = hdr_idx, bold = TRUE)
     ft <- flextable::align(ft, i = hdr_idx, align = "left")
-    ft <- flextable::bg(ft, i = hdr_idx, bg = "#d9ead3")
+    ft <- flextable::bg(ft, i = hdr_idx, bg = "#ECECEC")
   }
   
   # zebra for year rows
