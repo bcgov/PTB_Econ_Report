@@ -1,6 +1,6 @@
-### Demand Factor (PN)
+## Demand Factor (PN)
 
-#### Trip Volume
+### Trip Volume
 
 **Primary Factor:** Demand
 
@@ -23,7 +23,7 @@ There are people who would use the proposed service:
   - If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
   - The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
 
-##### `r region_name` Regional District Trip Volume Findings
+#### `r region_name` Regional District Trip Volume Findings
 *Table 1: `r region_name` Regional District Trip Volume*
 
 ```{r}

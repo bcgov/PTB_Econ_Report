@@ -1,10 +1,10 @@
-### Innovation Factor (SEC)
+## Innovation Factor (SEC)
 
 There is no analysis related to this factor.
 
-### Sustainability Factor (SEC)
+## Sustainability Factor (SEC)
 
-#### Revenue per Active Vehicle
+### Revenue per Active Vehicle
 
 Primary Factor: Sustainability
 
@@ -27,7 +27,7 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
 -   **The proposed service promotes overall profitability and economic sustainability of the industry.**\
     -Assuming fixed costs, stable or gradually increasing revenue per active vehicle in the taxi sector indicates overall profitability and economic sustainability for the industry.
 
-##### `r region_name` Regional District Revenue per Active Vehicle Findings
+#### `r region_name` Regional District Revenue per Active Vehicle Findings
 
 **Table 1: `r region_name` Regional District Revenue per Active Vehicle**
 

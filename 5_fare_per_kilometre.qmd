@@ -1,6 +1,6 @@
-### Affordability Factor (PN)
+## Affordability Factor (PN)
 
-#### Fare for a 5-Kilometre Trip
+### Fare for a 5-Kilometre Trip
 
 **Primary factor:** Affordability
 
@@ -18,7 +18,7 @@ The Board's public need policy in the Policy Manual lists examples of the afford
 
     -   In general, a lower fare for a 5-kilometre trip leads to improved affordability of service. On the other hand, the ratio of fare for a 5-kilometre trip to personal hourly wage rate can more accurately reflect affordability, with a lower ratio indicating better affordability.
 
-##### `r region_name` Regional District Fare for a 5-Kilometre Trip Findings
+#### `r region_name` Regional District Fare for a 5-Kilometre Trip Findings
 
 **Table 8: `r region_name` Regional District Fare for a 5-Kilometre Trip**
 

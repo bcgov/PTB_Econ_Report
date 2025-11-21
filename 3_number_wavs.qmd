@@ -1,6 +1,6 @@
-### Accessibility Factor (PN)
+## Accessibility Factor (PN)
 
-#### Number of Wheelchair Accessible Vehicles 
+### Number of Wheelchair Accessible Vehicles 
 
 **Primary Factor:** Accessibility
 
@@ -16,7 +16,7 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
   -There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
   - The number of WAVs on the road directly and positively correlates with the extent and quality of service provided to individuals with mobility disabilities.
   
-##### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
+#### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
 
 **Table 1: `r region_name` Regional District Number of Active Wheelchair Accessible Vehicles**
 

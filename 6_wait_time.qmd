@@ -1,10 +1,10 @@
-### Safety Factor (PN)
+## Safety Factor (PN)
 
 There is no analysis related to this factor.
 
-### Service Quality Factor (PN)
+## Service Quality Factor (PN)
 
-#### Wait Time
+### Wait Time
 
 Primary Factor: Service Quality
 
@@ -27,7 +27,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 -   **The proposed service provides a service that is comfortable and convenient.**\
     -A short wait time contributes to a more comfortable and convenient service. -The proposed service supports better customer service and customer satisfaction. A short wait time contributes to better customer service and customer satisfaction.
 
-##### `r region_name` Regional District Wait Time Findings
+#### `r region_name` Regional District Wait Time Findings
 
 **Table 1: `r region_name` Regional District Wait Time (minutes)**
 

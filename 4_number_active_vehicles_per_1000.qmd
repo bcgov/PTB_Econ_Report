@@ -1,4 +1,4 @@
-#### Number of Active Vehicles per 1,000 Persons
+### Number of Active Vehicles per 1,000 Persons
 
 Primary Factor: Accessibility
 
@@ -14,7 +14,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 \-**The proposed service enhances availability of passenger transportation services to everyone in the province, including in low-density areas, such as rural and remote communities.** -A higher number of active vehicles per 1,000 persons directly and positively correlates with greater service availability. -The number of vehicles per 1,000 persons in low-density areas provides an area-specific assessment of overall service availability.
 
-##### `r region_name` Regional District Active Vehicles per 1,000 Persons Findings
+#### `r region_name` Regional District Active Vehicles per 1,000 Persons Findings
 
 **Table 1: `r region_name` Regional District Active Vehicles per 1,000 Persons**
 
