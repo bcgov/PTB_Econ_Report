@@ -1,0 +1,42 @@
+|                                            |
+|--------------------------------------------|
+| title: "Appendix 1: Technical Methodology" |
+| format: pdf                                |
+
+A set of completed trips in a given area *j* during the period *t* is denoted by (T\_{j,t}), and each completed trip is denoted by (i \in T\_{j,t}). Each trip has a unique trip ID (one-to-one) and a unique vehicle ID (v_i) (many-to-one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database.
+
+## Demand Factor
+
+### Trip Volume
+
+Trip volume is the total count of trip IDs of completed trips.
+
+\`\`\`{=tex} \[ TV\_{j,t} = \|T\_{j,t}\| \] where ∣ ⋅ ∣ ∣⋅∣ counts the number of elements in the set.
+
+Trip Revenue Trip revenue is the total fare amount collected from all completed trips.
+
+\[ TR\_{j,t} = \sum*{i* \in T{j,t}} r_i\]
+
+where 𝑇 𝑅 𝑗 , 𝑡 TR j,t ​ is trip revenue and 𝑟 𝑖 r i ​ is the fare amount of trip 𝑖 i.
+
+Accessibility Factor Number of Wheelchair Accessible Vehicles (WAVs) Number of WAVs has two sub-metrics:
+
+Number of active wheelchair accessible vehicles
+
+Number of active wheelchair accessible vehicles providing accessible trips
+
+Active wheelchair accessible vehicles are determined by identifying the set of unique vehicle IDs 𝑉 𝑗 , 𝑡 V j,t ​ from completed trips and cross-referencing with the registry of accessible vehicles 𝑅 R.
+
+\[ WAV\^{1}{j,t} = \|R{j,t} \cap V\_{j,t}\|\]
+
+Active WAVs providing accessible trips (set 𝐴 𝑗 , 𝑡 A j,t):
+
+\[ WAV\^{2}{j,t} = \|R{j,t} \cap V\_{j,t} \cap A\_{j,t}\|\]
+
+Active WAVs per 1,000 persons:
+
+\[ WAV\^{per1}{j,t} = \frac{WAV^{1}{j,t}}{P_{j,t}} \times 1000\]
+
+Active WAVs providing accessible trips per 1,000 persons:
+
+\[ WAV\^{per2}{j,t} = \frac{WAV^{2}{j,t}}{P_{j,t}} \times 1000\]

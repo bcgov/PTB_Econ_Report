@@ -1,5 +1,3 @@
-### Sustainability Factor (SEC)
-
 #### Vehicle Occupancy Rate
 
 Primary Factor: Sustainability
