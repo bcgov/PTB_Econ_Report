@@ -20,20 +20,6 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
 
 **Table 1: `r region_name` Regional District Number of Active Wheelchair Accessible Vehicles**
 
-```{r}
-tbl <- make_indicator_table_compact(
-data       = raw_norm,
-indicator  = "ACTIVE_WAV",
-region     = region_name,
-services   = c("TAXI","TNS"),
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-digits     = 0
-)
-tbl
-
-```
 
 
 

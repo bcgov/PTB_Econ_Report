@@ -31,8 +31,9 @@ suppressPackageStartupMessages({
 # -----------------------------
 
 date_from   <- make_date(2023, 1, 1)     # report window start (inclusive)
-date_to     <- make_date(2025, 3, 1)     # report window end   (inclusive)
+date_to     <- make_date(2025, 5, 1)     # report window end   (inclusive)
 region_name <- "Metro Vancouver"          # display name used across report
+region <- "Capital"
 
 # Derived labels for narrative text
 
@@ -80,15 +81,15 @@ windowed <- raw_norm %>%
 
 # 1) Region aliasing: treat "Metro Vancouver Regional District" and "Metro Vancouver" as the same.
 
-with_region_alias <- function(region) {
-  if (identical(region, "Metro Vancouver Regional District")) {
-    c(region, "Metro Vancouver")
-  } else if (identical(region, "Metro Vancouver")) {
-    c("Metro Vancouver", "Metro Vancouver Regional District")
-  } else {
-    region
-  }
-}
+#with_region_alias <- function(region) {
+#  if (identical(region, "Metro Vancouver Regional District")) {
+#    c(region, "Metro Vancouver")
+#  } else if (identical(region, "Metro Vancouver")) {
+#    c("Metro Vancouver", "Metro Vancouver Regional District")
+#  } else {
+#    region
+#  }
+#}
 
 # 2) Formatter utilities (consistent across the doc)
 
@@ -112,7 +113,7 @@ filter_indicator <- function(data,
                              area_type = "REGIONAL",
                              date_from = NULL,
                              date_to   = NULL) {
-  region_vec <- with_region_alias(region)
+  region_vec <- region_name
   
   out <- data %>%
     filter(

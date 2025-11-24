@@ -1,42 +1,161 @@
-|                                            |
-|--------------------------------------------|
-| title: "Appendix 1: Technical Methodology" |
-| format: pdf                                |
+# Appendix 1: Technical Methodology
 
-A set of completed trips in a given area *j* during the period *t* is denoted by (T\_{j,t}), and each completed trip is denoted by (i \in T\_{j,t}). Each trip has a unique trip ID (one-to-one) and a unique vehicle ID (v_i) (many-to-one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database.
+Let (T\_{j,t}) be the set of completed trips in area (j) during period (t).\
+Each trip (i \in T\_{j,t}) has a unique trip ID and a vehicle ID (v_i).\
+All formulas below use Trip Database data unless stated otherwise.
+
+------------------------------------------------------------------------
 
 ## Demand Factor
 
 ### Trip Volume
 
-Trip volume is the total count of trip IDs of completed trips.
+\[ TV\_{j,t} = \|T\_{j,t}\| \]
 
-\`\`\`{=tex} \[ TV\_{j,t} = \|T\_{j,t}\| \] where ∣ ⋅ ∣ ∣⋅∣ counts the number of elements in the set.
+### Trip Revenue
 
-Trip Revenue Trip revenue is the total fare amount collected from all completed trips.
+\[ TR\_{j,t} = \sum*{i* \in T{j,t}} r_i \]
 
-\[ TR\_{j,t} = \sum*{i* \in T{j,t}} r_i\]
+------------------------------------------------------------------------
 
-where 𝑇 𝑅 𝑗 , 𝑡 TR j,t ​ is trip revenue and 𝑟 𝑖 r i ​ is the fare amount of trip 𝑖 i.
+## Accessibility Factor
 
-Accessibility Factor Number of Wheelchair Accessible Vehicles (WAVs) Number of WAVs has two sub-metrics:
+### Number of Wheelchair Accessible Vehicles (WAVs)
 
-Number of active wheelchair accessible vehicles
+#### 1. Active Registered Accessible Vehicles
 
-Number of active wheelchair accessible vehicles providing accessible trips
+\[ WAV\^{(1)}*{j,t} = \|R*{j,t} \cap V\_{j,t}\| \]
 
-Active wheelchair accessible vehicles are determined by identifying the set of unique vehicle IDs 𝑉 𝑗 , 𝑡 V j,t ​ from completed trips and cross-referencing with the registry of accessible vehicles 𝑅 R.
+#### 2. Active Accessible Vehicles Providing Accessible Trips
 
-\[ WAV\^{1}{j,t} = \|R{j,t} \cap V\_{j,t}\|\]
+\[ WAV\^{(2)}*{j,t} = \|R*{j,t} \cap V\_{j,t} \cap A\_{j,t}\| \]
 
-Active WAVs providing accessible trips (set 𝐴 𝑗 , 𝑡 A j,t):
+#### Per 1,000 Persons
 
-\[ WAV\^{2}{j,t} = \|R{j,t} \cap V\_{j,t} \cap A\_{j,t}\|\]
+\[ WAV\^{per1}*{j,t} =* \frac{WAV^{(1)}_{j,t}}{P_{j,t}} \times 1000 \] \[ WAV\^{per2}{j,t} = \frac{WAV^{(2)}_{j,t}}{P_{j,t}} \times 1000 \]
 
-Active WAVs per 1,000 persons:
+### Active Vehicles per 1,000 Persons
 
-\[ WAV\^{per1}{j,t} = \frac{WAV^{1}{j,t}}{P_{j,t}} \times 1000\]
+\[ \text{ActiveVehicles}\_{j,t} = \frac{|V_{j,t}|}{P_{j,t}} \times 1000 \]
 
-Active WAVs providing accessible trips per 1,000 persons:
+------------------------------------------------------------------------
 
-\[ WAV\^{per2}{j,t} = \frac{WAV^{2}{j,t}}{P_{j,t}} \times 1000\]
+## Affordability Factor
+
+### Fare per Kilometre
+
+\[ f_i = \frac{r_i}{d_i} \]
+
+Percentiles (10th, 50th, 90th) of the distribution of (f_i) are reported.
+
+------------------------------------------------------------------------
+
+## Safety Factor
+
+No indicators computed.
+
+------------------------------------------------------------------------
+
+## Service Quality Factor
+
+### Wait Time
+
+\[ w_i = t_i\^p - t_i\^h \]
+
+Median wait time is reported.
+
+------------------------------------------------------------------------
+
+## Competition Factor
+
+### Herfindahl–Hirschman Index (HHI)
+
+\[ HHI\_{j,t} = \sum*{i=1}\^{n} s*{i,j,t}\^{,2} \]
+
+### Theil Index
+
+\[ T = \sum\_{i=1}\^{n} \left(\frac{x_i}{\mu}\right) \ln\left(\frac{x_i}{\mu}\right) \]
+
+### Theil Decomposition
+
+\[ T = B + W \]
+
+Where: \[ B = \sum\_{j=1}\^{k} \left( \frac{n_j}{n} \frac{y_j}{y} \ln\left(\frac{y_j}{y}\right) \right) \]
+
+\[ W = \sum*{j=1}\^{k}* \left( \frac{y_j}{y} \sum{i=1}\^{n_j} \frac{y_{ij}}{y_j} \ln\left(\frac{y_{ij}}{y_j}\right) \right) \]
+
+------------------------------------------------------------------------
+
+## Innovation Factor
+
+No analysis conducted.
+
+------------------------------------------------------------------------
+
+## Sustainability Factor
+
+### Revenue per Active Vehicle
+
+\[ RevPerVehicle\_{j,t} = \frac{TR_{j,t}}{|V_{j,t}|} \]
+
+### Taxi Fleet Utilization
+
+\[ FleetUtilization\_{i,t} = \frac{AV_{i,t}}{Capacity_{i,t}} \]
+
+### Taxi Vehicle Occupancy Rate (VOR)
+
+\[ VOR = \frac{D_{i,t}}{L_{i,t}} \]
+
+------------------------------------------------------------------------
+
+## New Vehicle Occupancy Rate (Shift-Based Method)
+
+Define a **shift** as a sequence of trips where each trip starts within 60 minutes of the previous trip’s end.
+
+### Shift Start & End
+
+\[ t\^{shift}*{start} =* \min*i(t\^{vehicle}*{assign,i}) \] \[ t\^{shift}{end} = \max*i(t\^{dropoff}*{arrive,i}) \]
+
+### Shift Length
+
+\[ L\^{shift} = t\^{shift}*{end} - t\^{shift}*{start} \]
+
+### Shift Occupancy
+
+\[ D\^{shift} = \sum\_{i=1}\^{n} D_i \]
+
+### Average VOR
+
+\[ VOR = \frac{D_{i,t}}{L_{i,t}} \]
+
+### Vehicle Occupancy Rate Possible Range (VORPR)
+
+\[ VORPR = \frac{D_{i,t}}{O_{i,t}} \]
+
+Where operating time: \[ O_i = t\^{dropoff}*{arrive,i} - t\^{vehicle}*{assign,i} \]
+
+------------------------------------------------------------------------
+
+## Drivers’ Gross Hourly Earnings
+
+\[ GHE\_{j,t} = \text{Median} \left( \frac{\sum_{i \in T_{j,t}} r_i} {\sum*{i* \in T{j,t}} h_i} \right) \]
+
+------------------------------------------------------------------------
+
+## Number of Active Drivers
+
+\[ DR\_{j,t} = \|{ dr_i \mid i \in T\_{j,t} }\| \]
+
+------------------------------------------------------------------------
+
+## Peak-Hour Taxi Vehicle Occupancy Rate
+
+Peak hour identified as hour with the largest trip volume.
+
+\[ PeakVOR\_{i,t} = \frac{D^{peak}_{i,t}}{L^{peak}_{i,t}} \]
+
+------------------------------------------------------------------------
+
+## Variety Factor
+
+No analysis conducted.
