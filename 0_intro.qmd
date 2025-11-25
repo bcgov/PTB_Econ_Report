@@ -1,6 +1,7 @@
 ---
 title: "Economics Report"
 toc: true
+number_sections: true
 format:
   docx:  
     reference-doc: "Economics Report (Region 2).docx"

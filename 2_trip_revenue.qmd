@@ -27,6 +27,10 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 **Table 1: `r region_name` Regional District Trip Revenue (thousands of dollars)**
 
 
+
+*`r tbl_caption(paste(region_name, "Regional District Trip rec"))`*
+
+
 ```{r}
 raw_norm_k <- raw_norm %>% dplyr::mutate(
   value = ifelse(

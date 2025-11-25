@@ -3,6 +3,9 @@ title: "Economics Report"
 format:
   docx:
     reference-doc: "Economics Report (Region 2).docx"
+    include-in-header:
+      text: |
+        \usepackage{float}
 execute:
   echo: false
   warning: false
@@ -21,3 +24,5 @@ source("setup.R")
 {{< include 7_revenue_per_active_vehicle.qmd >}}
 {{< include 8_taxi_fleet_utilization_rate.qmd >}}
 {{< include 9_taxi_vehicle_occupancy_rate.qmd >}}
+{{< include 11_appendix.qmd >}}
+
