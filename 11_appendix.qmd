@@ -1,6 +1,6 @@
-## Appendix 1: Technical Methodology {#sec-technical-methodology}
+## Appendix 1: Technical Methodology
 
-A set of completed trips in a given area j during the period t is denoted by T~j,t~, and each completed trip is denoted by i in T~j,t~ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by v~i~ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database.
+A set of completed trips in a given area j during the period t is denoted by $T_{j,t}$, and each completed trip is denoted by i in $T_{j,t}$ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by $v_i$ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database. 
 
 ------------------------------------------------------------------------
 
@@ -8,7 +8,8 @@ A set of completed trips in a given area j during the period t is denoted by T~j
 
 #### Trip Volume
 
-Trip volume is the total count of trip IDs of completed trips. $$
+Trip volume is the total count of trip IDs of completed trips.
+$$
 TV_{j,t} = \lvert T_{j,t} \rvert
 $$ {#eq-tv} where \|∙\| counts the number of elements in the set.
 
@@ -18,35 +19,46 @@ Total trip revenue is:
 
 $$
 TR_{j,t} = \sum_{i \in T_{j,t}} r_i
-$$ {#eq-tr} where TR~j,t~ is trip revenue and r~i~ is the fare amount of the trip i. \### Accessibility Factor {#sec-accessibility}
+$$ {#eq-tr} 
+
+where $TR_{j,t}$ is trip revenue and $r_i$ is the fare amount of the trip $i$.
+
+### Accessibility Factor
 
 #### Number of Wheelchair Accessible Vehicles (WAVs)
 
-Number of WAVs has two sub-metrics: (1) the number of active wheelchair accessible and (2) the number of active wheelchair accessible providing accessible trips. The number of active wheelchair accessible vehicles is determined by identifying a set of unique vehicle IDs denoted by V~j,t~ from completed trips in the Trip Database and cross-referencing them with a set of the registry of accessible vehicles denoted by R.
+Number of WAVs has two sub-metrics: (1) the number of active wheelchair accessible and (2) the number of active wheelchair accessible providing accessible trips. 
+The number of active wheelchair accessible vehicles is determined by identifying a set of unique vehicle IDs denoted by $V_{j,t}$ from completed trips in the Trip Database and cross-referencing them with a set of the registry of accessible vehicles denoted by R. 
+
 
 $$
 WAV^{1}_{j,t} = \bigl\lvert R_{j,t} \cap V_{j,t} \bigr\rvert
-$$ {#eq-wav1} where \|∙\| counts the number of elements in the set, and V~j,t~∩R~j,t~ represents the set of active vehicles that are also registered as accessible.
+$$ 
+where |∙| counts the number of elements in the set, and $V_{j,t}∩R_{j,t}$ represents the set of active vehicles that are also registered as accessible.
 
 The number of active wheelchair accessible vehicles providing acceptable trips is determined by limiting the list of active WAVs to those reported as having provided accessible trips.
 
 $$
 WAV^{2}_{j,t} = \bigl\lvert R_{j,t} \cap V_{j,t} \cap A_{j,t} \bigr\rvert
-$$ {#eq-wav2} where \|∙\| counts the number of elements in the set, and R~j,t~∩V~j,t~∩A~j,t~ represents the set of active WAVs that are also providing accessible trips.
+$$ 
 
-The number of active wheelchair accessible vehicles per 1,000 person is the ratio of WAV^1^~j,t~to the area’s population denoted by P\_(j,t), multiplied by 1,000.
+where |∙| counts the number of elements in the set, and $R_{j,t}∩ V_{j,t}∩A_{j,t}$ represents the set of active WAVs that are also providing accessible trips. 
+
+The number of active wheelchair accessible vehicles per 1,000 person is the ratio of $WAV_{j,t}^1$ to the area’s population denoted by P_(j,t), multiplied by 1,000.
 
 $$
 WAV^{\text{per1}}_{j,t}
 = \frac{WAV^{1}_{j,t}}{P_{j,t}} \times 1000
-$$ {#eq-wav-per1} The number of active wheelchair accessible vehicles providing accessible trips per 1,000 person is the ratio of WAV^2^~j,t~ to the area’s population denoted by P~j,t~, multiplied by 1,000. $$
+$$ 
+The number of active wheelchair accessible vehicles providing accessible trips per 1,000 person is the ratio of $WAV_{j,t}^2$ to the area’s population denoted by $P_{j,t}$, multiplied by 1,000. 
+$$
 WAV^{\text{per2}}_{j,t}
 = \frac{WAV^{2}_{j,t}}{P_{j,t}} \times 1000
 $$ {#eq-wav-per2}
 
 #### Active Vehicles per 1,000 Persons
 
-The number of active vehicles per 1,000 persons is calculated as the ratio of total number of taxi and TNS active vehicles V~j,t~ (V~j,t~={v~i~\|i∈T~j,t~}) to the area’s population (P~j,t~), multiplied by 1,000.
+The number of active vehicles per 1,000 persons  is calculated as the ratio of total number of taxi and TNS active vehicles $V_{j,t}(V_{j,t}={v_i |i∈T_{j,t}})$ to the area’s population $(P_{j,t})$, multiplied by 1,000. 
 
 $$
 Number of Active Vehicles Per 1000 Persons _{j,t}
@@ -57,17 +69,17 @@ $$ {#eq-active-per-capita}
 
 #### Fare per Kilometre
 
-For each trip i, the fare per kilometre denoted by f~i~ is calculated as the ratio of its fare denoted by r~i~ to its trip length in kilometres denoted by d~i~.
+For each trip i, the fare per kilometre denoted by $f_i$ is calculated as the ratio of its fare denoted by $r_i$ to its trip length in kilometres denoted by $d_i$.
 
 $$
 f_i = \frac{r_i}{d_i}
-$$ {#eq-fare-per-km}
+$$ 
 
 The 10th, 50th, and the 90th percentiles of the fare per kilometre distribution are reported. Only trips recorded with a fare of at least \$2.50 were included, in line with the minimum flag rate of \$2.50.
 
 ### Safety Factor {#sec-safety}
 
-No indicators computed.
+There is no analysis related to this factor.
 
 ### Service Quality Factor
 
@@ -77,7 +89,7 @@ For each trip, wait time, denoted by $w_i$, is defined as the difference between
 
 $$
 w_i = t_i^{p} - t_i^{h}
-$$ {#eq-wait}
+$$ 
 
 The median of the wait time distribution is reported. The median, when compared to the average, is less affected by outliers or extreme values, providing a more accurate representation of the central tendency (i.e., typical wait times). Pre-booked and street hail trips were excluded, as they were not the focus of what the wait time indicator is intended to capture.
 
@@ -85,18 +97,22 @@ The median of the wait time distribution is reported. The median, when compared 
 
 #### Concentration Indices
 
-Herfindahl-Hirschman Index (HHI) and Theil Index are both measures of market concentration. The HHI index is calculated by summing the squares of each firm's market share, with lower values indicating more competition and higher values suggesting greater concentration. Specifically, the corresponding HHI Index for a given region is constructed as follows:
+Herfindahl-Hirschman Index (HHI) and Theil Index are both measures of market concentration. 
+The HHI index is calculated by summing the squares of each firm's market share, with lower values indicating more competition and higher values suggesting greater concentration. Specifically, the corresponding HHI Index for a given region is constructed as follows:
 
 $$
 HHI_{j,t} = \sum_{i=1}^{n} s_{i,j,t}^{2}
-$$ {#eq-hhi} where $s_{i,j,t}$is the market share of firm i in area j during period t, and n is the total number of companies The Theil Index is based on the concept of entropy from information theory. It measures the deviation of a distribution (like market shares) from a perfectly equal distribution. Specifically, the corresponding Theil Index for a given region is constructed as follows:
+$$  
+
+where $s_{i,j,t}$is the market share of firm i in area j during period t, and n is the total number of companies The Theil Index is based on the concept of entropy from information theory. It measures the deviation of a distribution (like market shares) from a perfectly equal distribution. Specifically, the corresponding Theil Index for a given region is constructed as follows:
 
 $$
 T = \sum_{i=1}^{n}
 \left( \frac{x_i}{\mu} \ln\!\left(\frac{x_i}{\mu}\right) \right)
-$$ {#eq-theil}
+$$ 
 
-where n is the total number of companies, and $x_i$ represents the revenue share of the $i^{th}$ entity and μ is the average share. The Theil decomposition is conducted as follows: $$
+where n is the total number of companies, and $x_i$ represents the revenue share of the $i^{th}$ entity and μ is the average share. The Theil decomposition is conducted as follows: 
+$$
 T = 
 \sum_{j=1}^{k}
 \left(
@@ -114,6 +130,7 @@ T =
 = B + W
 $$
 
+
 where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region.
 
 ### Innovation Factor
@@ -126,10 +143,13 @@ There is no analysis related to this factor.
 
 Trip revenue per active vehicle is calculated by dividing the sum of the total fare amount by the total number of active vehicles:
 
+
 $$
 RevPerVehicle_{j,t}
 = \frac{TR_{j,t}}{\lvert V_{j,t} \rvert}
-$$ {#eq-rev-per-vehicle} where TR\_(j,t) is total trip revenue, and \|V\_(j,t) \| is the number of active vehicles.
+$$ {#eq-rev-per-vehicle} 
+
+where $TR_{j,t}$ is total trip revenue, and $|V_{j,t} |$ is the number of active vehicles.
 
 #### Taxi Fleet Utilization
 
@@ -146,13 +166,15 @@ Taxi Vehicle Occupancy Rate (VOR) is calculated as the ratio of the sum of all t
 
 $$
 VOR_{i,t} = \frac{D_{i,t}}{L_{i,t}}
-$$ {#eq-vor} The shift length is determined by the difference between the shift end time and the shift start time. TNS trips are not included, as the start time for TNS shifts recorded in the Trip Database corresponds to the driver's first ride request rather than the actual beginning of their work shift.
+$$ {#eq-vor} 
+The shift length is determined by the difference between the shift end time and the shift start time.
+TNS trips are not included, as the start time for TNS shifts recorded in the Trip Database corresponds to the driver's first ride request rather than the actual beginning of their work shift.
 
-## New Vehicle Occupancy Rate (Mohammad)
+### New Vehicle Occupancy Rate 
 
 A shift is defined as a series of trips performed by a driver, where the start time of each trip occurs within **60 minutes of the previous trip’s end**. After defining the group of trips that are included in one shift, the following attributes are calculated:
 
-### Shift Start Time
+#### Shift Start Time
 
 (Denoted as $t_{\text{start}}^{\text{shift}}$) This is the earliest vehicle assignment DateTime ($t_{\text{assign},i}^{\text{vehicle}}$) in the shift.
 
@@ -161,7 +183,7 @@ t_{\text{start}}^{\text{shift}}
 = \min_i \left( t_{\text{assign},i}^{\text{vehicle}} \right)
 $$
 
-### Shift End Time
+#### Shift End Time
 
 Denoted as ( $t_{\text{end}}^{\text{shift}}$).\
 This is the latest drop-off arrival DateTime ( $t_{\text{arrive},i}^{\text{dropoff}}$ ):
@@ -171,7 +193,7 @@ t_{\text{end}}^{\text{shift}}
 = \max_i \left( t_{\text{arrive},i}^{\text{dropoff}} \right)
 $$
 
-### Shift Length
+#### Shift Length
 
 Denoted as ( $L^{\text{shift}}$ ):
 
@@ -228,9 +250,14 @@ GHE_{j,t}
 \sum_{i \in T_{j,t}} h_i
 }
 \right)
-$$ {#eq-ghe} where: - $GHE_{(j,t)}$ represents the drivers' gross hourly earnings in area j during period t. - r_i is the fare revenue for trip i. - h_i is the total working hours of the driver associated with trip i. - T\_(j,t) is the set of completed trips in area j during period t.
+$$ 
+where: 
+-   $GHE_{(j,t)}$ represents the drivers' gross hourly earnings in area j during period t. 
+-   $r_i$ is the fare revenue for trip i. 
+-   $h_i$ is the total working hours of the driver associated with trip i. 
+-   $T_{j,t}$ is the set of completed trips in area j during period t.
 
-------------------------------------------------------------------------
+
 
 ### Number of Active Drivers {#sec-drivers}
 
@@ -239,7 +266,7 @@ The number of active drivers is determined by identifying a set of unique driver
 $$
 DR_{j,t}
 = \bigl\lvert \{ dr_i \mid i \in T_{j,t} \} \bigr\rvert
-$$ {#eq-drivers}
+$$ 
 here:
 	$DR_{j,t}$ represents the number of active drivers in area j during period t.
 	$dr_i$ is the unique driver associated with trip i.
@@ -258,10 +285,10 @@ Once the peak hours are identified, the Peak-Hour Taxi Vehicle Occupancy Rate is
 $$
 PeakVOR_{i,t}
 = \frac{D^{\text{peak}}_{i,t}}{L^{\text{peak}}_{i,t}}
-$$ {#eq-peak-vor}
+$$ 
 
-------------------------------------------------------------------------
 
-### Variety Factor {#sec-variety}
+
+### Variety Factor 
 
 No analysis conducted.
