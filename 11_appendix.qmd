@@ -76,7 +76,7 @@ $$
 
 The 10th, 50th, and the 90th percentiles of the fare per kilometre distribution are reported. Only trips recorded with a fare of at least \$2.50 were included, in line with the minimum flag rate of \$2.50.
 
-### Safety Factor {#sec-safety}
+### Safety Factor 
 
 There is no analysis related to this factor.
 
@@ -136,7 +136,7 @@ where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mea
 
 There is no analysis related to this factor.
 
-### Sustainability Factor=
+### Sustainability Factor
 
 #### Revenue per Active Vehicle
 
@@ -271,7 +271,6 @@ here:
 	$dr_i$ is the unique driver associated with trip i.
 	$T_{j,t}$ is the set of completed trips in area j during period t.
 
-------------------------------------------------------------------------
 
 ### Peak-Hour Taxi Vehicle Occupancy Rate
 
