@@ -57,9 +57,9 @@ tbl
 #| echo: false
 fig_counter <- 0
 
-fig0_caption <- function(text) {
+fig_caption <- function(text) {
   fig_counter <<- fig_counter + 1
-  sprintf("Table %d: %s", fig_counter, text)
+  sprintf("Figure %d: %s", fig_counter, text)
 }
 ```
 
