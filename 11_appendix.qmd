@@ -2,9 +2,8 @@
 
 A set of completed trips in a given area j during the period t is denoted by $T_{j,t}$, and each completed trip is denoted by i in $T_{j,t}$ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by $v_i$ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database. 
 
-------------------------------------------------------------------------
 
-### Demand Factor {#sec-demand}
+### Demand Factor
 
 #### Trip Volume
 
@@ -65,7 +64,7 @@ Number of Active Vehicles Per 1000 Persons _{j,t}
 = \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000
 $$ {#eq-active-per-capita}
 
-### Affordability Factor {#sec-affordability}
+### Affordability Factor
 
 #### Fare per Kilometre
 
