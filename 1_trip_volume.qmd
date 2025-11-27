@@ -21,8 +21,6 @@ There are people who would use the proposed service:
 
 #### `r region_name` Regional District Trip Volume Findings
 
-*Table 1: `r region_name` Regional District Trip Volume*
-
 
 ```{r}
 #| echo: false
@@ -63,7 +61,6 @@ fig_caption <- function(text) {
 }
 ```
 
-*Figure 1: `r region_name` Regional District Trip Volume*
 
 *`r fig_caption(paste(region_name, "Regional District Trip Volume"))`*
 
