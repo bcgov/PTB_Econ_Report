@@ -18,8 +18,48 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
   
 #### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
 
-**Table 1: `r region_name` Regional District Number of Active Wheelchair Accessible Vehicles**
 
+
+*`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`*
+```{r}
+
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "ACTIVE_WAV",
+region     = region_name,
+services   = c("TAXI"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 0
+)
+tbl
+
+```
+
+*`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip "))`*
+
+```{r}
+
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+region     = region_name,
+services   = c("TAXI","TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 0
+)
+tbl
+
+```
+
+
+
+
+
+*`r fig_caption(paste(region_name, "Regional District Trip Volume"))`*
 
 
 
