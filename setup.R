@@ -453,6 +453,91 @@ make_indicator_chart_lines <- function(
 }
 
 
+# 10) line chart multiple indicators
+
+make_multi_indicator_chart_lines <- function(
+    data,
+    indicators,                      # e.g. c("ACTIVE_WAV", "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP", "ALLOCATED_WAV")
+    region,
+    services   = "TAXI",             # usually one service for this style of chart
+    area_type  = "REGIONAL",
+    date_from  = NULL,
+    date_to    = NULL,
+    title      = NULL,
+    caption    = NULL,
+    colors     = NULL,               # named vector, one color per indicator (optional)
+    labels     = NULL, 
+    base_size  = 10
+) {
+  # build tidy df for all indicators
+  df <- purrr::map_dfr(
+    indicators,
+    ~ filter_indicator(
+      data       = data,
+      indicator  = .x,
+      region     = region,
+      services   = services,
+      area_type  = area_type,
+      date_from  = date_from,
+      date_to    = date_to
+    ) %>%
+      mutate(indicator = .x)
+  ) %>%
+    mutate(
+      indicator = factor(indicator, levels = indicators),
+      service   = factor(service,  levels = services)
+    ) %>%
+    group_by(date, indicator) %>%              # collapse over service if you passed one
+    summarise(value = sum(value, na.rm = TRUE), .groups = "drop")
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  # auto title
+  if (is.null(title)) {
+    pretty_inds <- gsub("_", " ", indicators)
+    title <- paste0("Indicators: ", paste(stringr::str_to_title(pretty_inds), collapse = ", "))
+  }
+  
+  # colour palette: one colour per indicator if not supplied
+  if (is.null(colors)) {
+    pal <- scales::hue_pal()(length(indicators))
+    names(pal) <- indicators
+    colors <- pal
+  } else {
+    if (is.null(names(colors))) names(colors) <- indicators
+    colors <- colors[indicators]
+  }
+  
+  ggplot(df, aes(x = date, y = value, color = indicator)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 1.8, stroke = 0.2) +
+    scale_color_manual(values = colors,labels = labels, name = NULL) +
+    scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+    scale_x_date(
+      breaks = scales::pretty_breaks(n = 18),
+      date_labels = "%b\n%Y"
+    ) +
+    labs(
+      title    = title,
+      subtitle = paste(region, "Regional District"),
+      x        = NULL,
+      y        = "Value",
+      caption  = caption
+    ) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.6, "lines"),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
 
 
 

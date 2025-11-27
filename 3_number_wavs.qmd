@@ -56,11 +56,47 @@ tbl
 ```
 
 
-
+```{r}
+source("setup.R")
+```
 
 
 *`r fig_caption(paste(region_name, "Regional District Trip Volume"))`*
+```{r, fig.width=10, fig.height=5}
+chart <- make_multi_indicator_chart_lines(
+  data       = raw_norm,
+  indicators = c(
+    "ACTIVE_WAV",
+    "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+    "ALLOCATED_WAV"
+  ),
+  region     = region_name,
+  services   = "TAXI",
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  title      = "Number of WAVs (vehicles)",
+
+  colors = c(
+    ACTIVE_WAV                      = "#69B7FF",
+    ACTIVE_WAV_WITH_ACCESSIBLE_TRIP = "#1E3A8A",
+    ALLOCATED_WAV                   = "#D55E00"
+  ),
+
+  # NEW: custom legend labels
+  labels = c(
+    ACTIVE_WAV                      = "Active WAVs",
+    ACTIVE_WAV_WITH_ACCESSIBLE_TRIP = "Active WAVs Making Accessible Trips",
+    ALLOCATED_WAV                   = "Board-Allocated WAVs"
+  )
+)
+
+chart
 
 
 
+```
+
+
+Limitations: The number of active WAVs does not capture the Board’s other aspects of accessibility, including accessibility for persons with other disabilities, overall availability of services, essential service levels, service to underserved groups or communities, and inclusion. 
 
