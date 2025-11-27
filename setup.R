@@ -33,7 +33,7 @@ suppressPackageStartupMessages({
 date_from   <- make_date(2023, 1, 1)     # report window start (inclusive)
 date_to     <- make_date(2025, 5, 1)     # report window end   (inclusive)
 region_name <- "Metro Vancouver"          # display name used across report
-region <- "Capital"
+
 
 # Derived labels for narrative text
 
@@ -521,7 +521,7 @@ make_multi_indicator_chart_lines <- function(
       title    = title,
       subtitle = paste(region, "Regional District"),
       x        = NULL,
-      y        = "Value",
+      y        = NULL,
       caption  = caption
     ) +
     theme_minimal(base_size = base_size) +
@@ -558,10 +558,11 @@ indicators <- c(
   "TRIP_VOLUME",
   "VEHICLE_OCCUPANCY_RATE",
   "VEHICLE_PER_1000_PERSONS",
-  "WAIT_TIME"
+  "WAIT_TIME",
+  "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS",
+  "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS"
 )
 
-# واحد/فرمت حداقلی؛ هر جا لازم شد عوضش کن
 ind_units <- list(
   ACCESSIBLE_TRIP            = list(unit="count",   digits=0, currency=FALSE, scale=1),
   ACTIVE_VEHICLE             = list(unit="count",   digits=0, currency=FALSE, scale=1),

@@ -17,7 +17,9 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
   - The number of WAVs on the road directly and positively correlates with the extent and quality of service provided to individuals with mobility disabilities.
   
 #### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
-
+```{r}
+source("setup.R")
+```
 
 
 *`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`*
@@ -55,9 +57,42 @@ tbl
 
 ```
 
+*`r tbl_caption(paste(region_name, "Regional District Number of 1Active Wheelchair Accessible Vehicles per 1,000 Persons"))`*
+
 
 ```{r}
-source("setup.R")
+
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "ACTIVE_WAV_PER_1000_PERSONS",
+region     = region_name,
+services   = c("TAXI"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 5
+)
+tbl
+
+```
+
+*`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip per 1,000 Persons"))`*
+
+
+```{r}
+
+tbl <- make_indicator_table_compact(
+data       = raw_norm,
+indicator  = "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS",
+region     = region_name,
+services   = c("TAXI","TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+digits     = 2
+)
+tbl
+
 ```
 
 
@@ -92,8 +127,6 @@ chart <- make_multi_indicator_chart_lines(
 )
 
 chart
-
-
 
 ```
 
