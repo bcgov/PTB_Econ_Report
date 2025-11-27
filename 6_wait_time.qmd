@@ -29,7 +29,9 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 #### `r region_name` Regional District Wait Time Findings
 
-**Table 1: `r region_name` Regional District Wait Time (minutes)**
+
+*`r tbl_caption(paste(region_name, "Regional District Wait Time (minutes)"))`*
+
 
 
 ```{r}
@@ -46,7 +48,8 @@ tbl <- make_indicator_table_compact(
 tbl
 ```
 
-*Figure 1: `r region_name` Regional District Wait Time*
+
+*`r fig_caption(paste(region_name, "Regional District Wait Time (minutes)"))`*
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(

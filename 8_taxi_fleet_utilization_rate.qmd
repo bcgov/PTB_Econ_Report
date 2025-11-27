@@ -32,7 +32,8 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
 
 #### `r region_name` Regional District Taxi Fleet Utilization Rate Findings
 
-**Table 1: `r region_name` Regional District Taxi Fleet Utilization Rate **
+
+*`r tbl_caption(paste(region_name, "Regional District taxi fleet utilization rate"))`*
 
 
 ```{r}
@@ -49,7 +50,8 @@ tbl <- make_indicator_table_compact(
 tbl
 ```
 
-*Figure 1: `r region_name` Regional District taxi fleet utilization rate *
+
+*`r fig_caption(paste(region_name, "Regional District taxi fleet utilization rate"))`*
 
 ```{r, fig.width=10, fig.height=5} 
 chart <- make_indicator_chart_lines(
