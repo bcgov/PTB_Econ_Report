@@ -17,9 +17,6 @@ Policy Context: Public Need and Accessibility Factor
 
 
 *`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`*
-```{r}
-source("setup.R")
-```
 
 
 ```{r}
