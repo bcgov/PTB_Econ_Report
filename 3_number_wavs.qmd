@@ -70,7 +70,7 @@ services   = c("TAXI"),
 area_type  = "REGIONAL",
 date_from  = date_from,
 date_to    = date_to,
-digits     = 5
+digits     = 2
 )
 tbl
 
