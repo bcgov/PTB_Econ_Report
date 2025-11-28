@@ -1,0 +1,55 @@
+### Driver hourly revenue
+
+Primary Factor: Sustainability
+
+**Description:** Driver Hourly Revenue reflects whether the passenger transportation sector is producing a sustainable level of revenue for drivers to promote retention of their workforce. It is important to note that hourly revenue does not reflect take-home pay, which depends on factors such as business-level labour payment arrangements, employment classification (e.g., employee vs. independent contractor), operating costs, and hours worked. However, revenue per hour remains a useful indicator of market stability and service sustainability from a labour supply perspective.
+
+**Measurement:** This indicator captures the median[1] of the total fare[2] collected by taxi and TNS drivers per working hour in a defined geographical area for over a month. It reflects whether the passenger transportation sector is producing a sustainable level of revenue for drivers to promote retention of their workforce.
+
+**Interpretation:** Higher hourly revenue indicates stronger revenue generation for the sector, supporting its long-term operational sustainability. This indicator measures median hourly revenue at the sector level and does not reflect individual driver take-home earnings, which can vary based on a variety of factors. The focus is on the sector’s overall financial health and its ability to maintain service levels over time.
+
+
+Policy Context: Public Need and Accessibility Factor
+
+?????
+
+#### `r region_name` Regional District Taxi and TNS Driver hourly revenue Findings 
+
+
+*`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`*
+```{r}
+source("setup.R")
+```
+
+
+```{r}
+tbl <- make_indicator_table_compact(
+  data       = raw_norm,
+  indicator  = "DRIVER_EARNING($)",
+  region     = region_name,
+  services   = c("TAXI","TNS"),
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  digits     = 2
+)
+tbl
+```
+
+*`r fig_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`*
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "DRIVER_EARNING",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Taxi and TNS Driver hourly revenue($)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```

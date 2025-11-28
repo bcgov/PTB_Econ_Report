@@ -24,5 +24,6 @@ source("setup.R")
 {{< include 7_revenue_per_active_vehicle.qmd >}}
 {{< include 8_taxi_fleet_utilization_rate.qmd >}}
 {{< include 9_taxi_vehicle_occupancy_rate.qmd >}}
+{{< include 12_driver_earning.qmd >}}
 {{< include 11_appendix.qmd >}}
 

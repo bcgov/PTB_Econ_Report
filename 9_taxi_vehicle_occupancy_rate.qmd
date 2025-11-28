@@ -25,7 +25,7 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
 -   **The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.**\
     -A low vehicle occupancy rate can signal inadequate driver incomes.
 
-#### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings Findings
+#### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings 
 
 
 *`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`*
