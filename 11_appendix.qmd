@@ -52,7 +52,7 @@ $$
 The number of active wheelchair accessible vehicles providing accessible trips per 1,000 person is the ratio of $WAV_{j,t}^2$ to the area’s population denoted by $P_{j,t}$, multiplied by 1,000. 
 $$
 WAV^{\text{per2}}_{j,t}
-= \frac{WAV^{2}_{j,t}}{P_{j,t}} \times 1000
+= \frac{WAV^{2}_{j,t}}{P_{j,t}} \times 1000 \tag{1}
 $$ {#eq-wav-per2}
 
 #### Active Vehicles per 1,000 Persons
@@ -61,7 +61,7 @@ The number of active vehicles per 1,000 persons  is calculated as the ratio of t
 
 $$
 Number of Active Vehicles Per 1000 Persons _{j,t}
-= \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000
+= \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000\tag{1}
 $$ {#eq-active-per-capita}
 
 ### Affordability Factor
