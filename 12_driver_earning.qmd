@@ -22,7 +22,7 @@ Policy Context: Public Need and Accessibility Factor
 ```{r}
 tbl <- make_indicator_table_compact(
   data       = raw_norm,
-  indicator  = "DRIVER_EARNING($)",
+  indicator  = "DRIVER_EARNING",
   region     = region_name,
   services   = c("TAXI","TNS"),
   area_type  = "REGIONAL",
