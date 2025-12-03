@@ -71,8 +71,8 @@ chart
 
 Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TAXI","last_value_fmt")` in wait time for taxi trips. On a year-over-year (YoY) basis, the wait time for taxi trips was `r metric("WAIT_TIME","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("WAIT_TIME","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TAXI","last_value_fmt")` in wait time for taxi trips. On a year-over-year (YoY) basis, the wait time for taxi trips was `r metric("WAIT_TIME","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("WAIT_TIME","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.On a month-over-month (MoM) basis, taxi wait time changed by `r metric("WAIT_TIME","TAXI","mom_fmt")`.
 
-In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TNS","last_value_fmt")` in wait time for TNS trips. Compared with `r prev_label`, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`.
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TNS","last_value_fmt")` in wait time for TNS trips. Compared with `r prev_label`, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, TNS wait time changed by `r metric("WAIT_TIME","TNS","mom_fmt")`.
 
 **Limitations:** In calculating the median wait time, trips with unreasonably long wait times due to data errors were not included. Extreme outlier  wait times are not reported in the figure on cumulative distribution as they are unusually long, which may be due to data errors.

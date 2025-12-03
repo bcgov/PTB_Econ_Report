@@ -80,8 +80,6 @@ chart
 
 ```
 
-
-
 Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_VOLUME","TAXI","last_value_fmt")` taxi trips. On a year-over-year (YoY) basis, the total taxi trip volume was `r metric("TRIP_VOLUME","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_VOLUME","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`.[^1_trip_volume-1] These results indicate strong momentum in demand for TAXI services in the region. On a month-over-month (MoM) basis, taxi trip volume was`r metric("TRIP_VOLUME","TAXI","mom_fmt")`. These results indicate strong momentum in demand for TAXI services in the region.
