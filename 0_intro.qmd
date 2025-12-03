@@ -91,18 +91,18 @@ The Board’s *Policy Manual* provides information on the factors the Board may 
 
 Under the public need policy in the *Policy Manual*, PN is divided into the following factors:
 
--Demand
--Accessibility
--Affordability
--Safety
--Service Quality
+-   Demand
+-   Accessibility
+-   Affordability
+-   Safety
+-   Service Quality
 
 Under the sound economic conditions policy in the *Policy Manual*, SEC is divided into the following factors:
 
--Sustainability
--Competition
--Innovation
--Variety
+-   Sustainability
+-   Competition
+-   Innovation
+-   Variety
 
 This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
 
@@ -118,8 +118,9 @@ Since only the taxi and TNS sectors are required to report trip data under the d
 
 Due to data limitations, only two regions will be analyzed:
 
--Region 1 – Lower Mainland including Whistler; and,
--Region 2 – Capital Regional District (CRD).
+- Region 1 – Lower Mainland including Whistler; and,
+- Region 2 – Capital Regional District (CRD).
+
 
 **Regional Districts within these Regions may be analyzed so long as there is adequate data reliability for those Regional Districts.**
 

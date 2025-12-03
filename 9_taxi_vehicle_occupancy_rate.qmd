@@ -63,18 +63,7 @@ chart
 
 ```
 
-```{r}
 
-
-# metric("VEHICLE_OCCUPANCY_RATE","TAXI","last_value_fmt")
-metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
-  service <- match.arg(service)
-  field   <- match.arg(field)
-  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
-  if (is.null(out)) "n/a" else out
-}
-
-```
 
 Analysis and Conclusions
 

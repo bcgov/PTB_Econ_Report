@@ -127,19 +127,6 @@ company_fare_chart
 ```
 
 
-```{r}
-
-
-# metric("FARE_PER_5KM","TAXI","last_value_fmt")
-metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
-  service <- match.arg(service)
-  field   <- match.arg(field)
-  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
-  if (is.null(out)) "n/a" else out
-}
-
-```
-
 Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TAXI","last_value_fmt")` in fare per 5 km for taxi trips. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FARE_PER_5KM","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FARE_PER_5KM","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.

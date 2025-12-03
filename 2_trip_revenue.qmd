@@ -71,18 +71,7 @@ chart
 ```
 
 
-```{r}
 
-
-# metric("TRIP_REVENUE","TAXI","last_value_fmt")
-metric <- function(ind, service = c("TAXI","TNS"), field = c("last_value_fmt","yoy_fmt","ytd_yoy_fmt")){
-  service <- match.arg(service)
-  field   <- match.arg(field)
-  out <- tryCatch(metrics[[ind]][[service]][[field]], error = function(e) NA)
-  if (is.null(out)) "n/a" else out
-}
-
-```
 Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TAXI services in the region.
