@@ -371,7 +371,34 @@ make_indicator_chart_stacked_2 <- function(
     )
 }
 
-
+# 11) MoM
+last_month_mom <- function(data, indicator, region,
+                           services = c("TAXI","TNS"),
+                           area_type = "REGIONAL",
+                           date_from = NULL, date_to = NULL) {
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to)
+  if (nrow(df) == 0) return(NA_real_)
+  
+  # آخرین ماه در پنجره
+  last_date <- max(df$date, na.rm = TRUE)
+  # ماه قبل
+  prev_date <- last_date %m-% months(1)
+  
+  cur  <- df %>%
+    filter(date == last_date) %>%
+    summarise(v = sum(value, na.rm = TRUE)) %>%
+    pull(v)
+  
+  prev <- df %>%
+    filter(date == prev_date) %>%
+    summarise(v = sum(value, na.rm = TRUE)) %>%
+    pull(v)
+  
+  if (is.na(prev) || prev == 0) return(NA_real_)
+  
+  # هم‌اسکیل با yoy_ytd: درصد، نه نسبت
+  (cur / prev - 1) * 100
+}
 
 
 # 8) One-stop metrics helper for inline use
@@ -379,14 +406,36 @@ make_indicator_chart_stacked_2 <- function(
 compute_metrics <- function(data, indicator, region, focus_service = "TNS",
                             area_type = "REGIONAL", date_from = NULL, date_to = NULL) {
   list(
-    last_value = last_month_value(data, indicator, region, services = focus_service,
-                                  area_type = area_type, date_from = date_from, date_to = date_to),
-    yoy_last   = last_month_yoy(data, indicator, region, services = focus_service,
-                                area_type = area_type, date_from = date_from, date_to = date_to),
-    ytd_yoy    = ytd_yoy(data, indicator, region, end_date = date_to,
-                         services = focus_service, area_type = area_type)
+    last_value = last_month_value(
+      data, indicator, region,
+      services  = focus_service,
+      area_type = area_type,
+      date_from = date_from,
+      date_to   = date_to
+    ),
+    yoy_last   = last_month_yoy(
+      data, indicator, region,
+      services  = focus_service,
+      area_type = area_type,
+      date_from = date_from,
+      date_to   = date_to
+    ),
+    ytd_yoy    = ytd_yoy(
+      data, indicator, region,
+      end_date  = date_to,
+      services  = focus_service,
+      area_type = area_type
+    ),
+    mom_last   = last_month_mom(            # NEW
+      data, indicator, region,
+      services  = focus_service,
+      area_type = area_type,
+      date_from = date_from,
+      date_to   = date_to
+    )
   )
 }
+
 
 # 9) Dual-line chart (Taxi vs TNS) — e.g., Wait Time (minutes)
 
@@ -541,6 +590,7 @@ make_multi_indicator_chart_lines <- function(
 
 
 
+
 # ============================================================
 
 # Metrics 
@@ -607,10 +657,34 @@ for (ind in indicators) {
       last_value      = m$last_value,
       yoy_last        = m$yoy_last,
       ytd_yoy         = m$ytd_yoy,
+      mom_last        = m$mom_last,           # NEW: raw MoM
+      
       last_value_fmt  = fmt_value(m$last_value, meta),
       yoy_fmt         = fmt_pct(m$yoy_last, 2),
-      ytd_yoy_fmt     = fmt_pct(m$ytd_yoy, 2)
+      ytd_yoy_fmt     = fmt_pct(m$ytd_yoy, 2),
+      mom_fmt         = fmt_pct(m$mom_last, 2) # NEW: formatted MoM
     )
+    
   }
 }
+
+
+metric <- function(
+    indicator,
+    service,
+    field = c(
+      "last_value_fmt",
+      "yoy_fmt",
+      "ytd_yoy_fmt",
+      "mom_fmt",    # NEW: formatted MoM
+      "last_value",
+      "yoy_last",
+      "ytd_yoy",
+      "mom_last"    # NEW: raw MoM
+    )
+) {
+  field <- match.arg(field)
+  metrics[[indicator]][[service]][[field]]
+}
+
 
