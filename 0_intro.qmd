@@ -63,17 +63,71 @@ For taxi applicants, the Region is determined based on where the existing or pro
 
 The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (*MoTI*). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
 
+```{r}
+library(dplyr)
+library(tidyr)
+
+## ---------- Regional District level (LEVEL_NAME == "REGIONAL") ----------
+
+regional_rd <- raw_norm %>% 
+  filter(
+    area_type == "REGIONAL",
+    area      == region_name,          # e.g. "Metro Vancouver"
+    service   == "TAXI",
+    indicator %in% c("ALLOCATED_LICENSEE", "MAX_FLEET"),
+    date <= date_to
+  ) %>% 
+  group_by(indicator) %>% 
+  filter(date == max(date)) %>%        # latest month in your window
+  summarise(total = sum(value), .groups = "drop") %>% 
+  pivot_wider(names_from = indicator, values_from = total)
+
+regional_rd_licensees <- regional_rd$ALLOCATED_LICENSEE   # expected 29
+regional_rd_fleet     <- regional_rd$MAX_FLEET            # expected 2384
+
+
+## ---------- Region level (TNS zones, LEVEL_NAME == "TNS_ZONE") ----------
+
+regional_tns <- raw_norm %>% 
+  filter(
+    area_type == "TNS_ZONE",
+    service   == "TAXI",
+    area      == "ZONE 1",          # e.g. "Metro Vancouver"
+    indicator %in% c("ALLOCATED_LICENSEE", "MAX_FLEET"),
+    date <= date_to
+  ) %>% 
+  group_by(indicator) %>% 
+  filter(date == max(date)) %>%        # latest month across zones
+  summarise(total = sum(value), .groups = "drop") %>% 
+  pivot_wider(names_from = indicator, values_from = total)
+
+region_licensees <- regional_tns$ALLOCATED_LICENSEE       # expected 49
+region_fleet     <- regional_tns$MAX_FLEET                # expected 2604
+
+regional_rd_licensees <- format(regional_rd$ALLOCATED_LICENSEE,
+                                big.mark = ",", scientific = FALSE)
+
+regional_rd_fleet <- format(regional_rd$MAX_FLEET,
+                            big.mark = ",", scientific = FALSE)
+
+region_licensees <- format(regional_tns$ALLOCATED_LICENSEE,
+                           big.mark = ",", scientific = FALSE)
+
+region_fleet <- format(regional_tns$MAX_FLEET,
+                       big.mark = ",", scientific = FALSE)
+
+```
 
 
 -   At the municipal level,
     *   Number of taxi licensees operating: 8 
     *   Combined Board-approved maximum fleet size: 1,226
 -   At the Regional District level,
-    -   Number of taxi licensees operating: 29 
-    -   Combined Board-approved maximum fleet size: 2,384 
+    -   Number of taxi licensees operating: `r regional_rd_licensees` 
+    -   Combined Board-approved maximum fleet size: `r regional_rd_fleet` 
 -   At the Region level,
-    -   Number of taxi licensees operating: 49 
-    -   Combined Board-approved maximum fleet size: 2,604 
+    -   Number of taxi licensees operating: `r region_licensees` 
+    -   Combined Board-approved maximum fleet size: `r region_fleet` 
 
 # Background
 

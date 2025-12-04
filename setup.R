@@ -617,7 +617,15 @@ indicators <- c(
   "TRIP_VOLUME",
   "VEHICLE_OCCUPANCY_RATE",
   "VEHICLE_PER_1000_PERSONS",
-  "WAIT_TIME"
+  "WAIT_TIME",
+  # NEW:
+  "ACTIVE_WAV_PER_1000_PERSONS",
+  "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+  "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS",
+  "ALLOCATED_LICENSEE",
+  "ALLOCATED_WAV",
+  "DRIVER_EARNING",
+  "MAX_FLEET"
 )
 
 ind_units <- list(
@@ -631,7 +639,18 @@ ind_units <- list(
   TRIP_VOLUME                = list(unit="count",   digits=0, currency=FALSE, scale=1),
   VEHICLE_OCCUPANCY_RATE     = list(unit="pct",     digits=1, currency=FALSE, scale=100),
   VEHICLE_PER_1000_PERSONS   = list(unit="count",   digits=2, currency=FALSE, scale=1),
-  WAIT_TIME                  = list(unit="minutes", digits=1, currency=FALSE, scale=1)
+  WAIT_TIME                  = list(unit="minutes", digits=1, currency=FALSE, scale=1),
+  # New Indicators ---------------------------------------------------------
+  ACTIVE_WAV_PER_1000_PERSONS           = list(unit="count",    digits=2, currency=FALSE, scale=1),
+  ACTIVE_WAV_WITH_ACCESSIBLE_TRIP       = list(unit="count",    digits=0, currency=FALSE, scale=1),
+  ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS = list(unit="count", digits=2, currency=FALSE, scale=1),
+  
+  ALLOCATED_LICENSEE        = list(unit="count",    digits=0, currency=FALSE, scale=1),
+  ALLOCATED_WAV             = list(unit="count",    digits=0, currency=FALSE, scale=1),
+  
+  DRIVER_EARNING            = list(unit="currency", digits=0, currency=TRUE,  scale=1),
+  
+  MAX_FLEET                 = list(unit="count",    digits=0, currency=FALSE, scale=1)
 )
 
 fmt_value <- function(x, meta){
