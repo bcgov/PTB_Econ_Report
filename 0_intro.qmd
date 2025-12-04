@@ -63,15 +63,17 @@ For taxi applicants, the Region is determined based on where the existing or pro
 
 The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (*MoTI*). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
 
+
+
 -   At the municipal level,
-    *   Number of taxi licensees operating: 8
+    *   Number of taxi licensees operating: 8 
     *   Combined Board-approved maximum fleet size: 1,226
 -   At the Regional District level,
-    -   Number of taxi licensees operating: 29
-    -   Combined Board-approved maximum fleet size: 2,384
+    -   Number of taxi licensees operating: 29 
+    -   Combined Board-approved maximum fleet size: 2,384 
 -   At the Region level,
-    -   Number of taxi licensees operating: 49
-    -   Combined Board-approved maximum fleet size: 2,604
+    -   Number of taxi licensees operating: 49 
+    -   Combined Board-approved maximum fleet size: 2,604 
 
 # Background
 

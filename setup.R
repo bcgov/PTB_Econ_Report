@@ -213,8 +213,17 @@ make_indicator_table_compact <- function(
   
   wide <- dfc %>%
     dplyr::select(service, y, m_lab, value) %>%
-    tidyr::pivot_wider(names_from = m_lab, values_from = value) %>%
-    dplyr::arrange(match(service, services), y)
+    tidyr::pivot_wider(
+      names_from  = m_lab,
+      values_from = value,
+      values_fn   = ~ sum(.x, na.rm = TRUE),   # <- aggregate duplicates
+      values_fill = NA_real_                   # <- keep NAs as numeric
+    ) %>%
+    dplyr::arrange(match(service, services), y) %>%
+    dplyr::mutate(
+      dplyr::across(dplyr::all_of(month_cols), as.numeric)  # <- harden types
+    )
+  
   
   # optional blank zeros to reduce noise
   if (isTRUE(zero_to_blank)) {
