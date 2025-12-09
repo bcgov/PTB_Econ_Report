@@ -116,24 +116,21 @@ normalize_shift_code <- function(x) {
 # ------------------------------------------------------------
 # Map codes -> sentences
 # ------------------------------------------------------------
-trend_direction_text <- function(code, subject = "total trip revenue") {
+trend_direction_text <- function(code, subject = "this indicator") {
   if (is.na(code) || code == "") return(NA_character_)
   code <- normalize_trend_code(code)
   
   if (code == "NO_SIGNIFICANT_TREND") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend ",
-      "suggests that ", subject, " has remained stable."
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that there is no meaningful change in direction."
     )
   } else if (code == "TREND DOWN") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend ",
-      "suggests that ", subject, " is on a downward trajectory."
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that a downward trajectory is evident."
     )
   } else if (code == "TREND UP") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend ",
-      "suggests that ", subject, " is on an upward trajectory."
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that a upward trajectory is evident."
     )
   } else {
     NA_character_
