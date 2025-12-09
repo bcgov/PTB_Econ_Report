@@ -72,10 +72,14 @@ chart
 
 Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TAXI services in the region. On a month-over-month (MoM) basis, taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","mom_fmt")`. These results indicate strong momentum in demand for TAXI services in the region.
+In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TAXI services in the region. On a month-over-month (MoM) basis, taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TAXI")`
+`r shift_narrative("TRIP_REVENUE", "TAXI")`
+
+In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TNS")`
+`r shift_narrative("TRIP_REVENUE", "TNS")`
 
 
-In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","mom_fmt")`. These results indicate strong momentum in demand for TNS services in the region.
+
 
 
 **Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
