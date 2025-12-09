@@ -50,3 +50,12 @@ colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
 chart
 
 ```
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("DRIVER_EARNING","TAXI","last_value_fmt")` in driver earnings for taxi services. On a year-over-year (YoY) basis, average driver earnings for taxi services were `r metric("DRIVER_EARNING","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("DRIVER_EARNING","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, driver earnings for taxi trips changed by `r metric("DRIVER_EARNING","TAXI","mom_fmt")`.
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("DRIVER_EARNING","TNS","last_value_fmt")` in driver earnings for TNS services. Compared with `r prev_label`, average driver earnings for TNS services were `r metric("DRIVER_EARNING","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, earnings for TNS services were `r metric("DRIVER_EARNING","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, driver earnings for TNS trips changed by `r metric("DRIVER_EARNING","TNS","mom_fmt")`.
+
+**Limitations:**
+
+##Variety Factor (SEC)
+There is no analysis related to this factor.
