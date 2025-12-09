@@ -24,25 +24,28 @@ trend_raw <- read_excel(
     "text",    # SHIFT_DIRECTION
     "numeric", # SHIFT_EST
     "numeric", # SHIFT_P
-    "numeric"  # K_RECENT
-
+    "numeric"  # K_RECENT (if present)
   )
-) %>%
+) |>
   mutate(
-    date = as.Date(period)  # convenience; not strictly required
+    date = as.Date(period)
   )
 
 
+# ------------------------------------------------------------
+# Core lookup: returns both flags for the report month
+# ------------------------------------------------------------
 trend_lookup_flags <- function(indicator,
-                               service   = "TAXI",
-                               area_type = "REGIONAL",
+                               service    = "TAXI",
+                               area_type  = "REGIONAL",
                                model_type = "RECENT_1M_SHIFT",
-                               region    = region_name,
-                               end_date  = date_to) {
+                               region     = region_name,
+                               end_date   = date_to) {
+  
   yr <- year(end_date)
   mo <- month(end_date)
   
-  df <- trend_raw %>%
+  df <- trend_raw |>
     filter(
       LEVEL_NAME             == area_type,
       PICKUP_AREA            == region,
@@ -68,34 +71,102 @@ trend_lookup_flags <- function(indicator,
   )
 }
 
-
-
-
-
-
-trend_direction_metric <- function(indicator,
-                                   service   = "TAXI",
-                                   area_type = "REGIONAL") {
-  trend_lookup_flags(
+# ------------------------------------------------------------
+# Single accessor in the same style as metric()
+# ------------------------------------------------------------
+trend_metric <- function(indicator,
+                         service   = "TAXI",
+                         type      = c("trend_direction", "shift_direction"),
+                         area_type = "REGIONAL") {
+  type  <- match.arg(type)
+  flags <- trend_lookup_flags(
     indicator = indicator,
     service   = service,
     area_type = area_type
-  )$trend_direction
+  )
+  flags[[type]]
+}
+
+# Optional convenience wrappers (you can keep or delete)
+trend_direction_metric <- function(indicator,
+                                   service   = "TAXI",
+                                   area_type = "REGIONAL") {
+  trend_metric(indicator, service, "trend_direction", area_type)
 }
 
 shift_direction_metric <- function(indicator,
                                    service   = "TAXI",
                                    area_type = "REGIONAL") {
-  trend_lookup_flags(
-    indicator = indicator,
-    service   = service,
-    area_type = area_type
-  )$shift_direction
+  trend_metric(indicator, service, "shift_direction", area_type)
 }
 
+# ------------------------------------------------------------
+# Normalise codes coming out of Excel (fix typos)
+# ------------------------------------------------------------
+normalize_trend_code <- function(x) {
+  x <- toupper(trimws(x))
+  gsub("TRNED", "TREND", x, fixed = TRUE)
+}
 
+normalize_shift_code <- function(x) {
+  x <- toupper(trimws(x))
+  gsub("SHFIT", "SHIFT", x, fixed = TRUE)
+}
 
+# ------------------------------------------------------------
+# Map codes -> sentences
+# ------------------------------------------------------------
+trend_direction_text <- function(code, subject = "total trip revenue") {
+  if (is.na(code) || code == "") return(NA_character_)
+  code <- normalize_trend_code(code)
+  
+  if (code == "NO_SIGNIFICANT_TREND") {
+    paste0(
+      "Looking over the past two years, statistical analysis of the long-term trend ",
+      "suggests that ", subject, " has remained stable."
+    )
+  } else if (code == "TREND DOWN") {
+    paste0(
+      "Looking over the past two years, statistical analysis of the long-term trend ",
+      "suggests that ", subject, " is on a downward trajectory."
+    )
+  } else if (code == "TREND UP") {
+    paste0(
+      "Looking over the past two years, statistical analysis of the long-term trend ",
+      "suggests that ", subject, " is on an upward trajectory."
+    )
+  } else {
+    NA_character_
+  }
+}
 
+shift_direction_text <- function(code) {
+  if (is.na(code) || code == "") return(NA_character_)
+  code <- normalize_shift_code(code)
+  
+  if (code == "NO_SIGNIFICANT_SHIFT") {
+    "Statistical analysis of the short-term trend suggests that there is no active shift in market direction."
+  } else if (code == "SHIFT DOWN") {
+    "Statistical analysis of the short-term trend suggests that there is downward shift in market direction."
+  } else if (code == "SHIFT UP") {
+    "Statistical analysis of the short-term trend suggests that there is upward shift in market direction."
+  } else {
+    NA_character_
+  }
+}
 
+# ------------------------------------------------------------
+# Narratives that you call in chunks
+# ------------------------------------------------------------
+trend_narrative <- function(indicator,
+                            service = "TAXI",
+                            subject = "total trip revenue") {
+  code <- trend_metric(indicator, service, "trend_direction")
+  trend_direction_text(code, subject = subject)
+}
 
-
+shift_narrative <- function(indicator,
+                            service = "TAXI") {
+  code <- trend_metric(indicator, service, "shift_direction")
+  shift_direction_text(code)
+}
