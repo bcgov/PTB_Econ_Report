@@ -130,7 +130,8 @@ T =
 $$
 
 
-where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region.
+where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region.[^10]
+[^10]:Novotný, J. (2007). On the measurement of regional inequality: Does spatial dimension of income inequality matter? Annals of Regional Science, 41(3), 563-580. https://web.natur.cuni.cz/~pepino/NOVOTNY2007AnnalsofRegionalScience.pdf
 
 ### Innovation Factor
 
@@ -290,3 +291,8 @@ $$
 ### Variety Factor 
 
 No analysis conducted.
+
+
+## Appendix 2: Technical Methodology
+### New Vehicle Occupancy Rate 
+

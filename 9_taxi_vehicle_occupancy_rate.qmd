@@ -24,6 +24,13 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
     -A low vehicle occupancy rate indicates unsustainable profitability and economic instability in the industry.
 -   **The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.**\
     -A low vehicle occupancy rate can signal inadequate driver incomes.
+To assess whether a vehicle occupancy rate is high or low, we define the range of possible values it can take, referred to as the Vehicle Occupancy Rate Possible Range (VORPR)[^7]. If no trips occur during the working period, the vehicle occupancy rate is zero, representing the lower end of the range. Conversely, if there is no idle time between trips, the vehicle occupancy rate reaches its upper limit. Based on 2024 data for taxi and TNS vehicles in the Metro Vancouver Regional District (MVRD), the upper limit of the vehicle occupancy rate is approximately 0.7 for TNS vehicles and 0.8 for taxis. These values define the upper end of the VORPR.
+[^7]:The method of calculating The Vehicle Occupancy Rate Possible Range has been included in the Appendix.
+Existing studies provide baseline VOR levels for taxis and rideshare platforms. Cramer and Krueger (2016) found that Uber consistently achieved higher VOR than taxis across major U.S. cities. Their analysis showed that Uber’s VOR ranged from 55% to 68%, while taxi VOR remained lower, between 47% and 53%. The largest gap was observed in New York City, where Uber’s VOR (68%) exceeded taxi VOR (53%) by 15 percentage points. This trend suggests that rideshare platforms operate more efficiently than traditional taxi services (see Table 19 in Appendix 2 for detailed comparisons).[^8]
+[^8]:Data from Cramer, J., & Krueger, A. B. (2016). Disruptive Change in the Taxi Business: The Case of Uber. American Economic Review, 106(5), 177–182. https://www.aeaweb.org/articles?id=10.1257/aer.p20161002.
+Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indicate that between April 2023 and September 2024, Uber’s VOR fluctuated between 54.2% and 60.4%, while Lyft’s VOR ranged from 43.9% to 52.5%. The overall industry average varied between 48.7% and 57.5%, with NYC regulations requiring a minimum VOR of 53% (see Figure 22 in Appendix 2 for NYC-specific data).[^9]
+[^9]:Data from NYC Taxi & Limousine Commission (TLC). (2024). TLC Factbook: Data Dashboard for Industry Trends. Available at https://app.powerbigov.us/view?r=eyJrIjoiY2FlNjI3YWQtMDkzOS00MjliLTk0MTQtODc2NzU4OTYwNjFiIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9&pageName=ReportSection28c004ce23fc37acd783.
+
 
 #### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings 
 
