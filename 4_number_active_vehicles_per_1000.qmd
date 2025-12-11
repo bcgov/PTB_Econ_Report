@@ -16,9 +16,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 #### `r region_name` Regional District Active Vehicles per 1,000 Persons Findings
 
-
 *`r tbl_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`*
-
 
 ```{r}
 tbl <- make_indicator_table_compact(
@@ -33,12 +31,10 @@ tbl <- make_indicator_table_compact(
 )
 tbl
 ```
-Note: The above table reports the number of active vehicles per 1,000 persons up to the most recent year for which annual population data is available from Statistics Canada. As of October 2024, the most recent data available is up to 2023.[^4]
-[^4]:Statistics Canada. (2024). Table 17-10-0152-01 Population estimates, July 1, by census division, 2021 boundaries [Data table]. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710015201
+
+Note: The above table reports the number of active vehicles per 1,000 persons up to the most recent year for which annual population data is available from Statistics Canada. As of October 2024, the most recent data available is up to 2023.[^4] [^4]:Statistics Canada. (2024). Table 17-10-0152-01 Population estimates, July 1, by census division, 2021 boundaries.https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710015201
 
 *`r fig_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`*
-
-
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked_2(
@@ -55,8 +51,6 @@ chart <- make_indicator_chart_stacked_2(
 chart
 
 ```
-
-
 
 Analysis and Conclusions
 

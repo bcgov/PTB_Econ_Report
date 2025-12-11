@@ -6,7 +6,7 @@ Primary Factor: Sustainability
 
 **Measurement:** The vehicle occupancy rate is calculated as the median (50th percentile) of the ratio of the total duration of all trips to the total working hours of all taxi vehicles in an area over a month.
 
-**Interpretation:** A high vehicle occupancy rate indicates frequent passenger occupancy and low wasted time waiting for new trip requests. In contrast, a low taxi vehicle occupancy rate suggests that vehicles are driving longer times to pick up passengers or the wait time to receive new trips is long. A low vehicle occupancy rate is unfavourable as it negatively impacts sustainable profitability. Additionally, significant changes in the vehicle occupancy rate can signal shifts in market stability and potential sustainability challenges. 
+**Interpretation:** A high vehicle occupancy rate indicates frequent passenger occupancy and low wasted time waiting for new trip requests. In contrast, a low taxi vehicle occupancy rate suggests that vehicles are driving longer times to pick up passengers or the wait time to receive new trips is long. A low vehicle occupancy rate is unfavourable as it negatively impacts sustainable profitability. Additionally, significant changes in the vehicle occupancy rate can signal shifts in market stability and potential sustainability challenges.
 
 Policy Context: Public Need and Accessibility Factor
 
@@ -20,23 +20,26 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
     -Large shifts in the vehicle occupancy rate can indicate a significant market disruption.
 -   **The proposed service protects the passenger transportation sector from rapid disruption to ensure its long-term stability as an essential service.**\
     -Large shifts in the vehicle occupancy rate can indicate a rapid disruption, leading to challenges for long-term stability as an essential service.
--   *The proposed service promotes the overall profitability and economic sustainability of the industry.**\
+-   \*The proposed service promotes the overall profitability and economic sustainability of the industry.\*\*\
     -A low vehicle occupancy rate indicates unsustainable profitability and economic instability in the industry.
 -   **The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.**\
-    -A low vehicle occupancy rate can signal inadequate driver incomes.
-To assess whether a vehicle occupancy rate is high or low, we define the range of possible values it can take, referred to as the Vehicle Occupancy Rate Possible Range (VORPR)[^7]. If no trips occur during the working period, the vehicle occupancy rate is zero, representing the lower end of the range. Conversely, if there is no idle time between trips, the vehicle occupancy rate reaches its upper limit. Based on 2024 data for taxi and TNS vehicles in the Metro Vancouver Regional District (MVRD), the upper limit of the vehicle occupancy rate is approximately 0.7 for TNS vehicles and 0.8 for taxis. These values define the upper end of the VORPR.
-[^7]:The method of calculating The Vehicle Occupancy Rate Possible Range has been included in the Appendix.
-Existing studies provide baseline VOR levels for taxis and rideshare platforms. Cramer and Krueger (2016) found that Uber consistently achieved higher VOR than taxis across major U.S. cities. Their analysis showed that Uber’s VOR ranged from 55% to 68%, while taxi VOR remained lower, between 47% and 53%. The largest gap was observed in New York City, where Uber’s VOR (68%) exceeded taxi VOR (53%) by 15 percentage points. This trend suggests that rideshare platforms operate more efficiently than traditional taxi services (see Table 19 in Appendix 2 for detailed comparisons).[^8]
-[^8]:Data from Cramer, J., & Krueger, A. B. (2016). Disruptive Change in the Taxi Business: The Case of Uber. American Economic Review, 106(5), 177–182. https://www.aeaweb.org/articles?id=10.1257/aer.p20161002.
-Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indicate that between April 2023 and September 2024, Uber’s VOR fluctuated between 54.2% and 60.4%, while Lyft’s VOR ranged from 43.9% to 52.5%. The overall industry average varied between 48.7% and 57.5%, with NYC regulations requiring a minimum VOR of 53% (see Figure 22 in Appendix 2 for NYC-specific data).[^9]
-[^9]:Data from NYC Taxi & Limousine Commission (TLC). (2024). TLC Factbook: Data Dashboard for Industry Trends. Available at https://app.powerbigov.us/view?r=eyJrIjoiY2FlNjI3YWQtMDkzOS00MjliLTk0MTQtODc2NzU4OTYwNjFiIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9&pageName=ReportSection28c004ce23fc37acd783.
+    -A low vehicle occupancy rate can signal inadequate driver incomes. To assess whether a vehicle occupancy rate is high or low, we define the range of possible values it can take, referred to as the Vehicle Occupancy Rate Possible Range (VORPR)[^7]. 
+    
+[^7]: The method of calculating The Vehicle Occupancy Rate Possible Range has been included in the Appendix.
+    
+If no trips occur during the working period, the vehicle occupancy rate is zero, representing the lower end of the range. Conversely, if there is no idle time between trips, the vehicle occupancy rate reaches its upper limit. Based on 2024 data for taxi and TNS vehicles in the Metro Vancouver Regional District (MVRD), the upper limit of the vehicle occupancy rate is approximately 0.7 for TNS vehicles and 0.8 for taxis. These values define the upper end of the VORPR.
 
+Existing studies provide baseline VOR levels for taxis and rideshare platforms. Cramer and Krueger (2016) found that Uber consistently achieved higher VOR than taxis across major U.S. cities. Their analysis showed that Uber’s VOR ranged from 55% to 68%, while taxi VOR remained lower, between 47% and 53%. The largest gap was observed in New York City, where Uber’s VOR (68%) exceeded taxi VOR (53%) by 15 percentage points. This trend suggests that rideshare platforms operate more efficiently than traditional taxi services (see Table 19 in Appendix 2 for detailed comparisons)[^8].
 
-#### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings 
+[^8]: Data from Cramer, J., & Krueger, A. B. (2016). Disruptive Change in the Taxi Business: The Case of Uber. American Economic Review, 106(5), 177–182. https://www.aeaweb.org/articles?id=10.1257/aer.p20161002.
 
+Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indicate that between April 2023 and September 2024, Uber’s VOR fluctuated between 54.2% and 60.4%, while Lyft’s VOR ranged from 43.9% to 52.5%. The overall industry average varied between 48.7% and 57.5%, with NYC regulations requiring a minimum VOR of 53% (see Figure 22 in Appendix 2 for NYC-specific data)[^9]. 
+
+[^9]: Data from NYC Taxi & Limousine Commission (TLC). (2024). TLC Factbook: Data Dashboard for Industry Trends. Available at https://app.powerbigov.us/view?r=eyJrIjoiY2FlNjI3YWQtMDkzOS00MjliLTk0MTQtODc2NzU4OTYwNjFiIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9&pageName=ReportSection28c004ce23fc37acd783.
+
+#### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings
 
 *`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`*
-
 
 ```{r}
 tbl <- make_indicator_table_compact(
@@ -70,8 +73,6 @@ chart
 
 ```
 
-
-
 Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","last_value_fmt")` in Vehicle Occupancy Rate Findings for taxi trips. On a year-over-year (YoY) basis, the Vehicle Occupancy Rate Findings for taxi trips was `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, vehicle occupancy for taxi trips changed by `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","mom_fmt")`. `r trend_narrative("VEHICLE_OCCUPANCY_RATE", "TAXI")` `r shift_narrative("VEHICLE_OCCUPANCY_RATE", "TAXI")`
@@ -79,6 +80,3 @@ In `r end_label`, `r region_name` Regional District recorded a total of `r metri
 In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("VEHICLE_OCCUPANCY_RATE","TNS","last_value_fmt")` in Vehicle Occupancy Rate Findings for TNS trips. Compared with `r prev_label`, the Vehicle Occupancy Rate Findings for TNS trips was `r metric("VEHICLE_OCCUPANCY_RATE","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the Vehicle Occupancy Rate Findings for TNS trips was `r metric("VEHICLE_OCCUPANCY_RATE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, vehicle occupancy for TNS trips changed by `r metric("VEHICLE_OCCUPANCY_RATE","TNS","mom_fmt")`. `r trend_narrative("VEHICLE_OCCUPANCY_RATE", "TNS")` `r shift_narrative("VEHICLE_OCCUPANCY_RATE", "TNS")`
 
 **Limitations:** The vehicle occupancy rate illustrates the interaction between demand and supply and offers limited insight into the industry's sustainability. However, this indicator does not provide information about the Board’s other sustainability examples, including environmental impact and equity within the industry.
-
-
-

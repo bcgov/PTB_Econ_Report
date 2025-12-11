@@ -150,13 +150,30 @@ Under the public need policy in the *Policy Manual*, PN is divided into the foll
 Under the sound economic conditions policy in the *Policy Manual*, SEC is divided into the following factors:
 
 -   Sustainability
+
 -   Competition
+
 -   Innovation
+
 -   Variety
 
-This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart: 
+This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
 
+```{r}
+src <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\templates\\table_image.png"
 
+# local copy inside your project
+dir.create("img-cache", showWarnings = FALSE)
+dst <- file.path("img-cache", "table_image.png")
+
+if (!file.exists(dst)) {
+  ok <- file.copy(src, dst, overwrite = TRUE)
+  if (!ok) stop("Could not copy image from network share")
+}
+
+knitr::include_graphics(dst)
+
+```
 
 *Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.*
 
