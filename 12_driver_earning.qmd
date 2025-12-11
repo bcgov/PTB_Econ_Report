@@ -57,5 +57,5 @@ In `r end_label`, the `r region_name` Regional District recorded a total of `r m
 
 **Limitations:**
 
-##Variety Factor (SEC)
+## Variety Factor (SEC)
 There is no analysis related to this factor.

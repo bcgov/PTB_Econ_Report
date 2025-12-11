@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
   library(lubridate)
 })
 
-trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Initiatives\\Data Modelling & Policy Initiative\\Data Economic Modelling Projects\\2025_011_Trend_Analysis\\trend_results_2025_1205.xlsx"
+trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\trend_analysis_20251210.xlsx"
 
 trend_raw <- read_excel(
   trend_path,
@@ -13,18 +13,19 @@ trend_raw <- read_excel(
     "text",    # PICKUP_AREA
     "text",    # TRIP_SERVICE_TYPE_CODE
     "text",    # INDICATOR_TYPE
+    "date",    # period
     "numeric", # YEAR_POINT
     "numeric", # MONTH_POINT
-    "date",    # period
     "numeric", # INDICATOR_VALUE
     "text",    # MODEL_TYPE
     "text",    # TREND_DIRECTION
+    "numeric", # ESTIMATED_ANNUAL_CHANGE_PCT
     "numeric", # SLOPE_EST
     "numeric", # SLOPE_P
     "text",    # SHIFT_DIRECTION
+    "numeric", # ESTIMATED_SHIFT_PCT
     "numeric", # SHIFT_EST
-    "numeric", # SHIFT_P
-    "numeric"  # K_RECENT (if present)
+    "numeric" # SHIFT_P
   )
 ) |>
   mutate(
