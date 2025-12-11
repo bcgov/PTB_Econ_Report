@@ -17,6 +17,7 @@ trend_raw <- read_excel(
     "numeric", # YEAR_POINT
     "numeric", # MONTH_POINT
     "numeric", # INDICATOR_VALUE
+    "numeric", # INDICATOR_OBSERVATION
     "text",    # MODEL_TYPE
     "text",    # TREND_DIRECTION
     "numeric", # ESTIMATED_ANNUAL_CHANGE_PCT
