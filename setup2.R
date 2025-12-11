@@ -39,7 +39,7 @@ trend_raw <- read_excel(
 trend_lookup_flags <- function(indicator,
                                service    = "TAXI",
                                area_type  = "REGIONAL",
-                               model_type = "RECENT_1M_SHIFT",
+                               model_type = "RECENT_1M_SHIFT_LOG",
                                region     = region_name,
                                end_date   = date_to) {
   
