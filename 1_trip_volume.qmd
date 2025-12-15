@@ -36,20 +36,19 @@ tbl_caption <- function(text) {
 
 
 ```{r}
-
-tbl <- make_indicator_table_compact(
-data       = raw_norm,
-indicator  = "TRIP_VOLUME",
-region     = region_name,
-services   = c("TAXI","TNS"),
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-digits     = 0
+make_new_table(
+  data      = raw_norm,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  font_size     = 8,
+  page_width_in = 8,   
+  year_col_in   = 0.4
 )
-tbl
 
 ```
+
 
 ```{r}
 #| echo: false

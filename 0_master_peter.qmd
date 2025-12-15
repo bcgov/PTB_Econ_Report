@@ -1,11 +1,9 @@
 ---
 title: "Economics Report"
+toc: true
+number_sections: true
 format:
-  docx:
-    reference-doc: "Economics Report (Region 2).docx"
-    include-in-header:
-      text: |
-        \usepackage{float}
+  docx
 execute:
   echo: false
   warning: false
@@ -15,7 +13,6 @@ execute:
 source("setup.R")
 source("setup2.R")
 ```
-
 
 
 {{< include 0_intro.qmd >}}

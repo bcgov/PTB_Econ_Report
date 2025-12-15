@@ -727,5 +727,191 @@ metric <- function(
 
 
 
+make_new_table <- function(
+    data, indicator, region,
+    services  = c("TAXI","TNS"),
+    area_type = "REGIONAL",
+    date_from = NULL, date_to = NULL,
+    
+    digits    = 0,
+    zero_to_blank = FALSE,
+    currency  = NULL,
+    
+    font_family   = "BC Sans",
+    font_size     = 8,
+    
+    page_width_in = 6.8,     # portrait ~6.8 | landscape ~9.0
+    year_col_in   = 0.65,
+    cell_padding  = 2,
+    year_padding  = 2,
+    
+    header_bg     = "#E6E6E6",
+    service_bg    = "#D9D9D9",
+    zebra_bg      = "#F7F7F7",
+    border_col    = "#BFBFBF",
+    
+    inner_grid     = TRUE,
+    inner_border_w = 0.4,
+    outer_border_w = 0.8
+) {
+  
+  if (is.null(currency)) {
+    currency <- stringr::str_detect(
+      indicator,
+      stringr::regex("REVENUE|FARE|EARNING", ignore_case = TRUE)
+    )
+  }
+  
+  df <- filter_indicator(
+    data      = data,
+    indicator = indicator,
+    region    = region,
+    services  = services,
+    area_type = area_type,
+    date_from = date_from,
+    date_to   = date_to
+  ) %>%
+    dplyr::transmute(
+      service,
+      y = lubridate::year(date),
+      m = lubridate::month(date),
+      value = suppressWarnings(as.numeric(value))
+    )
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  month_cols <- as.character(lubridate::month(1:12, label = TRUE, abbr = TRUE))
+  
+  # year x month complete
+  dfc <- df %>%
+    dplyr::group_by(service, y) %>%
+    tidyr::complete(m = 1:12, fill = list(value = NA_real_)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(m_lab = as.character(lubridate::month(m, label = TRUE, abbr = TRUE)))
+  
+  wide <- dfc %>%
+    dplyr::select(service, y, m_lab, value) %>%
+    tidyr::pivot_wider(names_from = m_lab, values_from = value) %>%
+    dplyr::arrange(match(service, services), y)
+  
+  if (isTRUE(zero_to_blank)) {
+    wide <- wide %>%
+      dplyr::mutate(dplyr::across(dplyr::all_of(month_cols), ~ ifelse(.x == 0, NA_real_, .x)))
+  }
+  
+  # --- INSERT SERVICE HEADER ROWS (TAXI/TNS) ---
+  add_service_headers <- function(w, services, month_cols) {
+    out <- list()
+    for (srv in services) {
+      block <- w %>% dplyr::filter(service == srv)
+      if (nrow(block) == 0) next
+      header <- tibble::tibble(service = srv, y = NA_integer_)
+      for (m in month_cols) header[[m]] <- NA_real_
+      out[[srv]] <- dplyr::bind_rows(header, block)
+    }
+    dplyr::bind_rows(out)
+  }
+  
+  wide2 <- add_service_headers(wide, services, month_cols)
+  
+  out <- wide2 %>%
+    dplyr::mutate(
+      Year = ifelse(is.na(y), service, as.character(y))
+    ) %>%
+    dplyr::select(Year, dplyr::all_of(month_cols))
+  
+  ft <- flextable::flextable(out)
+  
+  # indices
+  hdr_idx <- which(is.na(wide2$y))                # TAXI/TNS rows
+  yr_idx  <- setdiff(seq_len(nrow(out)), hdr_idx) # real year rows
+  
+  # merge the service header rows across all columns
+  if (length(hdr_idx)) {
+    for (i in hdr_idx) {
+      ft <- flextable::merge_at(ft, i = i, j = 1:ncol(out))
+    }
+  }
+  
+  # number formatting
+  if (isTRUE(currency)) {
+    ft <- flextable::colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", prefix = "$", na_str = "")
+  } else {
+    ft <- flextable::colformat_num(ft, j = month_cols, digits = digits, big.mark = ",", na_str = "")
+  }
+  
+  # widths (inches) + fixed layout
+  month_w <- (page_width_in - year_col_in) / length(month_cols)
+  if (!is.finite(month_w) || month_w <= 0) stop("Invalid widths: check page_width_in and year_col_in.")
+  
+  ft <- flextable::set_table_properties(ft, layout = "fixed", width = 1)
+  ft <- flextable::width(ft, j = 1, width = year_col_in)
+  ft <- flextable::width(ft, j = 2:(length(month_cols) + 1), width = month_w)
+  
+  # font + padding
+  ft <- flextable::font(ft, fontname = font_family, part = "all")
+  ft <- flextable::fontsize(ft, size = font_size, part = "all")
+  ft <- flextable::padding(ft, padding = cell_padding, part = "all")
+  ft <- flextable::padding(ft, j = 1, padding = year_padding, part = "all")
+  
+  # alignment
+  ft <- flextable::align(ft, j = 1, align = "left", part = "all")
+  ft <- flextable::align(ft, j = 2:(length(month_cols) + 1), align = "center", part = "header")
+  ft <- flextable::align(ft, j = 2:(length(month_cols) + 1), align = "right",  part = "body")
+  
+  # header styling
+  ft <- flextable::bg(ft, part = "header", bg = header_bg)
+  ft <- flextable::bold(ft, part = "header", bold = TRUE)
+  
+  # service header styling
+  if (length(hdr_idx)) {
+    ft <- flextable::bg(ft,   i = hdr_idx, bg = service_bg, part = "body")
+    ft <- flextable::bold(ft, i = hdr_idx, bold = TRUE, part = "body")
+    ft <- flextable::align(ft, i = hdr_idx, align = "left", part = "body")
+  }
+  
+  # zebra for year rows only
+  if (length(yr_idx) >= 2) {
+    ft <- flextable::bg(ft, i = yr_idx[c(TRUE, FALSE)], bg = zebra_bg, part = "body")
+  }
+  if (length(yr_idx)) {
+    ft <- flextable::bold(ft, i = yr_idx, j = 1, bold = TRUE, part = "body")
+  }
+  
+  # borders: outer + inner grid
+  std  <- officer::fp_border(color = border_col, width = outer_border_w)
+  thin <- officer::fp_border(color = border_col, width = inner_border_w)
+  
+  ft <- flextable::border_remove(ft)
+  ft <- flextable::hline_top(ft,    border = std,  part = "all")
+  ft <- flextable::hline_bottom(ft, border = std,  part = "all")
+  ft <- flextable::vline_left(ft,   border = std,  part = "all")
+  ft <- flextable::vline_right(ft,  border = std,  part = "all")
+  
+  if (isTRUE(inner_grid)) {
+    ft <- flextable::border_inner_h(ft, border = thin, part = "all")
+    ft <- flextable::border_inner_v(ft, border = thin, part = "all")
+  }
+  
+  ft
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
