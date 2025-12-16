@@ -12,17 +12,17 @@ Policy Context: Public Need and Accessibility Factor
 
 The Board’s sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on the taxi vehicle occupancy rate:
 
--   **The proposed service promotes long-term stability for the passenger transportation industry.**\
+-   The proposed service promotes long-term stability for the passenger transportation industry.
     -Stability in the vehicle occupancy rate can reflect long-term stability in the industry.
--   **The proposed service encourages resiliency in the passenger transportation industry.**\
+-   The proposed service encourages resiliency in the passenger transportation industry.
     -Higher vehicle occupancy rates can reflect higher resiliency levels in the passenger transportation industry.
--   **The proposed service minimizes significant market disruption**\
+-   The proposed service minimizes significant market disruption
     -Large shifts in the vehicle occupancy rate can indicate a significant market disruption.
--   **The proposed service protects the passenger transportation sector from rapid disruption to ensure its long-term stability as an essential service.**\
+-   The proposed service protects the passenger transportation sector from rapid disruption to ensure its long-term stability as an essential service.
     -Large shifts in the vehicle occupancy rate can indicate a rapid disruption, leading to challenges for long-term stability as an essential service.
--   \*The proposed service promotes the overall profitability and economic sustainability of the industry.\*\*\
+-   The proposed service promotes the overall profitability and economic sustainability of the industry.
     -A low vehicle occupancy rate indicates unsustainable profitability and economic instability in the industry.
--   **The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.**\
+-   The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.
     -A low vehicle occupancy rate can signal inadequate driver incomes. To assess whether a vehicle occupancy rate is high or low, we define the range of possible values it can take, referred to as the Vehicle Occupancy Rate Possible Range (VORPR)[^7]. 
     
 [^7]: The method of calculating The Vehicle Occupancy Rate Possible Range has been included in the Appendix.
@@ -39,7 +39,7 @@ Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indic
 
 #### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings
 
-*`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`*
+`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`
 
 ```{r}
 tbl <- make_indicator_table_compact(
@@ -55,7 +55,7 @@ tbl <- make_indicator_table_compact(
 tbl
 ```
 
-*`r fig_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`*
+`r fig_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(

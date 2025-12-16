@@ -16,7 +16,7 @@ Policy Context: Public Need and Accessibility Factor
 #### `r region_name` Regional District Taxi and TNS Driver hourly revenue Findings 
 
 
-*`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`*
+`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`
 
 
 ```{r}
@@ -33,7 +33,7 @@ tbl <- make_indicator_table_compact(
 tbl
 ```
 
-*`r fig_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`*
+`r fig_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(
