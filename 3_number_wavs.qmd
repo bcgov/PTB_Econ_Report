@@ -22,36 +22,32 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
 
 `r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`
 ```{r}
-
-tbl <- make_indicator_table_compact(
-data       = raw_norm,
-indicator  = "ACTIVE_WAV",
-region     = region_name,
-services   = c("TAXI"),
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-digits     = 0
+make_new_table(
+  data      = raw_norm,
+  indicator = "ACTIVE_WAV",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  font_size     = 8,
+  page_width_in = 8,   
+  year_col_in   = 0.4
 )
-tbl
 
 ```
 
 `r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip "))`
 
 ```{r}
-
-tbl <- make_indicator_table_compact(
-data       = raw_norm,
-indicator  = "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
-region     = region_name,
-services   = c("TAXI","TNS"),
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-digits     = 0
+make_new_table(
+  data      = raw_norm,
+  indicator = "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  font_size     = 8,
+  page_width_in = 8,   
+  year_col_in   = 0.4
 )
-tbl
 
 ```
 
@@ -59,18 +55,16 @@ tbl
 
 
 ```{r}
-
-tbl <- make_indicator_table_compact(
-data       = raw_norm,
-indicator  = "ACTIVE_WAV_PER_1000_PERSONS",
-region     = region_name,
-services   = c("TAXI"),
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-digits     = 2
+make_new_table(
+  data      = raw_norm,
+  indicator = "ACTIVE_WAV_PER_1000_PERSONS",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  font_size     = 8,
+  page_width_in = 8,   
+  year_col_in   = 0.4
 )
-tbl
 
 ```
 
@@ -81,19 +75,16 @@ Note: The above table reports the number of WAVs per 1,000 persons and the annua
 
 
 ```{r}
-
-tbl <- make_indicator_table_compact(
-data       = raw_norm,
-indicator  = "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS",
-region     = region_name,
-services   = c("TAXI","TNS"),
-area_type  = "REGIONAL",
-date_from  = date_from,
-date_to    = date_to,
-digits     = 2
+make_new_table(
+  data      = raw_norm,
+  indicator = "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  font_size     = 8,
+  page_width_in = 8,   
+  year_col_in   = 0.4
 )
-tbl
-
 ```
 Note: The above table reports the number of WAVs providing accessible trips per 1,000 persons and the annual population data is available from BC Stats[^3]
 
