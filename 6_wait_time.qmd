@@ -16,21 +16,24 @@ Primary Factor: Service Quality
 
 Policy Context: Public Need and Accessibility Factor
 
-The Board’s *Public Need Policy* in the **Policy Manual** lists examples of the service quality factor, which are set out below alongside their corresponding implications on wait times:
+The Board’s Public Need Policy in the **Policy Manual** lists examples of the service quality factor, which are set out below alongside their corresponding implications on wait times:
 
--   **The proposed service provides more or improved service where there is currently inadequate service.**\
-    -A long wait time suggests an inadequate level of service supplied.
--   **The proposed service provides more reliable service.**\
-    -Consistent short wait times suggest that the service is reliable. -Significant changes in wait times can suggest that the service is not reliable. -Consistently long wait times suggest that the service is not reliable.
--   **The proposed service encourages more efficient service to the public, including trip speed.**\
-    -A long wait time suggests an inadequate level of service supplied.
--   **The proposed service provides a service that is comfortable and convenient.**\
-    -A short wait time contributes to a more comfortable and convenient service. -The proposed service supports better customer service and customer satisfaction. A short wait time contributes to better customer service and customer satisfaction.
+-   The proposed service provides more or improved service where there is currently inadequate service.
+    -   A long wait time suggests an inadequate level of service supplied.
+-   The proposed service provides more reliable service.
+    -   Consistent short wait times suggest that the service is reliable. 
+    -   Significant changes in wait times can suggest that the service is not reliable. 
+    -   Consistently long wait times suggest that the service is not reliable.
+-   The proposed service encourages more efficient service to the public, including trip speed.
+    -   A long wait time suggests an inadequate level of service supplied.
+-   The proposed service provides a service that is comfortable and convenient.
+    -   A short wait time contributes to a more comfortable and convenient service. 
+    -   The proposed service supports better customer service and customer satisfaction. A short wait time contributes to better customer service and customer satisfaction.
 
 #### `r region_name` Regional District Wait Time Findings
 
 
-*`r tbl_caption(paste(region_name, "Regional District Wait Time (minutes)"))`*
+`r tbl_caption(paste(region_name, "Regional District Wait Time (minutes)"))`
 
 
 
@@ -49,7 +52,7 @@ tbl
 ```
 
 
-*`r fig_caption(paste(region_name, "Regional District Wait Time (minutes)"))`*
+`r fig_caption(paste(region_name, "Regional District Wait Time (minutes)"))`
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(

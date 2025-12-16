@@ -10,13 +10,13 @@ Primary Factor: Accessibility
 
 Policy Context: Public Need and Accessibility Factor
 
-The Board’s *Public Need Policy* in the **Policy Manual** lists examples of the accessibility factor, which are set out below alongside their corresponding implications on the number of active vehicles per 1,000 persons:
+The Board’s Public Need Policy in the **Policy Manual** lists examples of the accessibility factor, which are set out below alongside their corresponding implications on the number of active vehicles per 1,000 persons:
 
 \-**The proposed service enhances availability of passenger transportation services to everyone in the province, including in low-density areas, such as rural and remote communities.** -A higher number of active vehicles per 1,000 persons directly and positively correlates with greater service availability. -The number of vehicles per 1,000 persons in low-density areas provides an area-specific assessment of overall service availability.
 
 #### `r region_name` Regional District Active Vehicles per 1,000 Persons Findings
 
-*`r tbl_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`*
+`r tbl_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`
 
 ```{r}
 tbl <- make_indicator_table_compact(
@@ -34,7 +34,7 @@ tbl
 
 Note: The above table reports the number of active vehicles per 1,000 persons up to the most recent year for which annual population data is available from Statistics Canada. As of October 2024, the most recent data available is up to 2023.[^4] [^4]:Statistics Canada. (2024). Table 17-10-0152-01 Population estimates, July 1, by census division, 2021 boundaries.https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710015201
 
-*`r fig_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`*
+`r fig_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked_2(

@@ -14,7 +14,7 @@ As stated previously, it is helpful to note that although taxis and TNS are simi
 
 Policy Context: Public Need and Demand Factor
 
-The Board’s *Public Need Policy* in the **Policy Manual** lists examples of the demand factor, which are set out below alongside their corresponding implications on trip revenue:
+The Board’s Public Need Policy in the **Policy Manual** lists examples of the demand factor, which are set out below alongside their corresponding implications on trip revenue:
 
 - **There are people who would use the proposed service.**  
   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
@@ -27,7 +27,7 @@ The Board’s *Public Need Policy* in the **Policy Manual** lists examples of th
 
 
 
-*`r tbl_caption(paste(region_name, "Regional District Trip Revenue(thousands of dollars)"))`*
+`r tbl_caption(paste(region_name, "Regional District Trip Revenue(thousands of dollars)"))`
 
 
 ```{r}
@@ -52,7 +52,7 @@ make_new_table(
 ```
 
 
-*`r fig_caption(paste(region_name, "Regional District Trip Revenue"))`*
+`r fig_caption(paste(region_name, "Regional District Trip Revenue"))`
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked(
 data       = raw_norm,

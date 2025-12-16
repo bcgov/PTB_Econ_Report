@@ -10,9 +10,9 @@
 
 **Interpretation:** Increases in taxi trip volume or TNS trip volume indicate growth in the quantity demanded in the respective markets. Moreover, a shift in trip volume from the taxi sector to the TNS sector suggests evolving consumer preferences and competition between the two types of partially substitutable services.
 
-It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.\*
+It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
 
-The Board’s public need policy in the *Policy Manual* lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume: - There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service. - When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume. - The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
+The Board’s public need policy in the Policy Manual lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume: - There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service. - When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume. - The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
 
 There are people who would use the proposed service:
 
@@ -32,7 +32,7 @@ tbl_caption <- function(text) {
 }
 ```
 
-*`r tbl_caption(paste(region_name, "Regional District Trip Volume"))`*
+`r tbl_caption(paste(region_name, "Regional District Trip Volume"))`
 
 
 ```{r}
@@ -61,7 +61,7 @@ fig_caption <- function(text) {
 ```
 
 
-*`r fig_caption(paste(region_name, "Regional District Trip Volume"))`*
+`r fig_caption(paste(region_name, "Regional District Trip Volume"))`
 
 
 ```{r, fig.width=10, fig.height=5}

@@ -26,7 +26,7 @@ This report was produced for the Board regarding a new application for a taxi li
 
 The applicant is **MS Taxi Ltd.**, which is doing business as MS Taxi. The application summary states the following:
 
-> There is a need for an additional taxi company servicing West Vancouver, North Vancouver, Vancouver, and YVR. It will positively affect transportation services. As MS Taxi, we will attract new taxi users that will increase the trip volume of all existing and new companies.
+There is a need for an additional taxi company servicing West Vancouver, North Vancouver, Vancouver, and YVR. It will positively affect transportation services. As MS Taxi, we will attract new taxi users that will increase the trip volume of all existing and new companies.
 
 Additional details of the application include:
 
@@ -43,7 +43,7 @@ For taxi applicants, the Region is determined based on where the existing or pro
 
 ## Existing Licensees
 
-The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (*MoTI*). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
+The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (MoTI). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
 
 ```{r}
 library(dplyr)
@@ -122,9 +122,9 @@ This economics report provides the Board with data analysis pertaining only to t
 
 ## PN and SEC Factors
 
-The Board’s *Policy Manual* provides information on the factors the Board may consider when determining PN and SEC. This economics report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economics report does not determine whether PN and SEC exist.
+The Board’s Policy Manual provides information on the factors the Board may consider when determining PN and SEC. This economics report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economics report does not determine whether PN and SEC exist.
 
-Under the public need policy in the *Policy Manual*, PN is divided into the following factors:
+Under the public need policy in the Policy Manual, PN is divided into the following factors:
 
 -   Demand
 -   Accessibility
@@ -132,7 +132,7 @@ Under the public need policy in the *Policy Manual*, PN is divided into the foll
 -   Safety
 -   Service Quality
 
-Under the sound economic conditions policy in the *Policy Manual*, SEC is divided into the following factors:
+Under the sound economic conditions policy in the Policy Manual, SEC is divided into the following factors:
 
 -   Sustainability
 
@@ -160,13 +160,13 @@ knitr::include_graphics(dst)
 
 ```
 
-*Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.*
+Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.
 
 ## Report Constraints
 
-Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established *data requirements* outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
+Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established data requirements outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
 
-Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economics report *at this time*.
+Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economics report at this time.
 
 Due to data limitations, only two regions will be analyzed:
 

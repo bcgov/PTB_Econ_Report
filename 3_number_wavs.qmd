@@ -20,7 +20,7 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
 
 
 
-*`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`*
+`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`
 ```{r}
 
 tbl <- make_indicator_table_compact(
@@ -37,7 +37,7 @@ tbl
 
 ```
 
-*`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip "))`*
+`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip "))`
 
 ```{r}
 
@@ -55,7 +55,7 @@ tbl
 
 ```
 
-*`r tbl_caption(paste(region_name, "Regional District Number of 1Active Wheelchair Accessible Vehicles per 1,000 Persons"))`*
+`r tbl_caption(paste(region_name, "Regional District Number of 1Active Wheelchair Accessible Vehicles per 1,000 Persons"))`
 
 
 ```{r}
@@ -77,7 +77,7 @@ tbl
 Note: The above table reports the number of WAVs per 1,000 persons and the annual population data is available from BC Stats [^2]
 
 [^2]:BC Stats. (n.d.). Population Estimates & Projections for British Columbia. Retrieved January 20, 2025, from https://bcstats.shinyapps.io/popApp/
-*`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip per 1,000 Persons"))`*
+`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip per 1,000 Persons"))`
 
 
 ```{r}
@@ -99,7 +99,7 @@ Note: The above table reports the number of WAVs providing accessible trips per 
 
 [^3]:BC Stats. (n.d.). Population Estimates & Projections for British Columbia. Retrieved January 20, 2025, from https://bcstats.shinyapps.io/popApp/
 
-*`r fig_caption(paste(region_name, "Regional District Trip Volume"))`*
+`r fig_caption(paste(region_name, "Regional District Trip Volume"))`
 ```{r, fig.width=10, fig.height=5}
 chart <- make_multi_indicator_chart_lines(
   data       = raw_norm,
