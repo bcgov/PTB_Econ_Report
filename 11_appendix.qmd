@@ -10,8 +10,8 @@ A set of completed trips in a given area j during the period t is denoted by $T_
 
 Trip volume is the total count of trip IDs of completed trips.
 $$
-TV_{j,t} = \lvert T_{j,t} \rvert
-$$ 
+TV_{j,t} = \lvert T_{j,t} \rvert 
+$$ {#eq-tv}
 
 
 where \|∙\| counts the number of elements in the set.
@@ -21,8 +21,8 @@ where \|∙\| counts the number of elements in the set.
 Total trip revenue is:
 
 $$
-TR_{j,t} = \sum_{i \in T_{j,t}} r_i\tag{2}
-$$ 
+TR_{j,t} = \sum_{i \in T_{j,t}} r_i
+$$ {#eq-tv}
 
 where $TR_{j,t}$ is trip revenue and $r_i$ is the fare amount of the trip $i$.
 
@@ -35,15 +35,15 @@ The number of active wheelchair accessible vehicles is determined by identifying
 
 
 $$
-WAV^{1}_{j,t} = \bigl\lvert R_{j,t} \cap V_{j,t} \bigr\rvert\tag{3}
-$$ 
+WAV^{1}_{j,t} = \bigl\lvert R_{j,t} \cap V_{j,t} \bigr\rvert
+$$ {#eq-tv}
 where |∙| counts the number of elements in the set, and $V_{j,t}∩R_{j,t}$ represents the set of active vehicles that are also registered as accessible.
 
 The number of active wheelchair accessible vehicles providing acceptable trips is determined by limiting the list of active WAVs to those reported as having provided accessible trips.
 
 $$
-WAV^{2}_{j,t} = \bigl\lvert R_{j,t} \cap V_{j,t} \cap A_{j,t} \bigr\rvert\tag{4}
-$$ 
+WAV^{2}_{j,t} = \bigl\lvert R_{j,t} \cap V_{j,t} \cap A_{j,t} \bigr\rvert
+$$ {#eq-tv}
 
 where |∙| counts the number of elements in the set, and $R_{j,t}∩ V_{j,t}∩A_{j,t}$ represents the set of active WAVs that are also providing accessible trips. 
 
@@ -51,13 +51,13 @@ The number of active wheelchair accessible vehicles per 1,000 person is the rati
 
 $$
 WAV^{\text{per1}}_{j,t}
-= \frac{WAV^{1}_{j,t}}{P_{j,t}} \times 1000\tag{5}
-$$ 
+= \frac{WAV^{1}_{j,t}}{P_{j,t}} \times 1000
+$$ {#eq-tv}
 The number of active wheelchair accessible vehicles providing accessible trips per 1,000 person is the ratio of $WAV_{j,t}^2$ to the area’s population denoted by $P_{j,t}$, multiplied by 1,000. 
 $$
 WAV^{\text{per2}}_{j,t}
-= \frac{WAV^{2}_{j,t}}{P_{j,t}} \times 1000 \tag{6}
-$$
+= \frac{WAV^{2}_{j,t}}{P_{j,t}} \times 1000
+$$ {#eq-tv}
 
 #### Active Vehicles per 1,000 Persons
 
@@ -65,8 +65,8 @@ The number of active vehicles per 1,000 persons  is calculated as the ratio of t
 
 $$
 Number of Active Vehicles Per 1000 Persons _{j,t}
-= \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000\tag{7}
-$$
+= \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000
+$$ {#eq-tv}
 
 ### Affordability Factor
 
@@ -75,8 +75,8 @@ $$
 For each trip i, the fare per kilometre denoted by $f_i$ is calculated as the ratio of its fare denoted by $r_i$ to its trip length in kilometres denoted by $d_i$.
 
 $$
-f_i = \frac{r_i}{d_i}\tag{8}
-$$ 
+f_i = \frac{r_i}{d_i}
+$$ {#eq-tv}
 
 The 10th, 50th, and the 90th percentiles of the fare per kilometre distribution are reported. Only trips recorded with a fare of at least \$2.50 were included, in line with the minimum flag rate of \$2.50.
 
@@ -91,8 +91,8 @@ There is no analysis related to this factor.
 For each trip, wait time, denoted by $w_i$, is defined as the difference between the pickup arrival time, denoted by $t_i^p$ and the hail time, denoted by $t_i^h$, measured in minutes.
 
 $$
-w_i = t_i^{p} - t_i^{h}\tag{9}
-$$ 
+w_i = t_i^{p} - t_i^{h}
+$$ {#eq-tv}
 
 The median of the wait time distribution is reported. The median, when compared to the average, is less affected by outliers or extreme values, providing a more accurate representation of the central tendency (i.e., typical wait times). Pre-booked and street hail trips were excluded, as they were not the focus of what the wait time indicator is intended to capture.
 
@@ -104,15 +104,15 @@ Herfindahl-Hirschman Index (HHI) and Theil Index are both measures of market con
 The HHI index is calculated by summing the squares of each firm's market share, with lower values indicating more competition and higher values suggesting greater concentration. Specifically, the corresponding HHI Index for a given region is constructed as follows:
 
 $$
-HHI_{j,t} = \sum_{i=1}^{n} s_{i,j,t}^{2}\tag{10}
-$$  
+HHI_{j,t} = \sum_{i=1}^{n} s_{i,j,t}^{2}
+$$  {#eq-tv}
 
 where $s_{i,j,t}$is the market share of firm i in area j during period t, and n is the total number of companies The Theil Index is based on the concept of entropy from information theory. It measures the deviation of a distribution (like market shares) from a perfectly equal distribution. Specifically, the corresponding Theil Index for a given region is constructed as follows:
 
 $$
 T = \sum_{i=1}^{n}
-\left( \frac{x_i}{\mu} \ln\!\left(\frac{x_i}{\mu}\right) \right)\tag{11}
-$$ 
+\left( \frac{x_i}{\mu} \ln\!\left(\frac{x_i}{\mu}\right) \right)
+$$ {#eq-tv}
 
 where n is the total number of companies, and $x_i$ represents the revenue share of the $i^{th}$ entity and μ is the average share. The Theil decomposition is conducted as follows: 
 $$
@@ -130,8 +130,8 @@ T =
 \frac{y_{ij}}{y_j}
 \ln\!\left(\frac{y_{ij}}{y_j}\right)
 \right)
-= B + W\tag{12}
-$$
+= B + W
+$$ {#eq-tv}
 
 
 where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region[^10].
@@ -152,8 +152,8 @@ Trip revenue per active vehicle is calculated by dividing the sum of the total f
 
 $$
 RevPerVehicle_{j,t}
-= \frac{TR_{j,t}}{\lvert V_{j,t} \rvert}\tag{13}
-$$
+= \frac{TR_{j,t}}{\lvert V_{j,t} \rvert}
+$$ {#eq-tv}
 
 where $TR_{j,t}$ is total trip revenue, and $|V_{j,t} |$ is the number of active vehicles.
 
@@ -163,16 +163,16 @@ Taxi fleet utilization is calculated as the ratio of the total number of active 
 
 $$
 FleetUtilization_{i,t}
-= \frac{AV_{i,t}}{Capacity_{i,t}}\tag{14}
-$$ 
+= \frac{AV_{i,t}}{Capacity_{i,t}}
+$$ {#eq-tv}
 
 #### Taxi Vehicle Occupancy Rate
 
 Taxi Vehicle Occupancy Rate (VOR) is calculated as the ratio of the sum of all trip durations denoted by $D_{i,t}$to the sum of all shift lengths denoted by $L_{i,t}$.
 
 $$
-VOR_{i,t} = \frac{D_{i,t}}{L_{i,t}}\tag{15}
-$$ 
+VOR_{i,t} = \frac{D_{i,t}}{L_{i,t}}
+$$ {#eq-tv}
 The shift length is determined by the difference between the shift end time and the shift start time.
 TNS trips are not included, as the start time for TNS shifts recorded in the Trip Database corresponds to the driver's first ride request rather than the actual beginning of their work shift.
 
@@ -186,8 +186,8 @@ A shift is defined as a series of trips performed by a driver, where the start t
 
 $$
 t_{\text{start}}^{\text{shift}} 
-= \min_i \left( t_{\text{assign},i}^{\text{vehicle}} \right)\tag{16}
-$$
+= \min_i \left( t_{\text{assign},i}^{\text{vehicle}} \right)
+$$ {#eq-tv}
 
 #### Shift End Time
 
@@ -196,8 +196,8 @@ This is the latest drop-off arrival DateTime ( $t_{\text{arrive},i}^{\text{dropo
 
 $$
 t_{\text{end}}^{\text{shift}}
-= \max_i \left( t_{\text{arrive},i}^{\text{dropoff}} \right)\tag{17}
-$$
+= \max_i \left( t_{\text{arrive},i}^{\text{dropoff}} \right)
+$$ {#eq-tv}
 
 #### Shift Length
 
@@ -206,8 +206,8 @@ Denoted as ( $L^{\text{shift}}$ ):
 $$
 L^{\text{shift}} 
 = t_{\text{end}}^{\text{shift}}
-- t_{\text{start}}^{\text{shift}}\tag{18}
-$$
+- t_{\text{start}}^{\text{shift}}
+$$ {#eq-tv}
 
 ### Shift Occupancy
 
@@ -216,30 +216,30 @@ This is the total sum of all trip durations ($D_i$) within the shift:
 
 $$
 D^{\text{shift}} 
-= \sum_{i=1}^{n} D_i\tag{19}
-$$
+= \sum_{i=1}^{n} D_i
+$$ {#eq-tv}
 
 The Average Vehicle Occupancy Rate (VOR) is calculated as the ratio of the sum of all trip durations denoted by $D_{i,t}$ to the sum of all shift lengths denoted by $L_{i,t}$.
 
 $$
-VOR = \frac{D_{i,t}}{L_{i,t}}\tag{20}
-$$
+VOR = \frac{D_{i,t}}{L_{i,t}}
+$$ {#eq-tv}
 
 This formula ensures that the VOR represents the proportion of time within a shift that a vehicle is actively engaged in service.
 
 The Vehicle Occupancy Rate Possible Range (VORPR) is calculated as the ratio of the sum of all trip durations denoted by $D_{i,t}$ to the sum of all Operating Time denoted by $O_{i,t}$.
 
 $$
-VORPR = \frac{D_{i,t}}{O_{i,t}}\tag{21}
-$$
+VORPR = \frac{D_{i,t}}{O_{i,t}}
+$$ {#eq-tv}
 
 The Operating time includes the time between vehicle assignment time and drop-off time.
 
 $$
 O_i 
 = t_{\text{arrive},i}^{\text{dropoff}}
-- t_{\text{assign},i}^{\text{vehicle}}\tag{22}
-$$
+- t_{\text{assign},i}^{\text{vehicle}}
+$$ {#eq-tv}
 
 ### Drivers’ Gross Hourly Earnings
 
@@ -255,8 +255,8 @@ GHE_{j,t}
 }{
 \sum_{i \in T_{j,t}} h_i
 }
-\right)\tag{23}
-$$ 
+\right)
+$$ {#eq-tv}
 where: 
 -   $GHE_{(j,t)}$ represents the drivers' gross hourly earnings in area j during period t. 
 -   $r_i$ is the fare revenue for trip i. 
@@ -271,8 +271,8 @@ The number of active drivers is determined by identifying a set of unique driver
 
 $$
 DR_{j,t}
-= \bigl\lvert \{ dr_i \mid i \in T_{j,t} \} \bigr\rvert\tag{24}
-$$ 
+= \bigl\lvert \{ dr_i \mid i \in T_{j,t} \} \bigr\rvert
+$$ {#eq-tv}
 here:
 	$DR_{j,t}$ represents the number of active drivers in area j during period t.
 	$dr_i$ is the unique driver associated with trip i.
@@ -305,8 +305,8 @@ Once the peak hours are identified, the Peak-Hour Taxi Vehicle Occupancy Rate is
 
 $$
 PeakVOR_{i,t}
-= \frac{D^{\text{peak}}_{i,t}}{L^{\text{peak}}_{i,t}}\tag{25}
-$$ 
+= \frac{D^{\text{peak}}_{i,t}}{L^{\text{peak}}_{i,t}}
+$$ {#eq-tv}
 
 
 
