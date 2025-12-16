@@ -25,17 +25,16 @@ The Board's public need policy in the Policy Manual lists examples of the afford
 
 
 ```{r}
-tbl <- make_indicator_table_compact(
-  data       = raw_norm,
-  indicator  = "FARE_PER_5KM",
-  region     = region_name,
-  services   = c("TAXI","TNS"),
-  area_type  = "REGIONAL",
-  date_from  = date_from,
-  date_to    = date_to,
-  digits     = 2
+make_new_table(
+  data      = raw_norm,
+  indicator = "FARE_PER_5KM",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  font_size     = 8,
+  page_width_in = 8,   
+  year_col_in   = 0.4
 )
-tbl
 ```
 
 

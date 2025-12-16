@@ -733,7 +733,7 @@ make_new_table <- function(
     area_type = "REGIONAL",
     date_from = NULL, date_to = NULL,
     
-    digits    = 0,
+    digits    = 2,
     zero_to_blank = FALSE,
     currency  = NULL,
     
