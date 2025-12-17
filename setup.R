@@ -50,7 +50,7 @@ prev_year  <- year(date_to) - 1
 
 # NOTE: keep raw as-is; do minimal typing so downstream functions are predictable.
 
-raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\3_indicators.xlsx")
+raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\Archive\\old_process\\3_indicators.xlsx")
 
 # Basic normalized view with a proper Date column and numeric values.
 

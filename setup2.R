@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
   library(lubridate)
 })
 
-trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\trend_analysis_20251211.xlsx"
+trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\Archive\\old_process\\trend_analysis_20251211.xlsx"
 
 trend_raw <- read_excel(
   trend_path,
