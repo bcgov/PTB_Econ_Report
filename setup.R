@@ -775,7 +775,7 @@ make_new_table <- function(
       service,
       y = lubridate::year(date),
       m = lubridate::month(date),
-      value = suppressWarnings(as.numeric(value))
+      value = round(suppressWarnings(as.numeric(value)), digits)
     )
   
   if (nrow(df) == 0) stop("No rows matched your filters.")
@@ -857,7 +857,7 @@ make_new_table <- function(
   # alignment
   ft <- flextable::align(ft, j = 1, align = "left", part = "all")
   ft <- flextable::align(ft, j = 2:(length(month_cols) + 1), align = "center", part = "header")
-  ft <- flextable::align(ft, j = 2:(length(month_cols) + 1), align = "right",  part = "body")
+  ft <- flextable::align(ft, j = 2:(length(month_cols) + 1), align = "center",  part = "body")
   
   # header styling
   ft <- flextable::bg(ft, part = "header", bg = header_bg)
