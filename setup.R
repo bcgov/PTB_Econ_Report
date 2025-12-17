@@ -323,6 +323,7 @@ make_indicator_chart_stacked <- function(
       legend.key.width = unit(1.2, "lines"),
       panel.grid.major.x = element_blank(),
       panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
       axis.text.x = element_text(margin = margin(t = 4)),
       plot.margin = margin(6, 8, 6, 6)
     )
@@ -480,8 +481,8 @@ make_indicator_chart_lines <- function(
     geom_line(linewidth = 1) +
     geom_point(size = 1.8, stroke = 0.2) +
     scale_color_manual(values = colors, name = "Service Type") +
-    scale_y_continuous(labels = label_number(accuracy = 0.1)) +
-    scale_x_date(breaks = pretty_breaks(n = 18), date_labels = "%b\n%Y") +
+    scale_y_continuous(labels = label_number(accuracy = 0.1), limits = c(0, NA)) +
+    scale_x_date(breaks = scales::breaks_width("1 month"), date_labels = "%b\n%y") +
     labs(
       title    = title,
       subtitle = paste(region, "Regional District"),
@@ -497,6 +498,7 @@ make_indicator_chart_lines <- function(
       legend.title = element_text(size = base_size, face = "bold"),
       legend.key.width = unit(1.2, "lines"),
       panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
       axis.text.x = element_text(margin = margin(t = 4)),
       plot.margin = margin(6, 8, 6, 6)
     )
@@ -562,10 +564,10 @@ make_multi_indicator_chart_lines <- function(
     geom_line(linewidth = 1) +
     geom_point(size = 1.8, stroke = 0.2) +
     scale_color_manual(values = colors,labels = labels, name = NULL) +
-    scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+    scale_y_continuous(labels = scales::label_number(accuracy = 0.1), limits = c(0, NA)) +
     scale_x_date(
-      breaks = scales::pretty_breaks(n = 18),
-      date_labels = "%b\n%Y"
+      breaks = scales::breaks_width("1 month"),
+      date_labels = "%b\n%y"
     ) +
     labs(
       title    = title,
@@ -582,6 +584,7 @@ make_multi_indicator_chart_lines <- function(
       legend.title = element_text(size = base_size, face = "bold"),
       legend.key.width = unit(1.6, "lines"),
       panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
       axis.text.x = element_text(margin = margin(t = 4)),
       plot.margin = margin(6, 8, 6, 6)
     )
