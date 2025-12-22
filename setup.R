@@ -21,6 +21,7 @@ suppressPackageStartupMessages({
   library(stringr) 
   library(knitr)
   library(kableExtra)
+  library(data.table)
   
 })
 
@@ -31,7 +32,7 @@ suppressPackageStartupMessages({
 # -----------------------------
 
 date_from   <- make_date(2023, 1, 1)     # report window start (inclusive)
-date_to     <- make_date(2025, 5, 1)     # report window end   (inclusive)
+date_to     <- make_date(2025, 11, 1)     # report window end   (inclusive)
 region_name <- "Metro Vancouver"          # display name used across report
 
 
@@ -49,8 +50,9 @@ prev_year  <- year(date_to) - 1
 # ============================================================
 
 # NOTE: keep raw as-is; do minimal typing so downstream functions are predictable.
+raw <- fread("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\output\\indicators_251219_122145.csv")
 
-raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\Archive\\old_process\\3_indicators.xlsx")
+#raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\Archive\\old_process\\3_indicators.xlsx")
 
 # Basic normalized view with a proper Date column and numeric values.
 
@@ -58,11 +60,11 @@ raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub
 
 raw_norm <- raw %>%
   transmute(
-    date   = make_date(as.integer(YEAR_POINT), as.integer(MONTH_POINT), 1),
+    date   = make_date(as.integer(YEAR), as.integer(MONTH), 1),
     area   = PICKUP_AREA,
-    area_type = LEVEL_NAME,
-    indicator = INDICATOR_TYPE,
-    service   = TRIP_SERVICE_TYPE_CODE,
+    area_type = REPORTING_LEVEL,
+    indicator = INDICATOR_NAME,
+    service   = SERVICE_TYPE,
     value     = suppressWarnings(as.numeric(INDICATOR_VALUE))
   ) %>%
   filter(!is.na(date), !is.na(value))
