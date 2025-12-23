@@ -39,7 +39,7 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
 ```{r}
 make_new_table(
   data      = raw_norm,
-  indicator = "FLEET_UTILIZATION_RATE_RATE",
+  indicator = "FLEET_UTILIZATION_RATE",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
@@ -55,7 +55,7 @@ make_new_table(
 ```{r, fig.width=10, fig.height=5} 
 chart <- make_indicator_chart_lines(
 data       = raw_norm,
-indicator  = "FLEET_UTILIZATION_RATE_RATE",  # Adjust indicator if needed
+indicator  = "FLEET_UTILIZATION_RATE",  # Adjust indicator if needed
 region     = region_name,
 services   = c("TAXI", "TNS"),
 area_type  = "REGIONAL",
