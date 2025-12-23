@@ -68,15 +68,15 @@ make_company_fare_chart <- function(
 ) {
   df <- data %>%
     dplyr::filter(
-      LEVEL_NAME            == "COMPANY",
+      REPORTING_LEVEL            == "COMPANY",
       PICKUP_AREA           == area,
-      TRIP_SERVICE_TYPE_CODE == service,
-      INDICATOR_TYPE        == indicator,
-      YEAR_POINT            == year,
-      MONTH_POINT           == month
+      SERVICE_TYPE    == service,
+      INDICATOR_NAME        == indicator,
+      YEAR            == year,
+      MONTH           == month
     ) %>%
     dplyr::mutate(
-      company = LEVEL_VALUE,
+      company = REPORTING_NAME,
       fare    = as.numeric(INDICATOR_VALUE)
     ) %>%
     dplyr::arrange(dplyr::desc(fare)) %>%
