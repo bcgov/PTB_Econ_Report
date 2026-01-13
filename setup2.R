@@ -37,12 +37,21 @@ trend_raw <- read_excel(
 # ------------------------------------------------------------
 # Core lookup: returns both flags for the report month
 # ------------------------------------------------------------
+model_override <- c(
+  "FLEET_UTILIZATION" = "LOGIT_ROLL_BINOMIAL",
+  "VEHICLE_OCCUPANCY_RATE" = "LOGIT_ROLL_BINOMIAL"
+)
+
 trend_lookup_flags <- function(indicator,
                                service    = "TAXI",
                                area_type  = "REGIONAL",
                                model_type = "RECENT_1M_SHIFT_LOG",
                                region     = region_name,
                                end_date   = date_to) {
+  
+  if (indicator %in% names(model_override)) {
+    model_type <- unname(model_override[[indicator]])
+  }
   
   yr <- year(end_date)
   mo <- month(end_date)

@@ -608,7 +608,7 @@ indicators <- c(
   "ACTIVE_VEHICLE",
   "ACTIVE_WAV",
   "FARE_PER_5KM",
-  "FLEET_UTILIZATION",
+  "FLEET_UTILIZATION_RATE",
   "REVENUE_PER_VEHICLE",
   "TRIP_REVENUE",
   "TRIP_VOLUME",
@@ -630,7 +630,7 @@ ind_units <- list(
   ACTIVE_VEHICLE             = list(unit="count",   digits=0, currency=FALSE, scale=1),
   ACTIVE_WAV                 = list(unit="count",   digits=0, currency=FALSE, scale=1),
   FARE_PER_5KM               = list(unit="currency",digits=2, currency=TRUE,  scale=1),
-  FLEET_UTILIZATION          = list(unit="pct",     digits=1, currency=FALSE, scale=100), # اگر داده‌ات 0..1 است
+  FLEET_UTILIZATION_RATE     = list(unit="pct",     digits=1, currency=FALSE, scale=100), # اگر داده‌ات 0..1 است
   REVENUE_PER_VEHICLE        = list(unit="currency",digits=0, currency=TRUE,  scale=1),
   TRIP_REVENUE               = list(unit="currency",digits=0, currency=TRUE,  scale=1),
   TRIP_VOLUME                = list(unit="count",   digits=0, currency=FALSE, scale=1),
