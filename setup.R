@@ -314,7 +314,7 @@ make_indicator_chart_stacked <- function(
     geom_col(width = 26, position = "stack") +
     scale_fill_manual(values = colors, name = "Service Type") +
     scale_y_continuous(labels = label_number(accuracy = 0.1, scale_cut = cut_short_scale()), expand = c(0, 0.02)) +
-    scale_x_date(breaks = scales::breaks_width("1 month"), date_labels = "%b\n%y") +
+    scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
     labs(title = title, subtitle = paste(region, "Regional District"), x = NULL, y = NULL, caption = caption) +
     theme_minimal(base_size = base_size) +
     theme(
@@ -359,7 +359,7 @@ make_indicator_chart_stacked_2 <- function(
     
     scale_fill_manual(values = colors, name = "Service Type") +
     scale_y_continuous(labels = label_number(accuracy = 0.1, scale_cut = cut_short_scale()), expand = c(0, 0.02)) +
-    scale_x_date(breaks = scales::breaks_width("1 month"), date_labels = "%b\n%y") +
+    scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
     labs(title = title, subtitle = paste(region, "Regional District"), x = NULL, y = NULL, caption = caption) +
     theme_minimal(base_size = base_size) +
     theme(
@@ -484,7 +484,7 @@ make_indicator_chart_lines <- function(
     geom_point(size = 1.8, stroke = 0.2) +
     scale_color_manual(values = colors, name = "Service Type") +
     scale_y_continuous(labels = label_number(accuracy = 0.1), limits = c(0, NA)) +
-    scale_x_date(breaks = scales::breaks_width("1 month"), date_labels = "%b\n%y") +
+    scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
     labs(
       title    = title,
       subtitle = paste(region, "Regional District"),
@@ -568,7 +568,7 @@ make_multi_indicator_chart_lines <- function(
     scale_color_manual(values = colors,labels = labels, name = NULL) +
     scale_y_continuous(labels = scales::label_number(accuracy = 0.1), limits = c(0, NA)) +
     scale_x_date(
-      breaks = scales::breaks_width("1 month"),
+      breaks = scales::breaks_width("3 month"),
       date_labels = "%b\n%y"
     ) +
     labs(
