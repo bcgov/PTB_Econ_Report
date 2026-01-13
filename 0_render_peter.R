@@ -35,7 +35,7 @@ ts   <- format(Sys.time(), "%Y%m%d_%H%M%S")
 
 message("Rendering ", input_file, " ...")
 status <- system2("quarto", c("render", input_file, "--to", output_type))
-if (!identical(status, 0L)) stop("Quarto render failed with status ", status)
+#if (!identical(status, 0L)) stop("Quarto render failed with status ", status)
 
 src  <- sub("\\.qmd$", paste0(".", output_type), input_file)
 if (!file.exists(src)) stop("Expected output not found: ", src)
