@@ -26,7 +26,7 @@ trend_raw <- read_excel(
     "text",    # SHIFT_DIRECTION
     "numeric", # ESTIMATED_SHIFT_PCT
     "numeric", # SHIFT_EST
-    "numeric" # SHIFT_P
+    "numeric"  # SHIFT_P
   )
 ) |>
   mutate(
