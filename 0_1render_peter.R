@@ -63,7 +63,7 @@
 
 # Simple Quarto renderer (no functions)
 
-input_file  <- "0_master_peter.qmd"
+input_file  <- "0_3master_peter.qmd"
 output_dir  <- "results"
 output_type <- "docx"
 keep_n      <- 10L
