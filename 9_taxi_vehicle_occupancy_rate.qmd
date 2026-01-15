@@ -42,16 +42,14 @@ Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indic
 `r tbl_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`
 
 ```{r}
-make_new_table(
+make_indicator_table_compact(
   data      = raw_norm,
   indicator = "VEHICLE_OCCUPANCY_RATE",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
+  digits    = 2,
+  currency  = FALSE)
 ```
 
 `r fig_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`
