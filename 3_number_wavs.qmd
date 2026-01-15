@@ -22,32 +22,27 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
 
 `r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`
 ```{r}
-make_new_table(
+make_indicator_table_compact(
   data      = raw_norm,
   indicator = "ACTIVE_WAV",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
-
+  digits    = 0,
+  currency  = FALSE)
 ```
 
 `r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip "))`
 
 ```{r}
-make_new_table(
+make_indicator_table_compact(
   data      = raw_norm,
   indicator = "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
+  digits    = 0,
+  currency  = FALSE)
 
 ```
 

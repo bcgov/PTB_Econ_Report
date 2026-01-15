@@ -32,22 +32,8 @@ tbl_caption <- function(text) {
 }
 ```
 
-`r tbl_caption(paste(region_name, "Regional District Trip Volume"))`
+`r tbl_caption(paste(region_name, "Regional District Trip Volume(thousands of dollars)"))`
 
-
-```{r}
-make_new_table(
-  data      = raw_norm,
-  indicator = "TRIP_VOLUME",
-  region    = region_name,
-  date_from = date_from,
-  date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
-
-```
 
 ```{r}
 raw_norm_k <- raw_norm %>% dplyr::mutate(
@@ -64,7 +50,7 @@ make_indicator_table_compact(
   date_from = date_from,
   date_to   = date_to,
   digits    = 0,
-  currency  = FALSE
+  currency  = TRUE
 )
 
 ```
