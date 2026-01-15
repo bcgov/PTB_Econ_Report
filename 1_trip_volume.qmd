@@ -49,6 +49,25 @@ make_new_table(
 
 ```
 
+```{r}
+raw_norm_k <- raw_norm %>% dplyr::mutate(
+  value = ifelse(
+    indicator == "TRIP_VOLUME",
+    round(value/1000, 0),  # round to nearest thousand dollars
+    value
+  )
+)
+make_indicator_table_compact(
+  data      = raw_norm_k,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 0,
+  currency  = FALSE
+)
+
+```
 
 ```{r}
 #| echo: false
