@@ -200,7 +200,7 @@ make_indicator_table_compact <- function(
       service,
       y = lubridate::year(date),
       m = lubridate::month(date),
-      value = round(value, 2)
+      value = round(value, digits)
     )
   
   if (nrow(df) == 0) stop("No rows matched your filters.")

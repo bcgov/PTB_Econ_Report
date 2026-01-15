@@ -38,16 +38,14 @@ The Board’s Public Need Policy in the **Policy Manual** lists examples of the 
 
 
 ```{r}
-make_new_table(
+make_indicator_table_compact(
   data      = raw_norm,
   indicator = "WAIT_TIME",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
+  digits    = 0,
+  currency  = FALSE)
 ```
 
 
