@@ -20,16 +20,14 @@ Policy Context: Public Need and Accessibility Factor
 
 
 ```{r}
-make_new_table(
+make_indicator_table_compact(
   data      = raw_norm,
   indicator = "DRIVER_EARNING",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
+  digits    = 2,
+  currency  = TRUE)
 ```
 
 `r fig_caption(paste(region_name, "Regional District Taxi and TNS Driver hourly revenue Findings"))`
