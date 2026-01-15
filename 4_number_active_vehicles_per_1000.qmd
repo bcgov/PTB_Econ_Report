@@ -19,16 +19,14 @@ The Board’s Public Need Policy in the **Policy Manual** lists examples of the 
 `r tbl_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`
 
 ```{r}
-make_new_table(
+make_indicator_table_compact(
   data      = raw_norm,
   indicator = "VEHICLE_PER_1000_PERSONS",
   region    = region_name,
   date_from = date_from,
   date_to   = date_to,
-  font_size     = 8,
-  page_width_in = 8,   
-  year_col_in   = 0.4
-)
+  digits    = 0,
+  currency  = FALSE)
 ```
 
 Note: The above table reports the number of active vehicles per 1,000 persons up to the most recent year for which annual population data is available from Statistics Canada. As of October 2024, the most recent data available is up to 2023.[^4] 
