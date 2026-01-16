@@ -2,6 +2,17 @@
 
 A set of completed trips in a given area j during the period t is denoted by $T_{j,t}$, and each completed trip is denoted by i in $T_{j,t}$ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by $v_i$ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database. 
 
+(temporary) list of indicators
+Utilization (Feb)
+Wait time (Mar)
+WAVs (APR)
+Fare Cost (May)
+Availability (Jun)
+Driver Hourly Earning (Sep)
+Trip Vol (Nov)
+Trip Rev (Dec)
+VOR (not yet published)
+
 
 ### Demand Factor
 
@@ -10,11 +21,11 @@ A set of completed trips in a given area j during the period t is denoted by $T_
 
 Trip volume is the total count of trip IDs of completed trips.
 $$
-TV_{j,t} = \lvert T_{j,t} \rvert 
+TV_{j,t} = \sum_{i \in \text{completed\_trips}}^{N_{j,t}} 1
 $$ {#eq-tv}
 
-
-where \|∙\| counts the number of elements in the set.
+where $TV_{j,t}$ represents trip volume in area j during period t, i on the right hand side denotes the index of trips. $N_{j,t}$ is the total number of completed trips in area j during period t. Each completed trip contributes a value of 1 to the summation.
+Observation selection note: In our data query, completed trips with valid data quality and a fare amount greater than $2.25 are included.
 
 #### Trip Revenue
 
