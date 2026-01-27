@@ -46,6 +46,36 @@ For taxi applicants, the Region is determined based on where the existing or pro
 The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (MoTI). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
 
 ```{r}
+## ---------- Municipal level (LEVEL_NAME == "MUNICIPAL") ----------
+
+municipal_name <- "City of Vancouver"   # ← اینو از کاربر بگیر
+
+municipal <- raw_norm %>% 
+  filter(
+    area_type == "MUNICIPAL",
+    area      == municipal_name,
+    service   == "TAXI",
+    indicator %in% c("ALLOCATED_LICENSEE", "MAX_FLEET"),
+    date <= date_to
+  ) %>% 
+  group_by(indicator) %>% 
+  filter(date == max(date)) %>%            # آخرین ماه موجود
+  summarise(total = sum(value), .groups = "drop") %>% 
+  pivot_wider(names_from = indicator, values_from = total)
+
+municipal_licensees <- format(
+  municipal$ALLOCATED_LICENSEE,
+  big.mark = ",", scientific = FALSE
+)
+
+municipal_fleet <- format(
+  municipal$MAX_FLEET,
+  big.mark = ",", scientific = FALSE
+)
+```
+
+
+```{r}
 library(dplyr)
 library(tidyr)
 
@@ -101,8 +131,8 @@ region_fleet <- format(regional_tns$MAX_FLEET,
 ```
 
 -   At the municipal level,
-    -   Number of taxi licensees operating: 8
-    -   Combined Board-approved maximum fleet size: 1,226
+    -   Number of taxi licensees operating: `r municipal_licensees`
+    -   Combined Board-approved maximum fleet size: `r municipal_fleet`
 -   At the Regional District level,
     -   Number of taxi licensees operating: `r regional_rd_licensees`
     -   Combined Board-approved maximum fleet size: `r regional_rd_fleet`

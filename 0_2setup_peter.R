@@ -483,7 +483,7 @@ make_indicator_chart_lines <- function(
     geom_line(linewidth = 1) +
     geom_point(size = 1.8, stroke = 0.2) +
     scale_color_manual(values = colors, name = "Service Type") +
-    scale_y_continuous(labels = label_number(accuracy = 0.1), limits = c(0, NA)) +
+    scale_y_continuous(labels = label_number(accuracy = 0.1, trim = TRUE), limits = c(0, NA)) +
     scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
     labs(
       title    = title,
