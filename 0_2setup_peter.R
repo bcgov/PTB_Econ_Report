@@ -32,7 +32,7 @@ suppressPackageStartupMessages({
 # -----------------------------
 
 date_from   <- make_date(2023, 1, 1)     # report window start (inclusive)
-date_to     <- make_date(2025, 11, 1)     # report window end   (inclusive)
+date_to     <- make_date(2025, 12, 1)     # report window end   (inclusive)
 region_name <- "Metro Vancouver"          # display name used across report
 
 
@@ -50,7 +50,7 @@ prev_year  <- year(date_to) - 1
 # ============================================================
 
 # NOTE: keep raw as-is; do minimal typing so downstream functions are predictable.
-raw <- fread("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\output\\indicators_251219_122145.csv")
+raw <- fread("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\output\\Indicators\\indicators_260123_150300.csv")
 
 #raw <- read_excel("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\Archive\\old_process\\3_indicators.xlsx")
 
