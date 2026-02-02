@@ -12,27 +12,19 @@
 
 It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
 
-The Board’s public need policy in the Policy Manual lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume: - There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service. - When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume. - The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
+The Board’s public need policy in the Policy Manual lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume: 
+-   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service. 
+    -   When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume. 
+    -   The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
 
-There are people who would use the proposed service:
-
--   If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
--   The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
+-   There are people who would use the proposed service:
+    -   If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
+    -   The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
 
 #### `r region_name` Regional District Trip Volume Findings
 
 
-```{r}
-#| echo: false
-tbl_counter <- 0
-
-tbl_caption <- function(text) {
-  tbl_counter <<- tbl_counter + 1
-  sprintf("Table %d: %s", tbl_counter, text)
-}
-```
-
-`r tbl_caption(paste(region_name, "Regional District Trip Volume(thousands of dollars)"))`
+`r tbl_caption(paste(region_name, "Regional District Trip Volume(thousands of trips)"))`
 
 
 ```{r}
@@ -50,20 +42,12 @@ make_indicator_table_compact(
   date_from = date_from,
   date_to   = date_to,
   digits    = 0,
-  currency  = TRUE
+  currency  = FALSE
 )
 
 ```
 
-```{r}
-#| echo: false
-fig_counter <- 0
 
-fig_caption <- function(text) {
-  fig_counter <<- fig_counter + 1
-  sprintf("Figure %d: %s", fig_counter, text)
-}
-```
 
 
 `r fig_caption(paste(region_name, "Regional District Trip Volume"))`

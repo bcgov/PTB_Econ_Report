@@ -1,22 +1,2459 @@
 ---
 title: "Economics Report"
+toc: true
+number_sections: true
 format:
-  docx:
-    reference-doc: "Economics Report (Region 2).docx"
+  docx
 execute:
   echo: false
   warning: false
   message: false
 ---
 ```{r}
-source("setup.R")
+
+# ============================================================
+
+# Setup
+
+# ============================================================
+
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+suppressPackageStartupMessages({
+  library(readxl)
+  library(dplyr)
+  library(tidyr)
+  library(lubridate)
+  library(stringr)
+  library(ggplot2)
+  library(scales)
+  library(flextable)
+  library(officer)
+  library(stringr) 
+  library(knitr)
+  library(kableExtra)
+  library(data.table)
+  library(rlang)
+  
+})
+
+# -----------------------------
+
+# Parameters (edit as needed)
+
+# -----------------------------
+
+date_from <- lubridate::ym("2023-01") # report window start (inclusive)
+date_to   <- lubridate::ym("2025-11") # report window end   (inclusive)
+  
+region_name <- "Metro Vancouver"          # display name used across report
+
+tns_zone <- "ZONE 1"                      #for fleet
+
+municipal_name <- "City of Vancouver"     #for fleet
+
+
+# Indicators:
+raw <- fread("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\output\\Indicators\\indicators_260130_112828.csv")
+
+#Trend analysis
+trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\Output\\Analysis\\trend_analysis_20251211.xlsx"
+
+# ============================================================
+
+# Data Load + Minimal Shaping
+
+# ============================================================
+
+# Derived labels for narrative text
+end_label  <- format(date_to, "%B %Y")
+prev_label <- format(date_to %m-% years(1), "%B %Y")
+prev_year  <- year(date_to) - 1
+
+raw_norm <- raw %>%
+  transmute(
+    date   = make_date(as.integer(YEAR), as.integer(MONTH), 1),
+    area   = PICKUP_AREA,
+    area_type = REPORTING_LEVEL,
+    indicator = INDICATOR_NAME,
+    service   = SERVICE_TYPE,
+    value     = suppressWarnings(as.numeric(INDICATOR_VALUE))
+  ) %>%
+  filter(!is.na(date), !is.na(value))
+
+# Restrict to reporting window for “windowed” analyses; we’ll still compute YTD from full data when needed.
+
+windowed <- raw_norm %>%
+  filter(between(date, date_from, date_to))
+
+
+# ============================================================
+
+# Helpers (single source of truth for math/formatting)
+
+# ============================================================
+
+
+# 2) Formatter utilities (consistent across the doc)
+
+fmt_pct <- function(x, digits = 2) {
+  if (is.na(x)) return("n/a")
+  paste0(ifelse(x >= 0, "+", ""), format(round(x, digits), nsmall = digits), "%")
+}
+
+fmt_num <- function(x, digits = 0, currency = FALSE) {
+  if (is.na(x)) return("n/a")
+  base <- format(round(x, digits), big.mark = ",", scientific = FALSE, trim = TRUE)
+  if (currency) paste0("$", base) else base
+}
+
+# 3) Core filter (use everywhere to keep logic consistent)
+
+filter_indicator <- function(data,
+                             indicator,
+                             region,
+                             services  = c("TAXI","TNS"),
+                             area_type = "REGIONAL",
+                             date_from = NULL,
+                             date_to   = NULL) {
+  region_vec <- region
+  
+  out <- data %>%
+    filter(
+      area_type == !!area_type,
+      area %in% region_vec,
+      indicator == !!indicator,
+      service %in% services
+    )
+  
+  if (!is.null(date_from)) out <- out %>% filter(date >= date_from)
+  if (!is.null(date_to))   out <- out %>% filter(date <= date_to)
+  
+  out
+}
+
+# 4) Safe last-month extraction (sums across selected services; returns NA if prev/denominator missing)
+
+last_month_value <- function(data, indicator, region, services = c("TAXI","TNS"),
+                             area_type = "REGIONAL",
+                             date_from = NULL, date_to = NULL) {
+
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to)
+  if (nrow(df) == 0) return(NA_real_)
+
+  last_date <- date_to
+  if (!any(df$date == last_date)) return(NA_real_)
+
+  df %>%
+    filter(date == last_date) %>%
+    summarise(v = sum(value, na.rm = TRUE)) %>%
+    pull(v)
+}
+
+last_month_yoy <- function(data, indicator, region,
+                           services = c("TAXI","TNS"),
+                           area_type = "REGIONAL",
+                           date_from = NULL, date_to = NULL) {
+
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to)
+  if (nrow(df) == 0) return(NA_real_)
+  if (is.null(date_to)) stop("date_to cannot be NULL in last_month_yoy().")
+
+  last_date <- date_to
+
+  # enforce exact month
+  if (!any(df$date == last_date)) return(NA_real_)
+
+  prev_date <- last_date %m-% years(1)
+
+  cur <- df %>%
+    filter(date == last_date) %>%
+    summarise(v = sum(value, na.rm = TRUE), .groups = "drop") %>%
+    pull(v)
+
+  prev <- df %>%
+    filter(date == prev_date) %>%
+    summarise(v = sum(value, na.rm = TRUE), .groups = "drop") %>%
+    pull(v)
+
+  if (length(prev) == 0 || is.na(prev) || prev == 0) return(NA_real_)
+
+  (cur / prev - 1) * 100
+}
+
+
+# 5) YTD YoY through a specific end month (uses *full* data so we can sum Jan..end_month of both years)
+
+ytd_yoy <- function(data, indicator, region, end_date,
+                    services = c("TAXI","TNS"), area_type = "REGIONAL") {
+  df <- filter_indicator(data, indicator, region, services, area_type) # no windowing here
+  if (nrow(df) == 0) return(NA_real_)
+  
+  y_end <- year(end_date); m_end <- month(end_date)
+  
+  cur  <- df %>% filter(year(date) == y_end,     month(date) <= m_end) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  prev <- df %>% filter(year(date) == y_end - 1, month(date) <= m_end) %>% summarise(v = sum(value, na.rm = TRUE)) %>% pull(v)
+  
+  if (is.na(prev) || prev == 0) return(NA_real_)
+  (cur/prev - 1) * 100
+}
+
+# 6) Compact monthly table (Taxi/TNS) with service headers; accepts window explicitly
+#    Override: Year column plain (no comma formatting), no table title row
+
+make_indicator_table_compact <- function(
+    data, indicator, region, services = c("TAXI","TNS"), area_type = "REGIONAL",
+    date_from = NULL, date_to = NULL, digits = 0, zero_to_blank = FALSE,
+    currency = NULL, font_size = 8
+) {
+  # auto-detect currency style if not set
+  if (is.null(currency)) {
+    currency <- stringr::str_detect(
+      indicator,
+      stringr::regex("REVENUE|FARE", ignore_case = TRUE)
+    )
+  }
+  
+  df <- filter_indicator(
+    data      = data,
+    indicator = indicator,
+    region    = region,
+    services  = services,
+    area_type = area_type,
+    date_from = date_from,
+    date_to   = date_to
+  ) %>%
+    dplyr::transmute(
+      service,
+      y = lubridate::year(date),
+      m = lubridate::month(date),
+      value = round(value, digits)
+    )
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  dfc <- df %>%
+    dplyr::group_by(service, y) %>%
+    tidyr::complete(m = 1:12, fill = list(value = NA_real_)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(m_lab = factor(month.abb[m], levels = month.abb))
+  
+  month_cols <- month.abb
+  
+  wide <- dfc %>%
+    dplyr::select(service, y, m_lab, value) %>%
+    tidyr::pivot_wider(names_from = m_lab, values_from = value) %>%
+    dplyr::arrange(match(service, services), y)
+  
+  
+  # optional blank zeros to reduce noise
+  if (isTRUE(zero_to_blank)) {
+    wide <- wide %>%
+      dplyr::mutate(dplyr::across(
+        dplyr::all_of(month_cols),
+        ~ ifelse(.x == 0, NA_real_, .x)
+      ))
+  }
+  
+  # insert service header rows
+  add_headers <- function(w, services) {
+    out <- list()
+    for (srv in services) {
+      block <- w %>% dplyr::filter(service == srv)
+      if (nrow(block) == 0) next
+      header <- tibble::tibble(service = srv, y = NA_integer_)
+      for (m in month_cols) header[[m]] <- NA_real_
+      out[[srv]] <- dplyr::bind_rows(header, block)
+    }
+    dplyr::bind_rows(out)
+  }
+  
+  wide2 <- add_headers(wide, services)
+  
+  # Year as plain string (no big.mark commas);
+  # header rows use service label in Year column
+  out <- wide2 %>%
+    dplyr::mutate(
+      Year = ifelse(is.na(y), service, as.character(y))
+    ) %>%
+    dplyr::select(Year, dplyr::all_of(month_cols))
+  
+  ft <- flextable::flextable(out)
+  
+  # style service header rows
+  hdr_idx <- which(is.na(wide2$y))
+  if (length(hdr_idx)) {
+    for (i in hdr_idx) {
+      ft <- flextable::merge_at(ft, i = i, j = 1:ncol(out))
+    }
+    ft <- flextable::bold(ft, i = hdr_idx, bold = TRUE)
+    ft <- flextable::align(ft, i = hdr_idx, align = "left")
+    ft <- flextable::bg(ft, i = hdr_idx, bg = "#ECECEC")
+  }
+  
+  # zebra for year rows
+  yr_idx <- setdiff(seq_len(nrow(out)), hdr_idx)
+  ft <- flextable::bg(ft, i = yr_idx, bg = "#ffffff")
+  ft <- flextable::bg(ft, i = yr_idx[c(TRUE, FALSE)], bg = "#f7f7f7")
+  ft <- flextable::bold(ft, i = yr_idx, j = 1)
+  
+  # number/currency format
+  if (isTRUE(currency)) {
+    ft <- flextable::colformat_num(
+      ft, j = month_cols, digits = digits,
+      big.mark = ",", prefix = "$", na_str = ""
+    )
+  } else {
+    ft <- flextable::colformat_num(
+      ft, j = month_cols, digits = digits,
+      big.mark = ",", na_str = ""
+    )
+  }
+  
+  # layout
+  ft <- flextable::fontsize(ft, part = "all", size = font_size)
+  ft <- flextable::autofit(ft)
+  ft <- flextable::set_table_properties(ft, width = 0.1, layout = "autofit")
+  ft <- flextable::width(ft, width = 0.1)
+  
+  # no title header row added
+  ft
+}
+
+
+
+# 7) Stacked column chart (Taxi over TNS or vice versa)
+
+make_indicator_chart_stacked <- function(
+    data, indicator, region, services = c("TNS","TAXI"), area_type = "REGIONAL",
+    date_from = NULL, date_to = NULL,
+    title = "Trip Volume (trips)",
+    caption = NULL,
+    colors = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
+    base_size = 10
+) {
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to) %>%
+    mutate(service = factor(service, levels = services))
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  ggplot(df, aes(x = date, y = value, fill = service)) +
+    geom_col(width = 26, position = "stack") +
+    scale_fill_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = label_number(accuracy = 0.1, scale_cut = cut_short_scale()), expand = c(0, 0.02)) +
+    scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
+    labs(title = title, subtitle = paste(region, "Regional District"), x = NULL, y = NULL, caption = caption) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+# 7.1) Stacked column chart (Taxi over TNS or vice versa) with lable
+make_indicator_chart_stacked_2 <- function(
+    data, indicator, region, services = c("TNS","TAXI"), area_type = "REGIONAL",
+    date_from = NULL, date_to = NULL,
+    title = "Trip Volume (trips)",
+    caption = NULL,
+    colors = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
+    base_size = 10
+) {
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to) %>%
+    mutate(service = factor(service, levels = services))
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  ggplot(df, aes(x = date, y = value, fill = service)) +
+    geom_col(width = 26, position = "stack") +
+    
+    # ADD LABELS
+    geom_text(
+      aes(label = scales::number(value, accuracy = 0.1)),
+      position = position_stack(vjust = 0.5),
+      size = 3,
+      color = "white"
+    ) +
+    
+    scale_fill_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = label_number(accuracy = 0.1, scale_cut = cut_short_scale()), expand = c(0, 0.02)) +
+    scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
+    labs(title = title, subtitle = paste(region, "Regional District"), x = NULL, y = NULL, caption = caption) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+# 11) MoM
+last_month_mom <- function(data, indicator, region,
+                           services = c("TAXI","TNS"),
+                           area_type = "REGIONAL",
+                           date_from = NULL, date_to = NULL) {
+
+  df <- filter_indicator(data, indicator, region, services, area_type, date_from, date_to)
+  if (nrow(df) == 0) return(NA_real_)
+  if (is.null(date_to)) stop("date_to cannot be NULL in last_month_mom().")
+
+  last_date <- date_to
+
+  # enforce exact month
+  if (!any(df$date == last_date)) return(NA_real_)
+
+  prev_date <- last_date %m-% months(1)
+
+  cur <- df %>%
+    filter(date == last_date) %>%
+    summarise(v = sum(value, na.rm = TRUE), .groups = "drop") %>%
+    pull(v)
+
+  prev <- df %>%
+    filter(date == prev_date) %>%
+    summarise(v = sum(value, na.rm = TRUE), .groups = "drop") %>%
+    pull(v)
+
+  if (length(prev) == 0 || is.na(prev) || prev == 0) return(NA_real_)
+
+  (cur / prev - 1) * 100
+}
+
+
+
+# 8) One-stop metrics helper for inline use
+
+compute_metrics <- function(data, indicator, region, focus_service = "TNS",
+                            area_type = "REGIONAL", date_from = NULL, date_to = NULL) {
+  list(
+    last_value = last_month_value(
+      data, indicator, region,
+      services  = focus_service,
+      area_type = area_type,
+      date_from = date_from,
+      date_to   = date_to
+    ),
+    yoy_last   = last_month_yoy(
+      data, indicator, region,
+      services  = focus_service,
+      area_type = area_type,
+      date_from = date_from,
+      date_to   = date_to
+    ),
+    ytd_yoy    = ytd_yoy(
+      data, indicator, region,
+      end_date  = date_to,
+      services  = focus_service,
+      area_type = area_type
+    ),
+    mom_last   = last_month_mom(            # NEW
+      data, indicator, region,
+      services  = focus_service,
+      area_type = area_type,
+      date_from = date_from,
+      date_to   = date_to
+    )
+  )
+}
+
+
+# 9) Dual-line chart (Taxi vs TNS) — e.g., Wait Time (minutes)
+
+make_indicator_chart_lines <- function(
+    data,
+    indicator  = "WAIT_TIME",
+    region,
+    services   = c("TAXI", "TNS"),
+    area_type  = "REGIONAL",
+    date_from  = NULL,
+    date_to    = NULL,
+    title      = NULL,
+    caption    = NULL,
+    colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
+    base_size  = 10
+) {
+  # get + tidy
+  df <- filter_indicator(
+    data        = data,
+    indicator   = indicator,
+    region      = region,
+    services    = services,
+    area_type   = area_type,
+    date_from   = date_from,
+    date_to     = date_to
+  ) %>%
+    mutate(service = factor(service, levels = services)) %>%
+    group_by(date, service) %>%
+    summarise(value = sum(value, na.rm = TRUE), .groups = "drop")
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  # auto title/y label
+  if (is.null(title)) {
+    pretty_ind <- gsub("_", " ", indicator)
+    title <- paste0(stringr::str_to_title(pretty_ind))
+  }
+  y_lab <- if (indicator == "WAIT_TIME") "minutes" else NULL
+  
+  ggplot(df, aes(x = date, y = value, color = service)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 1.8, stroke = 0.2) +
+    scale_color_manual(values = colors, name = "Service Type") +
+    scale_y_continuous(labels = label_number(accuracy = 0.1, trim = TRUE), limits = c(0, NA)) +
+    scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
+    labs(
+      title    = title,
+      subtitle = paste(region, "Regional District"),
+      x        = NULL,
+      y        = y_lab,
+      caption  = caption
+    ) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.2, "lines"),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+# 10) line chart multiple indicators
+
+make_multi_indicator_chart_lines <- function(
+    data,
+    indicators,                      # e.g. c("ACTIVE_WAV", "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP", "ALLOCATED_WAV")
+    region,
+    services   = "TAXI",             # usually one service for this style of chart
+    area_type  = "REGIONAL",
+    date_from  = NULL,
+    date_to    = NULL,
+    title      = NULL,
+    caption    = NULL,
+    colors     = NULL,               # named vector, one color per indicator (optional)
+    labels     = NULL, 
+    base_size  = 10
+) {
+  # build tidy df for all indicators
+  df <- purrr::map_dfr(
+    indicators,
+    ~ filter_indicator(
+      data       = data,
+      indicator  = .x,
+      region     = region,
+      services   = services,
+      area_type  = area_type,
+      date_from  = date_from,
+      date_to    = date_to
+    ) %>%
+      mutate(indicator = .x)
+  ) %>%
+    mutate(
+      indicator = factor(indicator, levels = indicators),
+      service   = factor(service,  levels = services)
+    ) %>%
+    group_by(date, indicator) %>%              # collapse over service if you passed one
+    summarise(value = sum(value, na.rm = TRUE), .groups = "drop")
+  
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+  
+  # auto title
+  if (is.null(title)) {
+    pretty_inds <- gsub("_", " ", indicators)
+    title <- paste0("Indicators: ", paste(stringr::str_to_title(pretty_inds), collapse = ", "))
+  }
+  
+  # colour palette: one colour per indicator if not supplied
+  if (is.null(colors)) {
+    pal <- scales::hue_pal()(length(indicators))
+    names(pal) <- indicators
+    colors <- pal
+  } else {
+    if (is.null(names(colors))) names(colors) <- indicators
+    colors <- colors[indicators]
+  }
+  
+  ggplot(df, aes(x = date, y = value, color = indicator)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 1.8, stroke = 0.2) +
+    scale_color_manual(values = colors,labels = labels, name = NULL) +
+    scale_y_continuous(labels = scales::label_number(accuracy = 0.1), limits = c(0, NA)) +
+    scale_x_date(
+      breaks = scales::breaks_width("3 month"),
+      date_labels = "%b\n%y"
+    ) +
+    labs(
+      title    = title,
+      subtitle = paste(region, "Regional District"),
+      x        = NULL,
+      y        = NULL,
+      caption  = caption
+    ) +
+    theme_minimal(base_size = base_size) +
+    theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = base_size, face = "bold"),
+      legend.key.width = unit(1.6, "lines"),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 4)),
+      plot.margin = margin(6, 8, 6, 6)
+    )
+}
+
+
+
+
+
+
+# ============================================================
+
+# Metrics 
+
+# ============================================================
+
+indicators <- c(
+  "ACCESSIBLE_TRIP",
+  "ACTIVE_VEHICLE",
+  "ACTIVE_WAV",
+  "FARE_PER_5KM",
+  "FLEET_UTILIZATION_RATE",
+  "REVENUE_PER_VEHICLE",
+  "TRIP_REVENUE",
+  "TRIP_VOLUME",
+  "VEHICLE_OCCUPANCY_RATE",
+  "VEHICLE_PER_1000_PERSONS",
+  "WAIT_TIME",
+  "ACTIVE_WAV_PER_1000_PERSONS",
+  "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+  "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS",
+  "ALLOCATED_LICENSEE",
+  "ALLOCATED_WAV",
+  "DRIVER_EARNING",
+  "MAX_FLEET"
+)
+
+ind_units <- list(
+  ACCESSIBLE_TRIP            = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  ACTIVE_VEHICLE             = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  ACTIVE_WAV                 = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  FARE_PER_5KM               = list(unit="currency",digits=2, currency=TRUE,  scale=1),
+  FLEET_UTILIZATION_RATE     = list(unit="pct",     digits=1, currency=FALSE, scale=100), 
+  REVENUE_PER_VEHICLE        = list(unit="currency",digits=0, currency=TRUE,  scale=1),
+  TRIP_REVENUE               = list(unit="currency",digits=0, currency=TRUE,  scale=1),
+  TRIP_VOLUME                = list(unit="count",   digits=0, currency=FALSE, scale=1),
+  VEHICLE_OCCUPANCY_RATE     = list(unit="pct",     digits=1, currency=FALSE, scale=100),
+  VEHICLE_PER_1000_PERSONS   = list(unit="count",   digits=2, currency=FALSE, scale=1),
+  WAIT_TIME                  = list(unit="minutes", digits=1, currency=FALSE, scale=1),
+  # New Indicators ---------------------------------------------------------
+  ACTIVE_WAV_PER_1000_PERSONS           = list(unit="count",    digits=2, currency=FALSE, scale=1),
+  ACTIVE_WAV_WITH_ACCESSIBLE_TRIP       = list(unit="count",    digits=0, currency=FALSE, scale=1),
+  ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS = list(unit="count", digits=2, currency=FALSE, scale=1),
+  
+  ALLOCATED_LICENSEE        = list(unit="count",    digits=0, currency=FALSE, scale=1),
+  ALLOCATED_WAV             = list(unit="count",    digits=0, currency=FALSE, scale=1),
+  
+  DRIVER_EARNING            = list(unit="currency", digits=0, currency=TRUE,  scale=1),
+  
+  MAX_FLEET                 = list(unit="count",    digits=0, currency=FALSE, scale=1)
+)
+
+fmt_value <- function(x, meta){
+  if (is.na(x)) return("n/a")
+  x <- x * (meta$scale %||% 1)
+  unit <- meta$unit
+  d    <- meta$digits %||% 0
+  if (isTRUE(meta$currency) || unit == "currency")      return(fmt_num(x, d, currency = TRUE))
+  if (unit == "pct")                                    return(paste0(format(round(x, d), nsmall=d), "%"))
+  if (unit == "minutes")                                return(paste0(fmt_num(x, d), " min"))
+  fmt_num(x, d)
+}
+
+suppressPackageStartupMessages({ library(purrr); library(dplyr) })
+
+metrics <- setNames(vector("list", length(indicators)), indicators)
+
+for (ind in indicators) {
+  meta <- ind_units[[ind]]
+  for (srv in c("TAXI","TNS")) {
+    m <- compute_metrics(
+      data          = raw_norm,
+      indicator     = ind,
+      region        = region_name,
+      focus_service = srv,
+      area_type     = "REGIONAL",
+      date_from     = date_from,
+      date_to       = date_to
+    )
+    
+    metrics[[ind]][[srv]] <- list(
+      last_value      = m$last_value,
+      yoy_last        = m$yoy_last,
+      ytd_yoy         = m$ytd_yoy,
+      mom_last        = m$mom_last,           # NEW: raw MoM
+      
+      last_value_fmt  = fmt_value(m$last_value, meta),
+      yoy_fmt         = fmt_pct(m$yoy_last, 2),
+      ytd_yoy_fmt     = fmt_pct(m$ytd_yoy, 2),
+      mom_fmt         = fmt_pct(m$mom_last, 2) # NEW: formatted MoM
+    )
+    
+  }
+}
+
+
+metric <- function(
+    indicator,
+    service,
+    field = c(
+      "last_value_fmt",
+      "yoy_fmt",
+      "ytd_yoy_fmt",
+      "mom_fmt",    # NEW: formatted MoM
+      "last_value",
+      "yoy_last",
+      "ytd_yoy",
+      "mom_last"    # NEW: raw MoM
+    )
+) {
+  field <- match.arg(field)
+  metrics[[indicator]][[service]][[field]]
+}
+
+
+# ------------------------------------------------------------
+# the following relevant information can be observed about the existing licensees in the area:
+# ------------------------------------------------------------
+## ---------- Municipal level (LEVEL_NAME == "MUNICIPAL") ----------
+
+municipal <- raw_norm %>%
+  filter(
+    area_type == "MUNICIPAL",
+    area      == municipal_name,
+    service   == "TAXI",
+    indicator %in% c("ALLOCATED_LICENSEE", "MAX_FLEET"),
+    date      == date_to
+  ) %>%
+  group_by(indicator) %>%
+  summarise(total = sum(value, na.rm = TRUE), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = indicator, values_from = total)
+
+municipal_licensees <- ifelse(
+  nrow(municipal) == 0 || is.na(municipal$ALLOCATED_LICENSEE),
+  NA_character_,
+  format(municipal$ALLOCATED_LICENSEE, big.mark = ",", scientific = FALSE)
+)
+
+municipal_fleet <- ifelse(
+  nrow(municipal) == 0 || is.na(municipal$MAX_FLEET),
+  NA_character_,
+  format(municipal$MAX_FLEET, big.mark = ",", scientific = FALSE)
+)
+
+
+## ---------- Regional District level (LEVEL_NAME == "REGIONAL") ----------
+
+regional_rd <- raw_norm %>%
+  filter(
+    area_type == "REGIONAL",
+    area      == region_name,
+    service   == "TAXI",
+    indicator %in% c("ALLOCATED_LICENSEE", "MAX_FLEET"),
+    date      == date_to
+  ) %>%
+  group_by(indicator) %>%
+  summarise(total = sum(value, na.rm = TRUE), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = indicator, values_from = total)
+
+regional_rd_licensees <- ifelse(
+  nrow(regional_rd) == 0 || is.na(regional_rd$ALLOCATED_LICENSEE),
+  NA_character_,
+  format(regional_rd$ALLOCATED_LICENSEE, big.mark = ",", scientific = FALSE)
+)
+
+regional_rd_fleet <- ifelse(
+  nrow(regional_rd) == 0 || is.na(regional_rd$MAX_FLEET),
+  NA_character_,
+  format(regional_rd$MAX_FLEET, big.mark = ",", scientific = FALSE)
+)
+
+
+
+## ---------- Region level (TNS zones, LEVEL_NAME == "TNS_ZONE") ----------
+
+regional_tns <- raw_norm %>%
+  filter(
+    area_type == "TNS_ZONE",
+    area      == tns_zone,
+    service   == "TAXI",
+    indicator %in% c("ALLOCATED_LICENSEE", "MAX_FLEET"),
+    date      == date_to
+  ) %>%
+  group_by(indicator) %>%
+  summarise(total = sum(value, na.rm = TRUE), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = indicator, values_from = total)
+
+region_licensees <- ifelse(
+  nrow(regional_tns) == 0 || is.na(regional_tns$ALLOCATED_LICENSEE),
+  NA_character_,
+  format(regional_tns$ALLOCATED_LICENSEE, big.mark = ",", scientific = FALSE)
+)
+
+region_fleet <- ifelse(
+  nrow(regional_tns) == 0 || is.na(regional_tns$MAX_FLEET),
+  NA_character_,
+  format(regional_tns$MAX_FLEET, big.mark = ",", scientific = FALSE)
+)
+
+# ------------------------------------------------------------
+# Figure counter and Table counter:
+# ------------------------------------------------------------
+
+#| echo: false
+tbl_counter <- 0
+
+tbl_caption <- function(text) {
+  tbl_counter <<- tbl_counter + 1
+  sprintf("Table %d: %s", tbl_counter, text)
+}
+
+#| echo: false
+fig_counter <- 0
+
+fig_caption <- function(text) {
+  fig_counter <<- fig_counter + 1
+  sprintf("Figure %d: %s", fig_counter, text)
+}
+
+
+# ------------------------------------------------------------
+# make_wait_time_percentile_chart:
+# ------------------------------------------------------------
+make_wait_time_percentile_chart <- function(
+    data,
+    region,
+    services  = c("TAXI", "TNS"),
+    area_type = "REGIONAL",
+    date_from = NULL,
+    date_to   = NULL,
+    title     = "Cumulative Distribution of Wait Times (minutes)",
+    base_size = 10,
+    colors    = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+) {
+
+  empty_plot <- function(msg) {
+    ggplot2::ggplot() +
+      ggplot2::annotate("text", x = 0, y = 0, label = msg, size = 4) +
+      ggplot2::theme_void(base_size = base_size) +
+      ggplot2::labs(title = title, subtitle = paste(region, "Regional District"))
+  }
+
+  if (is.null(date_to)) {
+    return(empty_plot("Figure not produced: date_to is NULL (end month not provided)."))
+  }
+
+  df <- data %>%
+    dplyr::filter(
+      area_type == !!area_type,
+      area == !!region,
+      service %in% services,
+      stringr::str_detect(indicator, "^WAIT_TIME_\\d+_PERCENTILE$")
+    )
+
+  if (!is.null(date_from)) df <- df %>% dplyr::filter(date >= date_from)
+  df <- df %>% dplyr::filter(date <= date_to)
+
+  if (nrow(df) == 0) {
+    return(empty_plot(paste0(
+      "Figure not produced: no percentile data found in the selected window (",
+      format(date_from, "%b %Y"), " to ", format(date_to, "%b %Y"), ")."
+    )))
+  }
+
+  # MUST match the report end month exactly
+  if (!any(df$date == date_to)) {
+    return(empty_plot(paste0(
+      "Figure not produced: missing percentile data for the report end month (",
+      format(date_to, "%b %Y"), ")."
+    )))
+  }
+
+  df_last <- df %>%
+    dplyr::filter(date == date_to) %>%
+    dplyr::mutate(
+      percentile = as.numeric(stringr::str_extract(indicator, "\\d+")),
+      service    = factor(service, levels = services)
+    ) %>%
+    dplyr::group_by(service, percentile) %>%
+    dplyr::summarise(value = mean(value, na.rm = TRUE), .groups = "drop")
+
+  if (nrow(df_last) == 0) {
+    return(empty_plot(paste0(
+      "Figure not produced: data for ", format(date_to, "%b %Y"),
+      " exists but is empty after aggregation."
+    )))
+  }
+
+  ggplot2::ggplot(df_last, ggplot2::aes(x = percentile, y = value, color = service)) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_color_manual(values = colors, name = "Service Type") +
+    ggplot2::scale_x_continuous(breaks = seq(0, 100, 10)) +
+    ggplot2::scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+    ggplot2::labs(
+      title    = title,
+      subtitle = paste(region, "Regional District"),
+      x        = "Percentile",
+      y        = "Wait Time (minutes)",
+      caption  = paste0("Report end month: ", format(date_to, "%b %Y"))
+    ) +
+    ggplot2::theme_minimal(base_size = base_size) +
+    ggplot2::theme(
+      plot.title.position = "plot",
+      legend.position = "top",
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank()
+    )
+}
+
+
+# ------------------------------------------------------------
+# make_company_fare_chart:
+# ------------------------------------------------------------
+
+make_company_fare_chart <- function(
+    data,
+    area      = region_name,
+    year      = 2023,
+    month     = 1,
+    service   = "TAXI",
+    indicator = "FARE_PER_5KM",
+    title     = "Taxi Fare for a 5-Kilometre Trip ($)",
+    base_size = 10
+) {
+  df <- data %>%
+    dplyr::filter(
+      REPORTING_LEVEL            == "COMPANY",
+      PICKUP_AREA           == area,
+      SERVICE_TYPE    == service,
+      INDICATOR_NAME        == indicator,
+      YEAR            == year,
+      MONTH           == month
+    ) %>%
+    dplyr::mutate(
+      company = REPORTING_NAME,
+      fare    = as.numeric(INDICATOR_VALUE)
+    ) %>%
+    dplyr::arrange(dplyr::desc(fare)) %>%
+    dplyr::mutate(
+      company = factor(company, levels = rev(company))
+    )
+
+  if (nrow(df) == 0) stop("No rows matched your filters.")
+
+  ggplot(df, aes(x = company, y = fare)) +
+  geom_col(width = 0.7, fill = "#1f77b4") +
+  geom_text(
+    aes(label = scales::dollar(fare, accuracy = 1)),
+    hjust = -0.1,                       # push label a bit right of bar end
+    size  = 3
+  ) +
+  coord_flip() +
+  expand_limits(y = max(df$fare) * 1.05) +  # extra room for labels
+  scale_y_continuous(
+    labels = scales::dollar_format(accuracy = 0.01),
+    expand = c(0, 0.02)
+  ) +
+  labs(
+    title    = title,
+    subtitle = "Metro Vancouver Regional District",
+    x        = NULL,
+    y        = "Fare for a 5-Kilometre Trip",
+    caption  = "Service Type: TAXI"
+  ) +
+  theme_minimal(base_size = base_size) +
+  theme(
+    plot.title.position = "plot",
+    axis.title.y        = element_blank(),
+    axis.text.y         = element_text(hjust = 1),
+    panel.grid.major.y  = element_blank(),
+    panel.grid.minor    = element_blank(),
+    plot.margin         = margin(6, 8, 6, 6)
+  )
+}
+
 ```
-{{< include 0_intro.qmd >}}
-{{< include 1_trip_volume.qmd >}}
-{{< include 2_trip_revenue_thousands.qmd >}}
+
+
+```{r}
+trend_raw <- read_excel(
+  trend_path,
+  col_types = c(
+    "text",    # LEVEL_NAME
+    "text",    # PICKUP_AREA
+    "text",    # TRIP_SERVICE_TYPE_CODE
+    "text",    # INDICATOR_TYPE
+    "date",    # period
+    "numeric", # YEAR_POINT
+    "numeric", # MONTH_POINT
+    "numeric", # INDICATOR_VALUE
+    "numeric", # INDICATOR_OBSERVATION
+    "text",    # MODEL_TYPE
+    "text",    # TREND_DIRECTION
+    "numeric", # ESTIMATED_ANNUAL_CHANGE_PCT
+    "numeric", # SLOPE_EST
+    "numeric", # SLOPE_P
+    "text",    # SHIFT_DIRECTION
+    "numeric", # ESTIMATED_SHIFT_PCT
+    "numeric", # SHIFT_EST
+    "numeric"  # SHIFT_P
+  )
+) |>
+  mutate(
+    date = as.Date(period)
+  )
+
+
+# ------------------------------------------------------------
+# Core lookup: returns both flags for the report month
+# ------------------------------------------------------------
+model_override <- c(
+  "FLEET_UTILIZATION" = "LOGIT_ROLL_BINOMIAL",
+  "VEHICLE_OCCUPANCY_RATE" = "LOGIT_ROLL_BINOMIAL"
+)
+
+trend_lookup_flags <- function(indicator,
+                               service    = "TAXI",
+                               area_type  = "REGIONAL",
+                               model_type = "RECENT_1M_SHIFT_LOG",
+                               region     = region_name,
+                               end_date   = date_to) {
+  
+  if (indicator %in% names(model_override)) {
+    model_type <- unname(model_override[[indicator]])
+  }
+  
+  yr <- year(end_date)
+  mo <- month(end_date)
+  
+  df <- trend_raw |>
+    filter(
+      LEVEL_NAME             == area_type,
+      PICKUP_AREA            == region,
+      TRIP_SERVICE_TYPE_CODE == service,
+      INDICATOR_TYPE         == indicator,
+      YEAR_POINT             == yr,
+      MONTH_POINT            == mo,
+      MODEL_TYPE             == model_type
+    )
+  
+  if (nrow(df) == 0) {
+    return(list(
+      trend_direction = NA_character_,
+      shift_direction = NA_character_
+    ))
+  }
+  
+  row <- dplyr::slice_tail(df, n = 1)
+  
+  list(
+    trend_direction = row$TREND_DIRECTION[[1]],
+    shift_direction = row$SHIFT_DIRECTION[[1]]
+  )
+}
+
+# ------------------------------------------------------------
+# Single accessor in the same style as metric()
+# ------------------------------------------------------------
+trend_metric <- function(indicator,
+                         service   = "TAXI",
+                         type      = c("trend_direction", "shift_direction"),
+                         area_type = "REGIONAL") {
+  type  <- match.arg(type)
+  flags <- trend_lookup_flags(
+    indicator = indicator,
+    service   = service,
+    area_type = area_type
+  )
+  flags[[type]]
+}
+
+# Optional convenience wrappers (you can keep or delete)
+trend_direction_metric <- function(indicator,
+                                   service   = "TAXI",
+                                   area_type = "REGIONAL") {
+  trend_metric(indicator, service, "trend_direction", area_type)
+}
+
+shift_direction_metric <- function(indicator,
+                                   service   = "TAXI",
+                                   area_type = "REGIONAL") {
+  trend_metric(indicator, service, "shift_direction", area_type)
+}
+
+# ------------------------------------------------------------
+# Normalise codes coming out of Excel (fix typos)
+# ------------------------------------------------------------
+normalize_trend_code <- function(x) {
+  x <- toupper(trimws(x))
+  gsub("TRNED", "TREND", x, fixed = TRUE)
+}
+
+normalize_shift_code <- function(x) {
+  x <- toupper(trimws(x))
+  gsub("SHFIT", "SHIFT", x, fixed = TRUE)
+}
+
+# ------------------------------------------------------------
+# Map codes -> sentences
+# ------------------------------------------------------------
+trend_direction_text <- function(code, subject = "this indicator") {
+  if (is.na(code) || code == "") return(NA_character_)
+  code <- normalize_trend_code(code)
+  
+  if (code == "NO_SIGNIFICANT_TREND") {
+    paste0(
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that there is no meaningful change in direction."
+    )
+  } else if (code == "TREND DOWN") {
+    paste0(
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that a downward trajectory is evident."
+    )
+  } else if (code == "TREND UP") {
+    paste0(
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that an upward trajectory is evident."
+    )
+  } else {
+    NA_character_
+  }
+}
+
+shift_direction_text <- function(code) {
+  if (is.na(code) || code == "") return(NA_character_)
+  code <- normalize_shift_code(code)
+  
+  if (code == "NO_SIGNIFICANT_SHIFT") {
+    "Statistical analysis of the short-term trend suggests that there is no active shift in market direction."
+  } else if (code == "SHIFT DOWN") {
+    "Statistical analysis of the short-term trend suggests that there is a downward shift in market direction."
+  } else if (code == "SHIFT UP") {
+    "Statistical analysis of the short-term trend suggests that there is an upward shift in market direction."
+  } else {
+    NA_character_
+  }
+}
+
+# ------------------------------------------------------------
+# Narratives that you call in chunks
+# ------------------------------------------------------------
+trend_narrative <- function(indicator,
+                            service = "TAXI",
+                            subject = "total trip revenue") {
+  code <- trend_metric(indicator, service, "trend_direction")
+  trend_direction_text(code, subject = subject)
+}
+
+shift_narrative <- function(indicator,
+                            service = "TAXI") {
+  code <- trend_metric(indicator, service, "shift_direction")
+  shift_direction_text(code)
+}
+
+```
+
+# Introduction
+
+## Commencing Investigation
+
+This economics report has been produced pursuant to a Board investigation under section 27 of the Act ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)). The Board investigation was commenced on (DATE???????), with respect to application #(???????????????).
+
+The Board’s letter of instruction to Senior Economist included the application details, outlined below, along with a request for economic analysis pertaining to the following relevant indicators:
+
+|                                                  |     |
+|--------------------------------------------------|-----|
+| Trip Volume:                                     | ✓   |
+| Trip Revenue:                                    | ✓   |
+| Number of Wheelchair Accessible Vehicles (WAVs): | ✓   |
+| Number of Active Vehicles per 1,000 Persons:     | ✓   |
+| Fare per Kilometre:                              | ✓   |
+| Wait Time:                                       | ✓   |
+| Concentration indices:                           | ✓   |
+| Revenue per Active Vehicle:                      | ✓   |
+| Taxi Fleet Utilization Rate:                     | ✓   |
+| Taxi Vehicle Occupancy Rate:                     | ✓   |
+| Peak-Hour Taxi Vehicle Occupancy Rate:           | ✓   |
+
+## Application Details
+
+This report was produced for the Board regarding a new application for a taxi licence.
+
+The applicant is **??????????????????????**, which is doing business as MS Taxi. The application summary states the following:
+
+This is just a template:(edit this part)
+There is a need for an additional taxi company servicing West Vancouver, North Vancouver, Vancouver, and YVR. It will positively affect transportation services. As MS Taxi, we will attract new taxi users that will increase the trip volume of all existing and new companies.
+
+Additional details of the application include:
+
+-   Proposed operating area: West Vancouver, North Vancouver, Vancouver, YVR
+-   Proposed fleet size: 30 (25 Conventional; 5 WAV)
+
+## Area of Study
+
+The proposed operating area for this taxi application is mainly within the City of Vancouver, District of West Vancouver, and District of North Vancouver. These municipalities are located in the Greater Vancouver Regional District.
+
+For the purpose of statistical analysis, both taxi and TNS applications are associated with the same Region, as contemplated in the Board’s operating areas policy in the *Policy Manual*, even though taxi businesses do not generally operate at a regional level.
+
+For taxi applicants, the Region is determined based on where the existing or proposed operating area is located. In this case, **this taxi application is located in Region 1**. The Regional District is also determined based on where the existing or proposed operating area is located.
+
+## Existing Licensees
+
+The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (MoTI). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024**, the following relevant information can be observed about the existing licensees in the area:
+
+-   At the municipal level,
+    -   Number of taxi licensees operating: `r municipal_licensees`
+    -   Combined Board-approved maximum fleet size: `r municipal_fleet`
+-   At the Regional District level,
+    -   Number of taxi licensees operating: `r regional_rd_licensees`
+    -   Combined Board-approved maximum fleet size: `r regional_rd_fleet`
+-   At the Region level,
+    -   Number of taxi licensees operating: `r region_licensees`
+    -   Combined Board-approved maximum fleet size: `r region_fleet`
+
+# Background
+
+## Section 28 Criteria
+
+Under section 28(1) of the Act, the Board must consider the following factors when determining applications:
+
+-   Whether the applicant is fit, proper, and capable of providing the service applied for (threshold test); 
+-   Whether there is a public need for the service; and 
+-   Whether the application would promote sound economic conditions in the B.C. passenger transportation business.
+
+This economics report provides the Board with data analysis pertaining only to the “public need” (PN) and “sound economic conditions” (SEC) criteria. It does not speak to the fit, proper, and capable criteria.
+
+## PN and SEC Factors
+
+The Board’s Policy Manual provides information on the factors the Board may consider when determining PN and SEC. This economics report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economics report does not determine whether PN and SEC exist.
+
+Under the public need policy in the Policy Manual, PN is divided into the following factors:
+
+-   Demand
+-   Accessibility
+-   Affordability
+-   Safety
+-   Service Quality
+
+Under the sound economic conditions policy in the Policy Manual, SEC is divided into the following factors:
+
+-   Sustainability
+
+-   Competition
+
+-   Innovation
+
+-   Variety
+
+This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
+
+```{r}
+src <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\templates\\table_image.png"
+
+# local copy inside your project
+dir.create("img-cache", showWarnings = FALSE)
+dst <- file.path("img-cache", "table_image.png")
+
+if (!file.exists(dst)) {
+  ok <- file.copy(src, dst, overwrite = TRUE)
+  if (!ok) stop("Could not copy image from network share")
+}
+
+knitr::include_graphics(dst)
+
+```
+
+Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.
+
+## Report Constraints
+
+Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established data requirements outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
+
+Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economics report at this time.
+
+Due to data limitations, only two regions will be analyzed:
+
+-   Region 1 – Lower Mainland including Whistler; and,
+-   Region 2 – Capital Regional District (CRD).
+
+**Regional Districts within these Regions may be analyzed so long as there is adequate data reliability for those Regional Districts.**
+
+At this time, three other regions will not be included in this economics report due to insufficient data coverage, poor data quality, or unreliable trip data submissions: Region 3 (Vancouver Island excluding CRD); Region 4 (Interior); and, Region 5 (Northern B.C. and other).
+
+## Qualifications
+
+This economics report was authored by the Board’s Senior Economist, **Peter Tseng**, who is ultimately responsible for the analysis contained in this report.
+
+Peter Tseng has over a decade of experience in economic analytics, policy evaluation, and statistical reporting. He holds a Ph.D. in Economics from the University of Victoria and has held senior roles with the BC Public Service, including at the Ministry of Finance and Ministry of Health.
+
+# Factors and Their Indicators
+
+All analyses in this report are based on data from the Trip Database unless otherwise specified. Technical details of each indicator can be found in Appendix 1.
+
+## Demand Factor (PN)
+
+### Trip Volume
+
+**Primary Factor:** Demand
+
+**Description:** Trip volume represents, in real terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+
+**Measurement:** Trip volume is calculated as the number of completed trips reported to the Trip Database in an area over a month.
+
+**Interpretation:** Increases in taxi trip volume or TNS trip volume indicate growth in the quantity demanded in the respective markets. Moreover, a shift in trip volume from the taxi sector to the TNS sector suggests evolving consumer preferences and competition between the two types of partially substitutable services.
+
+It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
+
+The Board’s public need policy in the Policy Manual lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume: 
+-   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service. 
+    -   When the proposed service fulfills previously unmet demand and brings new users into the market, it will result in an overall increase in trip volume. 
+    -   The increase can only be evident after the proposed service is introduced. However, historical trends can provide valuable indications. For example, a steady increase in trip volume over time can signal a growing demand for the taxi or TNS services, suggesting potential usage for the proposed service.
+
+-   There are people who would use the proposed service:
+    -   If the proposed service attracts current users of taxis or TNS, it will result in a redistribution of market share measured by trip volume among existing providers.
+    -   The redistribution can only be evident after the proposed service is introduced. However, historical trends can provide indications. For example, ongoing shifts in market share of sectors can indicate changes in customer preference.
+
+#### `r region_name` Regional District Trip Volume Findings
+
+
+`r tbl_caption(paste(region_name, "Regional District Trip Volume(thousands of trips)"))`
+
+
+```{r}
+raw_norm_k <- raw_norm %>% dplyr::mutate(
+  value = ifelse(
+    indicator == "TRIP_VOLUME",
+    round(value/1000, 0),  # round to nearest thousand dollars
+    value
+  )
+)
+make_indicator_table_compact(
+  data      = raw_norm_k,
+  indicator = "TRIP_VOLUME",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 0,
+  currency  = FALSE
+)
+
+```
 
 
 
 
+`r fig_caption(paste(region_name, "Regional District Trip Volume"))`
+
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_stacked(
+data       = raw_norm,
+indicator  = "TRIP_VOLUME",
+region     = region_name,
+services   = c("TNS","TAXI"),  # first = bottom of stack
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Trip Volume (trips)"
+)
+chart
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_VOLUME","TAXI","last_value_fmt")` taxi trips. On a year-over-year (YoY) basis, the total taxi trip volume was `r metric("TRIP_VOLUME","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_VOLUME","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`.[^1] These results indicate strong momentum in demand for TAXI services in the region. On a month-over-month (MoM) basis, taxi trip volume was`r metric("TRIP_VOLUME","TAXI","mom_fmt")`. `r trend_narrative("TRIP_VOLUME", "TAXI")` `r shift_narrative("TRIP_VOLUME", "TAXI")`
+
+[^1]: Year-over-year (YoY) compares September 2024 with September 2023, while year-to-date (YTD) compares the cumulative data from January to September 2024 with the same period in 2023. YoY evaluates specific monthly changes, while YTD assesses trends over a recent period of time.
+
+In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_VOLUME","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip volume was `r metric("TRIP_VOLUME","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip volume was `r metric("TRIP_VOLUME","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip volume was `r metric("TRIP_VOLUME","TNS","mom_fmt")`. `r trend_narrative("TRIP_VOLUME", "TNS")` `r shift_narrative("TRIP_VOLUME", "TNS")`
+
+**Limitations.** Quantity demanded does not equate to demand. Quantity demanded refers to the actual number of trips observed, whereas demand includes all potential trips if there were no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
+
+### Trip Revenue
+
+**Primary Factor:** Demand
+
+
+**Description:**Trip revenue represents, in nominal terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
+
+**Measurement:**Trip revenue is calculated as the total fare amount of all completed trips reported to the Trip Database in an area over a month.
+
+**Interpretations:**Increases in taxi trip revenue or TNS trip revenue indicate growth of quantity demanded in the respective markets. Moreover, a shift in trip revenue from the taxi sector to the TNS sector can signify a structural change in market dynamics, suggesting evolving consumer preferences or competition between the two types of partially substitutable services.
+
+As stated previously, it is helpful to note that although taxis and TNS are similar, they are not the same. taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined revenue of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
+
+
+Policy Context: Public Need and Demand Factor
+
+The Board’s Public Need Policy in the **Policy Manual** lists examples of the demand factor, which are set out below alongside their corresponding implications on trip revenue:
+
+- **There are people who would use the proposed service.**  
+  There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+  - If the proposed service attracts current taxi or TNS users, it will result in a redistribution of market share as measured by trip revenue among existing providers.
+  - The redistribution can only be observed after the proposed service is introduced. However, historical trends can provide valuable indications. For instance, ongoing shifts in market shares of sectors can indicate changes in customer preference.
+
+#### `r region_name` Regional District Trip Revenue Findings
+
+
+
+
+
+`r tbl_caption(paste(region_name, "Regional District Trip Revenue(thousands of dollars)"))`
+
+
+```{r}
+raw_norm_k <- raw_norm %>% dplyr::mutate(
+  value = ifelse(
+    indicator == "TRIP_REVENUE",
+    round(value/1000, 0),  # round to nearest thousand dollars
+    value
+  )
+)
+make_indicator_table_compact(
+  data      = raw_norm_k,
+  indicator = "TRIP_REVENUE",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 0,
+  currency  = TRUE)
+```
+
+
+`r fig_caption(paste(region_name, "Regional District Trip Revenue"))`
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_stacked(
+data       = raw_norm,
+indicator  = "TRIP_REVENUE",
+region     = region_name,
+services   = c("TNS","TAXI"),  # first = bottom of stack
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Trip Revenue ($)"
+)
+chart
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for taxi services in the region. On a month-over-month (MoM) basis, taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TAXI")`
+`r shift_narrative("TRIP_REVENUE", "TAXI")`
+
+In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TNS")`
+`r shift_narrative("TRIP_REVENUE", "TNS")`
+
+
+
+
+
+**Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
+
+
+## Accessibility Factor (PN)
+
+### Number of Wheelchair Accessible Vehicles 
+
+**Primary Factor:** Accessibility
+
+**Description:**The number of wheelchair accessible vehicles can be further divided into two sub-metrics: (1) the number of active wheelchair accessible vehicles and (2) the number of active wheelchair accessible vehicles providing at least one accessible trip. The number of active wheelchair accessible vehicles (WAVs) refers to the total number of vehicles equipped to accommodate passengers who use wheelchairs and that have been in operation in an area over a month. On the other hand, the number of active wheelchair accessible vehicles (WAVs) providing at least one accessible trip refers to the number of active WAVs that have recorded at least one accessible trip in the Trip Database.
+
+**Measurement:** The number of active WAVs is determined by cross-referencing the list of WAVs reported to the Registrar’s Office during licence renewal with the list of active vehicles (which may not necessarily have provided accessible trips) reported to the Trip Database. Then, the number of active wheelchair accessible vehicles providing at least one accessible trip is determined by limiting the list of active WAVs to those reported as having provided accessible trips. Both metrics can be further normalized per 1,000 persons to indicate their growth relative to the population.
+
+**Interpretations:** The number of active WAVs indicates the accessibility and inclusiveness of passenger transportation services for individuals who use wheelchairs. Generally, a higher number of active WAVs, especially compared to growth in overall demand (proxied by the number of WAVs per 1,000 persons), indicates a greater level of availability for these individuals. A lack of growth in the number of WAVs (both sub-metrics) would indicate suppliers’ unwillingness to match the demand, potentially due to the high costs associated with WAVs. 
+
+The Board’s public need policy in the Policy Manual lists examples of the accessibility  factor, which are set out below alongside their corresponding implications on the number of active wheelchair vehicles:
+
+- **The proposed service provides more or improved service to persons with mobility disabilities, including WAVs.**  
+  -There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+  - The number of WAVs on the road directly and positively correlates with the extent and quality of service provided to individuals with mobility disabilities.
+  
+#### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
+
+
+
+`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles"))`
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "ACTIVE_WAV",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 0,
+  currency  = FALSE)
+```
+
+`r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip "))`
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 0,
+  currency  = FALSE)
+
+```
+
+<!-- `r tbl_caption(paste(region_name, "Regional District Number of 1Active Wheelchair Accessible Vehicles per 1,000 Persons"))` -->
+
+
+<!-- ```{r} -->
+<!-- make_new_table( -->
+<!--   data      = raw_norm, -->
+<!--   indicator = "ACTIVE_WAV_PER_1000_PERSONS", -->
+<!--   region    = region_name, -->
+<!--   date_from = date_from, -->
+<!--   date_to   = date_to, -->
+<!--   font_size     = 8, -->
+<!--   page_width_in = 8,    -->
+<!--   year_col_in   = 0.4 -->
+<!-- ) -->
+
+<!-- ``` -->
+
+<!-- Note: The above table reports the number of WAVs per 1,000 persons and the annual population data is available from BC Stats [^2] -->
+
+<!-- [^2]:BC Stats. (n.d.). Population Estimates & Projections for British Columbia. Retrieved January 20, 2025, from https://bcstats.shinyapps.io/popApp/ -->
+<!-- `r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip per 1,000 Persons"))` -->
+
+
+<!-- ```{r} -->
+<!-- make_new_table( -->
+<!--   data      = raw_norm, -->
+<!--   indicator = "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS", -->
+<!--   region    = region_name, -->
+<!--   date_from = date_from, -->
+<!--   date_to   = date_to, -->
+<!--   font_size     = 8, -->
+<!--   page_width_in = 8,    -->
+<!--   year_col_in   = 0.4 -->
+<!-- ) -->
+<!-- ``` -->
+<!-- Note: The above table reports the number of WAVs providing accessible trips per 1,000 persons and the annual population data is available from BC Stats[^3] -->
+
+<!-- [^3]:BC Stats. (n.d.). Population Estimates & Projections for British Columbia. Retrieved January 20, 2025, from https://bcstats.shinyapps.io/popApp/ -->
+
+`r fig_caption(paste(region_name, "Regional District Trip Volume"))`
+```{r, fig.width=10, fig.height=5}
+chart <- make_multi_indicator_chart_lines(
+  data       = raw_norm,
+  indicators = c(
+    "ACTIVE_WAV",
+    "ACTIVE_WAV_WITH_ACCESSIBLE_TRIP",
+    "ALLOCATED_WAV"
+  ),
+  region     = region_name,
+  services   = "TAXI",
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  title      = "Number of WAVs (vehicles)",
+
+  colors = c(
+    ACTIVE_WAV                      = "#69B7FF",
+    ACTIVE_WAV_WITH_ACCESSIBLE_TRIP = "#1E3A8A",
+    ALLOCATED_WAV                   = "#D55E00"
+  ),
+
+  # NEW: custom legend labels
+  labels = c(
+    ACTIVE_WAV                      = "Active WAVs",
+    ACTIVE_WAV_WITH_ACCESSIBLE_TRIP = "Active WAVs Making Accessible Trips",
+    ALLOCATED_WAV                   = "Board-Allocated WAVs"
+  )
+)
+
+chart
+
+```
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV","TAXI","last_value_fmt")` active WAVs. On a year-over-year (YoY) basis, the number of active WAVs in the taxi fleet was `r metric("ACTIVE_WAV","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs in the taxi fleet changed by `r metric("ACTIVE_WAV","TAXI","mom_fmt")`. However, the number of active WAVs remained below the Board’s approved WAVs (`r metric("ALLOCATED_WAV","TAXI","last_value_fmt")` vehicles in `r end_label`), indicating that the full potential utilization of approved WAVs in this area had yet to be realized. `r trend_narrative("ALLOCATED_WAV","TAXI")` `r shift_narrative("ALLOCATED_WAV","TAXI")`
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","last_value_fmt")` active WAVs providing accessible trips. On a year-over-year (YoY) basis, the number of active WAVs providing accessible trips was `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs providing accessible trips changed by `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","mom_fmt")`. `r trend_narrative("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")` `r shift_narrative("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")`
+
+
+<!-- In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","last_value_fmt")` vehicles per 1,000 persons. On a year-over-year (YoY) basis, the availability of active WAVs per 1,000 persons was `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs per 1,000 persons changed by `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","mom_fmt")`. `r trend_narrative("ACTIVE_WAV_PER_1000_PERSONS","TAXI")` `r shift_narrative("ACTIVE_WAV_PER_1000_PERSONS","TAXI")` -->
+
+<!-- In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","last_value_fmt")` vehicles per 1,000 persons providing accessible trips. On a year-over-year (YoY) basis, the availability of active WAVs per 1,000 persons providing accessible trips was `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs per 1,000 persons providing accessible trips changed by `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","mom_fmt")`. `r trend_narrative("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI")` `r shift_narrative("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI")` -->
+
+
+Limitations: The number of active WAVs does not capture the Board’s other aspects of accessibility, including accessibility for persons with other disabilities, overall availability of services, essential service levels, service to underserved groups or communities, and inclusion. 
+
+### Number of Active Vehicles per 1,000 Persons
+
+Primary Factor: Accessibility
+
+**Description:** The number of active vehicles per 1,000 persons represents the total number of vehicles serving every 1,000 persons in an area over a month.
+
+**Measurement:** The number of active vehicles per 1,000 persons is calculated as the ratio of the total number of active vehicles (including both taxis and TNS) in an area relative to its population, normalized to a per 1,000 persons basis.
+
+**Interpretation:** A higher number of active vehicles per 1,000 persons indicates higher accessibility to services in the area, as more taxi and TNS vehicles are available to serve every 1,000 persons.
+
+Policy Context: Public Need and Accessibility Factor
+
+The Board’s Public Need Policy in the **Policy Manual** lists examples of the accessibility factor, which are set out below alongside their corresponding implications on the number of active vehicles per 1,000 persons:
+
+\-**The proposed service enhances availability of passenger transportation services to everyone in the province, including in low-density areas, such as rural and remote communities.** -A higher number of active vehicles per 1,000 persons directly and positively correlates with greater service availability. -The number of vehicles per 1,000 persons in low-density areas provides an area-specific assessment of overall service availability.
+
+#### `r region_name` Regional District Active Vehicles per 1,000 Persons Findings
+
+`r tbl_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "VEHICLE_PER_1000_PERSONS",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 2,
+  currency  = FALSE)
+```
+
+Note: The above table reports the number of active vehicles per 1,000 persons up to the most recent year for which annual population data is available from Statistics Canada. As of October 2024, the most recent data available is up to 2023.[^4] 
+
+[^4]: Statistics Canada. (2024). Table 17-10-0152-01 Population estimates, July 1, by census division, 2021 boundaries.https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710015201
+
+`r fig_caption(paste(region_name, "Regional District Active Vehicles per 1,000 Persons"))`
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_stacked_2(
+  data       = raw_norm,
+  indicator  = "VEHICLE_PER_1000_PERSONS",
+  region     = region_name,
+  services   = c("TNS","TAXI"),   # first = bottom of stack
+  area_type  = "REGIONAL",
+  date_from  = date_from,
+  date_to    = date_to,
+  title      = "Active Vehicles per 1,000 Persons",
+  caption    = NULL
+)
+chart
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District had `r metric("VEHICLE_PER_1000_PERSONS","TAXI","last_value_fmt")` active taxi vehicles per 1000 persons. On a year-over-year (YoY) basis, the active taxi vehicles per 1000 persons changed by `r metric("VEHICLE_PER_1000_PERSONS","TAXI","yoy_fmt")`, while year-to-date (YTD), the figure was `r metric("VEHICLE_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` compared to the same period in `r prev_year`. On a month-over-month (MoM) basis, the active taxi vehicles per 1000 persons changed by `r metric("VEHICLE_PER_1000_PERSONS","TAXI","mom_fmt")`. `r trend_narrative("VEHICLE_PER_1000_PERSONS", "TAXI")` `r shift_narrative("VEHICLE_PER_1000_PERSONS", "TAXI")`
+
+In `r end_label`, `r region_name` Regional District had `r metric("VEHICLE_PER_1000_PERSONS","TNS","last_value_fmt")` active TNS vehicles per 1000 persons. Compared with `r prev_label`, TNS active vehicles per 1000 persons changed by `r metric("VEHICLE_PER_1000_PERSONS","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, the active TNS vehicles per 1000 persons was `r metric("VEHICLE_PER_1000_PERSONS","TNS","ytd_yoy_fmt")` compared to the same period in `r prev_year`. On a month-over-month (MoM) basis, the active TNS vehicles per 1000 persons changed by `r metric("VEHICLE_PER_1000_PERSONS","TNS","mom_fmt")`. `r trend_narrative("VEHICLE_PER_1000_PERSONS", "TNS")` `r shift_narrative("VEHICLE_PER_1000_PERSONS", "TNS")`
+
+**Limitations:** The number of active vehicles per 1,000 persons does not address the Board’s other examples of accessibility, including accessibility for people with other disabilities or underserved groups and communities. In addition, it does not reflect the reduction in the barriers to inclusion.
+
+
+## Affordability Factor (PN)
+
+### Fare for a 5-Kilometre Trip
+
+**Primary factor:** Affordability
+
+**Description:** Fare for a 5-kilometre trip reflects the trip revenue that service providers earn during a trip with a length of 5 kilometres.
+
+**Measurement:** : Fare for a 5-kilometre trip is measured by the median (i.e., the 50th percentile) of the 5-kilometre trip fare distribution in an area over a month from the Trip Database. It is also measured by operating companies' fares for a 5-kilometer trip in an area over the most recent month. Specifically, for taxi service in an area with a common rate, an operating company's fare for a 5-kilometre trip is calculated as the common flag rate plus the product of 5 kilometres and the common distance rate. For taxi service in an area without a common rate, an operating company's fare for a 5-kilometre trip is measured by the median of its 5-kilometre trip fare distribution. For TNS service in any area, an operating company's fare for a 5-kilometre trip is measured by the median of its 5-kilometre trip fare distribution.
+
+**Interpretation:** : For some areas, the average distance of trips approximates 5 kilometres in most months. For other areas, a majority of trips are shorter than 5 kilometres in most months. Hence, fare for a 5-kilometre trip can serve as indicators of the affordability of passenger transportation services. In general, a higher fare for a 5-kilometre trip indicates reduced affordability, as it suggests higher costs for passengers. Specifically, if the fare for a 5-kilometre trip increases more rapidly than B.C.'s average hourly wage rate, affordability would decrease as the rising costs outpace the passengers' ability to pay.[^5]
+
+[^5]: Statistics Canada. (2024). Table 14-10-0222-01 Employment, average hourly and weekly earnings (including overtime), and average weekly hours for the industrial aggregate excluding unclassified businesses, monthly,seasonally adjusted [Data table]. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022201&pickMembers%5B0%5D=1.11&cubeTimeFrame.startMonth=01&cubeTimeFrame.startYear=2022&cubeTimeFrame.endMonth=07&cubeTimeFrame.endYear=2024&referencePeriods=20220101%2C20240701
+
+The Board's public need policy in the Policy Manual lists examples of the affordability factor, which are set out below alongside their corresponding implications on fare for a 5-kilometre trip:
+
+-   The proposed service provides more affordable options or services for consumers.
+
+    -   In general, a lower fare for a 5-kilometre trip leads to improved affordability of service. On the other hand, the ratio of fare for a 5-kilometre trip to personal hourly wage rate can more accurately reflect affordability, with a lower ratio indicating better affordability.
+
+#### `r region_name` Regional District Fare for a 5-Kilometre Trip Findings
+
+
+`r tbl_caption(paste(region_name, "Regional District Fare for a 5-Kilometre Trip"))`
+
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "FARE_PER_5KM",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 2,
+  currency  = TRUE)
+```
+
+
+`r fig_caption(paste(region_name, "Regional District Fare for a 5-Kilometre Trips"))`
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "FARE_PER_5KM",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Fare for a 5-Kilometre Trip ($)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+
+```{r, fig.width=11, fig.height=12}
+company_fare_chart <- make_company_fare_chart(raw)
+company_fare_chart
+```
+
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TAXI","last_value_fmt")` in fare per 5 km for taxi trips. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FARE_PER_5KM","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FARE_PER_5KM","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.On a month-over-month (MoM) basis, the fare per 5 km for taxi trips changed by `r metric("FARE_PER_5KM","TAXI","mom_fmt")`. `r trend_narrative("FARE_PER_5KM", "TAXI")` `r shift_narrative("FARE_PER_5KM", "TAXI")`[^6]
+
+[^6]:There are a few trips whose distances are exactly 5 kilometres from the Trip Database. As such, all trips with distances not longer than 5.5 kilometres and not shorter than 4.5 kilometres were pooled together to calculate the fare distribution for a 5-kilometre trip. Fares for pooled trips were divided by their respective lengths, which is fare per kilometre, and then were multiplied by 5, yielding the fare distribution for a 5-kilometre trip. 
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TNS","last_value_fmt")` in fare per 5 km for TNS trips. Compared with `r prev_label`, the fare per 5 km for TNS trips was `r metric("FARE_PER_5KM","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the fare per 5 km for TNS trips was `r metric("FARE_PER_5KM","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the fare per 5 km for TNS trips changed by `r metric("FARE_PER_5KM","TNS","mom_fmt")`. `r trend_narrative("FARE_PER_5KM", "TNS")` `r shift_narrative("FARE_PER_5KM", "TNS")`
+
+**Limitations:** The number of Fare for a 5-Kilometre Trip does not address the Board's other examples of accessibility, including accessibility for people with other disabilities or underserved groups and communities. In addition, it does not reflect the reduction in the barriers to inclusion.
+
+
+## Safety Factor (PN)
+
+There is no analysis related to this factor.
+
+## Service Quality Factor (PN)
+
+### Wait Time
+
+Primary Factor: Service Quality
+
+**Description:** Wait time reflects the duration passengers wait for vehicles to arrive for pick up.
+
+**Measurement:** Wait time for each trip is calculated as the difference between the pick-up arrival time and the hail time. Wait time is measured by the median (i.e., the 50th percentile) of the monthly wait time distribution in an area, and different percentiles of the monthly wait time distribution are also calculated.
+
+**Interpretation:** Wait time serves as an indicator of the quality of passenger transportation services. It acts as a market-clearing variable, influenced by factors such as demand, supply, and the efficiency of the technology used to match passengers with vehicles. A longer wait time indicates reduced service quality, as it suggests longer delays for passengers and higher operating costs for licensees.
+
+Policy Context: Public Need and Accessibility Factor
+
+The Board’s Public Need Policy in the **Policy Manual** lists examples of the service quality factor, which are set out below alongside their corresponding implications on wait times:
+
+-   The proposed service provides more or improved service where there is currently inadequate service.
+    -   A long wait time suggests an inadequate level of service supplied.
+-   The proposed service provides more reliable service.
+    -   Consistent short wait times suggest that the service is reliable. 
+    -   Significant changes in wait times can suggest that the service is not reliable. 
+    -   Consistently long wait times suggest that the service is not reliable.
+-   The proposed service encourages more efficient service to the public, including trip speed.
+    -   A long wait time suggests an inadequate level of service supplied.
+-   The proposed service provides a service that is comfortable and convenient.
+    -   A short wait time contributes to a more comfortable and convenient service. 
+    -   The proposed service supports better customer service and customer satisfaction. A short wait time contributes to better customer service and customer satisfaction.
+
+#### `r region_name` Regional District Wait Time Findings
+
+
+`r tbl_caption(paste(region_name, "Regional District Wait Time (minutes)"))`
+
+
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "WAIT_TIME",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 2,
+  currency  = FALSE)
+```
+
+
+`r fig_caption(paste(region_name, "Regional District Wait Time (minutes)"))`
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "WAIT_TIME",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Wait Time (minutes)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+
+```{r}
+make_wait_time_percentile_chart(
+  data      = raw_norm,
+  region    = region_name,
+  services  = c("TAXI", "TNS"),
+  area_type = "REGIONAL",
+  date_from = date_from,
+  date_to   = date_to
+)
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TAXI","last_value_fmt")` in wait time for taxi trips. On a year-over-year (YoY) basis, the wait time for taxi trips was `r metric("WAIT_TIME","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("WAIT_TIME","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.On a month-over-month (MoM) basis, taxi wait time changed by `r metric("WAIT_TIME","TAXI","mom_fmt")`. `r trend_narrative("WAIT_TIME", "TAXI")` `r shift_narrative("WAIT_TIME", "TAXI")`
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TNS","last_value_fmt")` in wait time for TNS trips. Compared with `r prev_label`, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the wait time for TNS trips was `r metric("WAIT_TIME","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, TNS wait time changed by `r metric("WAIT_TIME","TNS","mom_fmt")`. `r trend_narrative("WAIT_TIME", "TNS")` `r shift_narrative("WAIT_TIME", "TNS")`
+
+**Limitations:** In calculating the median wait time, trips with unreasonably long wait times due to data errors were not included. Extreme outlier  wait times are not reported in the figure on cumulative distribution as they are unusually long, which may be due to data errors.
+
+## Innovation Factor (SEC)
+
+There is no analysis related to this factor.
+
+## Sustainability Factor (SEC)
+
+### Revenue per Active Vehicle
+
+Primary Factor: Sustainability
+
+**Description:** Revenue per active vehicle measures the amount of revenue generated by each vehicle that was in operation in a given area during the reporting period.
+
+**Measurement:** Revenue per active vehicle is calculated as the median (50th percentile) of the revenue-per-active-vehicle distribution in an area over a month.
+
+**Interpretation:** Higher revenue per active vehicle supports the industry's sustainability by ensuring each vehicle generates more gross income.
+
+Policy Context: Public Need and Accessibility Factor
+
+The Board’s sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on revenue per active vehicle:
+
+-   The proposed service promotes long-term stability for the passenger transportation industry.
+    -Assuming fixed costs, high and stable revenue per active vehicle implies high and stable profits, thus promoting long-term stability for the industry.
+-   The proposed service encourages resiliency in the passenger transportation industry.
+    -Assuming fixed costs, high and stable revenue per active vehicle implies high and stable profits, thus encouraging industry resilience.
+-   The proposed service minimizes significant market disruption.
+    -Assuming fixed costs, stable or gradually increasing revenue per active vehicle in the taxi sector indicates a lack of rapid disruption.
+-   The proposed service promotes overall profitability and economic sustainability of the industry.
+    -Assuming fixed costs, stable or gradually increasing revenue per active vehicle in the taxi sector indicates overall profitability and economic sustainability for the industry.
+
+#### `r region_name` Regional District Revenue per Active Vehicle Findings
+
+
+`r tbl_caption(paste(region_name, "Regional District Revenue per Active Vehicle"))`
+
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "REVENUE_PER_VEHICLE",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 0,
+  currency  = TRUE)
+```
+
+
+`r fig_caption(paste(region_name, "Regional District Revenue per Active Vehicle"))`
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "REVENUE_PER_VEHICLE",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Revenue per Active Vehicle",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("REVENUE_PER_VEHICLE","TAXI","last_value_fmt")` in revenue per active vehicle for taxi trips. On a year-over-year (YoY) basis, the revenue per active vehicle for taxi trips was `r metric("REVENUE_PER_VEHICLE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("REVENUE_PER_VEHICLE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, revenue per active taxi vehicle changed by `r metric("REVENUE_PER_VEHICLE","TAXI","mom_fmt")`. `r trend_narrative("REVENUE_PER_VEHICLE", "TAXI")` `r shift_narrative("REVENUE_PER_VEHICLE", "TAXI")`
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("REVENUE_PER_VEHICLE","TNS","last_value_fmt")` in revenue per active vehicle for TNS trips. Compared with `r prev_label`, the revenue per active vehicle for TNS trips was `r metric("REVENUE_PER_VEHICLE","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the revenue per active vehicle for TNS trips was `r metric("REVENUE_PER_VEHICLE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, revenue per active TNS vehicle changed by `r metric("REVENUE_PER_VEHICLE","TNS","mom_fmt")`. `r trend_narrative("REVENUE_PER_VEHICLE", "TNS")` `r shift_narrative("REVENUE_PER_VEHICLE", "TNS")`
+
+**Limitations:** The median (i.e., the 50th percentile) revenue per active vehicle cannot fully represent the sustainability of all active vehicles in a region in a month. Moreover, revenue per active vehicle does not address the Board’s other sustainability examples, including balance across different sectors, promotion of driver incomes and contribution to a stable supply of drivers in the taxi sector, environmental sustainability, reduction of greenhouse gas emissions, other pollutions, congestion, or reduction of harm to or enhancement of Public Transportation.
+
+### Taxi Fleet Utilization Rate
+
+**Primary factor:** Sustainability
+
+**Description:** Taxi fleet utilization rate represents the proportion of licensed vehicles that are active in an area over a month.
+
+**Measurement:** The taxi fleet utilization rate is determined by dividing the number of active vehicles by the total number of licensed vehicles in a given area during the reporting period. The number of active vehicles is determined by data reported to the Trip Database, while the maximum fleet size is based on the 
+
+**Interpretation:** A relatively stable taxi fleet utilization rate over time can indicate long-term stability for the taxi and TNS industry . On the other hand, a decline in utilization rates, other things being equal, suggests unsustainable economic conditions as licensees choose to operate fewer vehicles in their fleet.
+
+The Board’s sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on taxi fleet utilization rate:
+
+-   The proposed service promotes long-term stability for the passenger transportation industry.
+
+    -   Stability in taxi fleet utilization rate can indicate the long-term stability of the industry.
+
+-   A higher taxi fleet utilization rate indicates greater resiliency in the passenger transportation industry.
+
+    -   A consistently close-to-full fleet utilization rate indicates the industry is at its supply capacity, and unable to meet further demand growth. A consistently low fleet utilization can indicate a lack of growth of the industry.
+
+-   The proposed service minimizes significant market disruption.
+
+    -   A low taxi fleet utilization rate increases the risk of market oversupply.
+
+-   The proposed service protects the taxi sector from rapid disruption to ensure its long-term stability as an essential service.
+
+    -   A low taxi fleet utilization rate increases the risk of rapid disruption in the taxi sector.
+
+-   The proposed service promotes overall profitability and economic sustainability of the industry.
+
+    -   A low taxi fleet utilization rate suggests lower profitability or economic unsustainability in the market. 
+
+#### `r region_name` Regional District Taxi Fleet Utilization Rate Findings
+
+
+`r tbl_caption(paste(region_name, "Regional District taxi fleet utilization rate"))`
+
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "FLEET_UTILIZATION_RATE",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 2,
+  currency  = FALSE)
+```
+
+
+`r fig_caption(paste(region_name, "Regional District taxi fleet utilization rate"))`
+
+```{r, fig.width=10, fig.height=5} 
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "FLEET_UTILIZATION_RATE",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Taxi Fleet Utilization Rate",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FLEET_UTILIZATION_RATE","TAXI","last_value_fmt")` in taxi fleet utilization rate  trips. On a year-over-year (YoY) basis, the taxi fleet utilization rate  trips was `r metric("FLEET_UTILIZATION_RATE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FLEET_UTILIZATION_RATE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, taxi fleet utilization changed by `r metric("FLEET_UTILIZATION_RATE","TAXI","mom_fmt")`. `r trend_narrative("FLEET_UTILIZATION", "TAXI")` `r shift_narrative("FLEET_UTILIZATION", "TAXI")`
+
+
+**Limitations:** The taxi fleet utilization rate does not provide insight into the equitability of opportunities in the industry, the impact on Public Transportation, the industry's sustainable profitability levels, or driver incomes, nor does it address the environmental aspects of sustainability.
+
+### Vehicle Occupancy Rate
+
+Primary Factor: Sustainability
+
+**Description:** The vehicle occupancy rate represents the proportion of working time during which a taxi or TNS vehicle carries passengers over the total working time over a month in an area.
+
+**Measurement:** The vehicle occupancy rate is calculated as the median (50th percentile) of the ratio of the total duration of all trips to the total working hours of all taxi vehicles in an area over a month.
+
+**Interpretation:** A high vehicle occupancy rate indicates frequent passenger occupancy and low wasted time waiting for new trip requests. In contrast, a low taxi vehicle occupancy rate suggests that vehicles are driving longer times to pick up passengers or the wait time to receive new trips is long. A low vehicle occupancy rate is unfavourable as it negatively impacts sustainable profitability. Additionally, significant changes in the vehicle occupancy rate can signal shifts in market stability and potential sustainability challenges.
+
+Policy Context: Public Need and Accessibility Factor
+
+The Board’s sound economic conditions policy in the Policy Manual lists examples of the sustainability factor, which are set out below alongside their corresponding implications on the taxi vehicle occupancy rate:
+
+-   The proposed service promotes long-term stability for the passenger transportation industry.
+    -Stability in the vehicle occupancy rate can reflect long-term stability in the industry.
+-   The proposed service encourages resiliency in the passenger transportation industry.
+    -Higher vehicle occupancy rates can reflect higher resiliency levels in the passenger transportation industry.
+-   The proposed service minimizes significant market disruption
+    -Large shifts in the vehicle occupancy rate can indicate a significant market disruption.
+-   The proposed service protects the passenger transportation sector from rapid disruption to ensure its long-term stability as an essential service.
+    -Large shifts in the vehicle occupancy rate can indicate a rapid disruption, leading to challenges for long-term stability as an essential service.
+-   The proposed service promotes the overall profitability and economic sustainability of the industry.
+    -A low vehicle occupancy rate indicates unsustainable profitability and economic instability in the industry.
+-   The proposed service promotes adequate driver incomes to contribute to a stable supply of drivers.
+    -A low vehicle occupancy rate can signal inadequate driver incomes. To assess whether a vehicle occupancy rate is high or low, we define the range of possible values it can take, referred to as the Vehicle Occupancy Rate Possible Range (VORPR)[^7]. 
+    
+[^7]: The method of calculating The Vehicle Occupancy Rate Possible Range has been included in the Appendix.
+    
+If no trips occur during the working period, the vehicle occupancy rate is zero, representing the lower end of the range. Conversely, if there is no idle time between trips, the vehicle occupancy rate reaches its upper limit. Based on 2024 data for taxi and TNS vehicles in the Metro Vancouver Regional District (MVRD), the upper limit of the vehicle occupancy rate is approximately 0.7 for TNS vehicles and 0.8 for taxi. These values define the upper end of the VORPR.
+
+Existing studies provide baseline VOR levels for taxis and rideshare platforms. Cramer and Krueger (2016) found that Uber consistently achieved higher VOR than taxis across major U.S. cities. Their analysis showed that Uber’s VOR ranged from 55% to 68%, while taxi VOR remained lower, between 47% and 53%. The largest gap was observed in New York City, where Uber’s VOR (68%) exceeded taxi VOR (53%) by 15 percentage points. This trend suggests that rideshare platforms operate more efficiently than traditional taxi services (see Table 19 in Appendix 2 for detailed comparisons)[^8].
+
+[^8]: Data from Cramer, J., & Krueger, A. B. (2016). Disruptive Change in the Taxi Business: The Case of Uber. American Economic Review, 106(5), 177–182. https://www.aeaweb.org/articles?id=10.1257/aer.p20161002.
+
+Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indicate that between April 2023 and September 2024, Uber’s VOR fluctuated between 54.2% and 60.4%, while Lyft’s VOR ranged from 43.9% to 52.5%. The overall industry average varied between 48.7% and 57.5%, with NYC regulations requiring a minimum VOR of 53% (see Figure 22 in Appendix 2 for NYC-specific data)[^9]. 
+
+[^9]: Data from NYC Taxi & Limousine Commission (TLC). (2024). TLC Factbook: Data Dashboard for Industry Trends. Available at https://app.powerbigov.us/view?r=eyJrIjoiY2FlNjI3YWQtMDkzOS00MjliLTk0MTQtODc2NzU4OTYwNjFiIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9&pageName=ReportSection28c004ce23fc37acd783.
+
+#### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings
+
+`r tbl_caption(paste(region_name, "Regional District taxi and TNS Vehicle Occupancy Rate Findings"))`
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "VEHICLE_OCCUPANCY_RATE",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 2,
+  currency  = FALSE)
+```
+
+`r fig_caption(paste(region_name, "Regional District taxi and TNS Vehicle Occupancy Rate Findings"))`
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "VEHICLE_OCCUPANCY_RATE",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Taxi and TNS Vehicle Occupancy Rate Findings",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+Analysis and Conclusions
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","last_value_fmt")` in Vehicle Occupancy Rate Findings for taxi trips. On a year-over-year (YoY) basis, the Vehicle Occupancy Rate Findings for taxi trips was `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, vehicle occupancy for taxi trips changed by `r metric("VEHICLE_OCCUPANCY_RATE","TAXI","mom_fmt")`. `r trend_narrative("VEHICLE_OCCUPANCY_RATE", "TAXI")` `r shift_narrative("VEHICLE_OCCUPANCY_RATE", "TAXI")`
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("VEHICLE_OCCUPANCY_RATE","TNS","last_value_fmt")` in Vehicle Occupancy Rate Findings for TNS trips. Compared with `r prev_label`, the Vehicle Occupancy Rate Findings for TNS trips was `r metric("VEHICLE_OCCUPANCY_RATE","TNS","yoy_fmt")` (YoY). Year-to-date through r end_label, the Vehicle Occupancy Rate Findings for TNS trips was `r metric("VEHICLE_OCCUPANCY_RATE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, vehicle occupancy for TNS trips changed by `r metric("VEHICLE_OCCUPANCY_RATE","TNS","mom_fmt")`. `r trend_narrative("VEHICLE_OCCUPANCY_RATE", "TNS")` `r shift_narrative("VEHICLE_OCCUPANCY_RATE", "TNS")`
+
+**Limitations:** The vehicle occupancy rate illustrates the interaction between demand and supply and offers limited insight into the industry's sustainability. However, this indicator does not provide information about the Board’s other sustainability examples, including environmental impact and equity within the industry.
+
+### Driver hourly revenue
+
+Primary Factor: Sustainability
+
+**Description:** Driver Hourly Revenue reflects whether the passenger transportation sector is producing a sustainable level of revenue for drivers to promote retention of their workforce. It is important to note that hourly revenue does not reflect take-home pay, which depends on factors such as business-level labour payment arrangements, employment classification (e.g., employee vs. independent contractor), operating costs, and hours worked. However, revenue per hour remains a useful indicator of market stability and service sustainability from a labour supply perspective.
+
+**Measurement:** This indicator captures the median[1] of the total fare[2] collected by taxi and TNS drivers per working hour in a defined geographical area for over a month. It reflects whether the passenger transportation sector is producing a sustainable level of revenue for drivers to promote retention of their workforce.
+
+**Interpretation:** Higher hourly revenue indicates stronger revenue generation for the sector, supporting its long-term operational sustainability. This indicator measures median hourly revenue at the sector level and does not reflect individual driver take-home earnings, which can vary based on a variety of factors. The focus is on the sector’s overall financial health and its ability to maintain service levels over time.
+
+
+Policy Context: Public Need and Accessibility Factor
+
+
+
+#### `r region_name` Regional District taxi and TNS Driver hourly revenue Findings 
+
+
+`r tbl_caption(paste(region_name, "Regional District taxi and TNS Driver hourly revenue Findings"))`
+
+
+```{r}
+make_indicator_table_compact(
+  data      = raw_norm,
+  indicator = "DRIVER_EARNING",
+  region    = region_name,
+  date_from = date_from,
+  date_to   = date_to,
+  digits    = 2,
+  currency  = TRUE)
+```
+
+`r fig_caption(paste(region_name, "Regional District taxi and TNS Driver hourly revenue Findings"))`
+
+```{r, fig.width=10, fig.height=5}
+chart <- make_indicator_chart_lines(
+data       = raw_norm,
+indicator  = "DRIVER_EARNING",  # Adjust indicator if needed
+region     = region_name,
+services   = c("TAXI", "TNS"),
+area_type  = "REGIONAL",
+date_from  = date_from,
+date_to    = date_to,
+title      = "Taxi and TNS Driver hourly revenue($)",
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+)
+chart
+
+```
+
+In `r end_label`, `r region_name` Regional District recorded a total of `r metric("DRIVER_EARNING","TAXI","last_value_fmt")` in driver earnings for taxi services. On a year-over-year (YoY) basis, average driver earnings for taxi services were `r metric("DRIVER_EARNING","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("DRIVER_EARNING","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, driver earnings for taxi trips changed by `r metric("DRIVER_EARNING","TAXI","mom_fmt")`. `r trend_narrative("DRIVER_EARNING", "TAXI")` `r shift_narrative("DRIVER_EARNING", "TAXI")`
+
+In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("DRIVER_EARNING","TNS","last_value_fmt")` in driver earnings for TNS services. Compared with `r prev_label`, average driver earnings for TNS services were `r metric("DRIVER_EARNING","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, earnings for TNS services were `r metric("DRIVER_EARNING","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, driver earnings for TNS trips changed by `r metric("DRIVER_EARNING","TNS","mom_fmt")`. `r trend_narrative("DRIVER_EARNING", "TNS")` `r shift_narrative("DRIVER_EARNING", "TNS")`
+
+**Limitations:**
+
+## Variety Factor (SEC)
+There is no analysis related to this factor.
+
+
+## Appendix 1: Technical Methodology
+
+A set of completed trips in a given area j during the period t is denoted by $T_{j,t}$, and each completed trip is denoted by i in $T_{j,t}$ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by $v_i$ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database. 
+
+(temporary) list of indicators
+Utilization (Feb)
+Wait time (Mar)
+WAVs (APR)
+Fare Cost (May)
+Availability (Jun)
+Driver Hourly Earning (Sep)
+Trip Vol (Nov)
+Trip Rev (Dec)
+VOR (not yet published)
+
+
+### Demand Factor(PN)
+
+#### Trip Volume
+
+
+Trip volume is the total count of trip IDs of completed trips.
+$$
+TV_{j,t} = \sum_{i \in \text{completed\_trips}}^{N_{j,t}} 1
+$$ {#eq-tv}
+
+where $TV_{j,t}$ represents trip volume in area j during period t, i on the right hand side denotes the index of trips. $N_{j,t}$ is the total number of completed trips in area j during period t. Each completed trip contributes a value of 1 to the summation.
+Observation selection note: In our data query, completed trips with valid data quality and a fare amount greater than $2.25 are included.
+
+#### Trip Revenue
+
+Trip revenue is the total fare amount collected from all completed trips.
+
+$$
+TR_{j,t} = \sum_{i=1}^{N_{j,t}} r_i
+$$ {#eq-tv}
+
+where $TR_{j,t}$ represents trip revenue in area j during period t, $r_{i}$ is the gross revenue (reported to the Trip Database) with i indexes completed trips, $N_{j,t}$ is the total number of completed trips in area j during period t.
+Observation selection note: In our data query, completed trips with valid data quality (strictly positive duration) and a fare amount strictly greater than 0 are included.
+
+### Accessibility Factor(PN)
+
+#### Number of Wheelchair Accessible Vehicles (WAVs)
+
+Recall that this indicator counts the number of distinct wheelchair-accessible vehicles (WAVs) that actively provided completed accessible trips during a given month. 
+Let:
+-   	$WAV_{i,t}$= Number of distinct WAVs active in pickup area i during month t, based on observed accessible trips.
+Observation selection note: the following criteria and logic are applied:
+-   1.  Trip-Level Filters:
+    -	Only completed trips.
+    - Trip type must be flagged as accessible. 
+    - Trip type must be flagged as accessible. 
+-   2.	Vehicle Identification:
+    - A WAV is counted as “active” if it is associated with at least one completed accessible trip during the month.
+    - Distinct WAVs are counted by unique VEHICLE_ID and VEHICLE_REGISTRATION_NO per area and month.
+Note that regular trips by WAVs (i.e., not flagged as accessible riders) are excluded. Moreover, WAV status is inferred based on actual trip provision, not registry cross-referencing. 
+
+### Availability indicator(PN)
+Recall that this indicator captures patterns in the presence of drivers, vehicles, and completed trips throughout the day. 
+This indicator is composed of three complementary metrics, each calculated by hour then aggregated monthly:
+
+#### Metric 1: Number of Active Vehicles per 1,000 Persons
+
+The number of active vehicles per 1,000 persons  is calculated as the ratio of total number of taxi and TNS active vehicles $V_{j,t}$ in area j during time period t to the area’s population  $(P_{j,t})$, multiplied by 1,000. 
+
+$$
+Number of Active Vehicles Per 1000 Persons _{j,t}
+= \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000
+$$ {#eq-tv}
+#### Metric 2: Matching time by hour of the week
+Trip-level wait time definition:
+$$
+w_i= t_i^p- t_i^h
+$$ {#eq-tv}
+Where: $t_{i^p}$ is pickup arrival time for trip $i$, $t_{i^h}$ is hail (request) time for trip $i$. The reported value is the median wait time for trips occurring in a given hour of the reporting period.
+
+#### Metric 3. Hourly vehicle availability pattern
+Active vehicles by hour of week: The number of vehicles completed at least one trip during a given hour. 
+
+
+### Affordability Factor(PN)
+Fare Cost Indicator
+Recall that indicator measures the effective cost of passenger services using two complementary metrics:Fare per Kilometre: based on actual trip-level fare and distance data; and Real cost for a 5 Kilometre Trip: this metric captures the fare cost of a five-kilometre trip, measured in labour compensation of a typical B.C. worker.
+
+#### Metric 1. Fare for a 5 km trip
+
+This first metric estimates the typical fare a passenger would pay for a 5 km trip, using actual trip records where the total trip distance falls within a ±0.25 km buffer (i.e., trips with distance between 4.75 km and 5.25 km). 
+
+Reported Statistics:
+-   The 10th, 50th (median), and 90th percentiles of the fare distribution for (approximately, with ±0.25 km buffer) 5 km trips.
+Observation selection note:
+-   Completed trips, non-zero fare, valid data
+-   	Distance filter: 4.75≤$d_i$≤5.25km
+This serves as a standardized pricing benchmark, independent of trip distance variability. It is useful for understanding market-level pricing consistency, and differences between operators.
+
+#### Metric 2: Real cost for a 5 km trip
+In this metric, tThe 5 km fare is also converted into real terms, expressed in minutes of labour by a typical B.C. worker. This is computed as:
+$$
+Real Cost=Fare (5km)/Hourly Wage ×60
+$$ {#eq-tv}
+
+This helps translates nominal pricing into affordability context. 
+Observation selection note: the same selection logics as in Metric 1 were applied.
+
+
+
+### Safety Factor(PN)
+
+There is no analysis related to this factor.
+
+### Service Quality Factor(PN)
+
+#### Wait Time
+
+Recall that this indicator is defined as the duration (in minutes) between the time a trip was requested and when the passenger was picked up.
+Let:
+-   i: index for trips
+-   $w_i$= wait time for trip i
+-   $t_i^p$= pickup arrival time for trip i
+-   $t_i^h$= hail (request) time for trip i
+Then:
+
+$$
+w_i = t_i^{p} - t_i^{h}
+$$ {#eq-tv}
+
+Reported Statistics:
+-   The median wait time per month is reported, calculated separately by:
+	  -Pickup area, trip service type (e.g., Taxi vs. TNS), and geospatial area type, 
+-	  The SQL uses the PERCENTILE_CONT(0.5) window function to compute the median of wait times (in minutes) for each grouping by year and month.
+Observation selection note: 
+-   Select only trips with wait time between 10 seconds and 24 hours.
+-   Excluding flagged street-hail trips.
+-   Excluding pre-booked trips.
+-   Keeping only trips with valid data quality and flagged as completed. 
+
+### Competition Factor (SEC)
+There is no analysis related to this factor.
+### Innovation Factor (SEC) 
+There is no analysis related to this factor.
+
+#### Concentration Indices
+
+Herfindahl-Hirschman Index (HHI) and Theil Index are both measures of market concentration. 
+The HHI index is calculated by summing the squares of each firm's market share, with lower values indicating more competition and higher values suggesting greater concentration. Specifically, the corresponding HHI Index for a given region is constructed as follows:
+
+$$
+HHI_{j,t} = \sum_{i=1}^{n} s_{i,j,t}^{2}
+$$  {#eq-tv}
+
+where $s_{i,j,t}$is the market share of firm i in area j during period t, and n is the total number of companies The Theil Index is based on the concept of entropy from information theory. It measures the deviation of a distribution (like market shares) from a perfectly equal distribution. Specifically, the corresponding Theil Index for a given region is constructed as follows:
+
+$$
+T = \sum_{i=1}^{n}
+\left( \frac{x_i}{\mu} \ln\!\left(\frac{x_i}{\mu}\right) \right)
+$$ {#eq-tv}
+
+where n is the total number of companies, and $x_i$ represents the revenue share of the $i^{th}$ entity and μ is the average share. The Theil decomposition is conducted as follows: 
+$$
+T = 
+\sum_{j=1}^{k}
+\left(
+\frac{n_j}{n} \frac{y_j}{y}
+\ln\!\left(\frac{y_j}{y}\right)
+\right)
++
+\sum_{j=1}^{k}
+\left(
+\frac{y_j}{y}
+\sum_{i=1}^{n_j}
+\frac{y_{ij}}{y_j}
+\ln\!\left(\frac{y_{ij}}{y_j}\right)
+\right)
+= B + W
+$$ {#eq-tv}
+
+
+where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region[^10].
+
+[^10]:Novotný, J. (2007). On the measurement of regional inequality: Does spatial dimension of income inequality matter? Annals of Regional Science, 41(3), 563-580. https://web.natur.cuni.cz/~pepino/NOVOTNY2007AnnalsofRegionalScience.pdf
+
+
+### Innovation Factor
+
+There is no analysis related to this factor.
+
+### Sustainability Factor
+
+
+#### Taxi Fleet Utilization
+
+Taxi fleet utilizationRecall that this indicator is calculated as the monthly average ratio of active taxi vehicles to the total approved fleet capacity, expressed as a percentage.
+Let:
+-   $AV_{i,t}$ be the average (over the observation period, such as a month) number of active taxi vehicles per day in pickup area i during month $t$, as calculated from trip-level activity data.
+-   $Capacity_{i,t}$ be the total number of taxi vehicles authorized to operate in pickup area $i$ during the same period.
+The formula is:
+$$
+FleetUtilization_{i,t}
+= \frac{AV_{i,t}}{Capacity_{i,t}}*100
+$$ {#eq-tv}
+
+Note that vehicles are counted based on distinct vehicle IDs observed per day, then averaged across days in each calendar month. Fleet capacity values are assumed to reflect approved vehicles eligible to operate during the same month (based on the Board’s licensing records).
+
+Observation selection note: 
+-   Only vehicles with at least one completed passenger trip on a given day are counted as "active" and hence selected for a given day.
+-   Trips with missing or invalid pickup area information are excluded from the geospatial aggregation.
+
+
+#### Vehicle Occupancy Rate 
+
+A shift is defined as a series of trips performed by a driver, where the start time of each trip occurs within **60 minutes of the previous trip’s end**. After defining the group of trips that are included in one shift, the following attributes are calculated:
+
+-   Shift Start Time: (Denoted as $t_{\text{start}}^{\text{shift}}$) This is the earliest vehicle assignment DateTime ($t_{\text{assign},i}^{\text{vehicle}}$) in the shift.
+
+-   Shift End Time: Denoted as ( $t_{\text{end}}^{\text{shift}}$).\
+This is the latest drop-off arrival DateTime ( $t_{\text{arrive},i}^{\text{dropoff}}$ ) in the shift.
+
+-   Shift Length: Denoted as ( $L^{\text{shift}}$ ): The difference between the shift end time and shift start time:
+
+$$
+L^{\text{shift}} 
+= t_{\text{end}}^{\text{shift}}
+- t_{\text{start}}^{\text{shift}}
+$$ {#eq-tv}
+
+-   Shift Occupancy: Denoted as ($D^{\text{shift}}$).\
+This is the total sum of all trip durations ($D_i$) within the shift:
+
+$$
+D^{\text{shift}} 
+= \sum_{i=1}^{n} D_i
+$$ {#eq-tv}
+
+The Average Vehicle Occupancy Rate (VOR) is calculated as the ratio of the sum of all trip durations denoted by $D_{i,t}$ to the sum of all shift lengths denoted by $L_{i,t}$.
+
+$$
+VOR = \frac{D_{i,t}}{L_{i,t}}
+$$ {#eq-tv}
+
+This formula ensures that the VOR represents the proportion of time within a shift that a vehicle is actively engaged in service.
+
+The Vehicle Occupancy Rate Possible Range (VORPR) is calculated as the ratio of the sum of all trip durations denoted by $D_{i,t}$ to the sum of all Operating Time denoted by $O_{i,t}$.
+
+$$
+VORPR = \frac{D_{i,t}}{O_{i,t}}
+$$ {#eq-tv}
+
+The Operating time includes the time between vehicle assignment time and drop-off time.
+
+$$
+O_i 
+= t_{\text{arrive},i}^{\text{dropoff}}
+- t_{\text{assign},i}^{\text{vehicle}}
+$$ {#eq-tv}
+
+### Drivers’ Gross Hourly Earnings
+
+Recall that this indicator measures the median gross fare revenue earned per working hour by drivers within a defined geographic area and time period. 
+Let $GHE_{j,t}$ denote the gross hourly earning in area j during time $t$:
+$$
+GHE_{j,t}
+=
+\operatorname{Median}_{u \in D_{j,t}}
+\left(
+\frac{\sum_{s \in S_{d_{j,t}}} r_s^{\,t}}
+     {\sum_{s \in S_{d_{j,t}}} l_s^{\,t}}
+\right)
+\times 60
+$$
+	where: d indexes drivers, $D_{j,t}$ is the set of drivers active in area $j$ during period $t$, $s$ indexes inferred shifts, $S_{d,j,t}$is the set of shifts worked by driver d in area $j$, period $t$, $r_s$ is total fare revenue earned during shift $s$, $l_s$ the length of shift s in minutes.
+
+The calculation of this indicator involves nested aggregations and multiple sub metrics, we hence provided a note on the computation here. Driver shifts are not explicitly reported in the Trip Database. Instead, shifts are inferred using observed trip activity. 
+-   First, trips are ordered chronologically for each driver. 
+-   A new shift is assumed to begin when the time gap between the end of one trip and the assignment time of the next trip exceeds 60 minutes. 
+-   Trips separated by 60 minutes or less are treated as belonging to the same continuous working shift. 
+This approach approximates continuous working periods (clusters) while avoiding over-fragmentation of shifts due to short breaks between trips. We performed sensitivity analysis changing the gap time from 60 minutes to 45, 75, 90, and 120 minutes, and the resulting total working time is not sensitive to this parameter from 45 to 90 minutes.
+Reported statistics: For each inferred shift, we report the following statistics:
+-   Shift fare revenue, which is measured by the sum of total passenger fares collected across all trips within the shift.
+-   Shift length, which is then calculated by the elapsed time (in minutes) between the first vehicle assignment and the final drop-off in the shift.
+-   Shift occupancy, which is calculated as the sum of trip durations within the shift.
+Within each calendar month, shift-level measures are aggregated at the driver level:
+-   Total monthly shift fare revenue is calculated by summing shift fare revenue.
+-   Total monthly working time is calculated by summing shift lengths.
+-   Average driver hourly revenue is computed as:
+
+Average hourly revenue is then defined as $GHE_{j,t}=\operatorname{Median}_{u \in D_{j,t}}\left(\frac{\sum_{s \in S_{d_{j,t}}} r_s^{\,t}}{\sum_{s \in S_{d_{j,t}}} l_s^{\,t}}\right)\times 60$ (refer to the main equation in this indicator section). This produces a per-driver monthly estimate of gross fare revenue per working hour. The median is used and reported instead of the mean to reduce sensitivity to extreme values and to better reflect typical driver experience within the sector.
+
+
+### Variety Factor 
+
+There is no analysis related to this factor.
+
+## Appendix 2: Technical Methodology
+### New Vehicle Occupancy Rate 
+`r tbl_caption("U.S. Cities VOR (2016)")`
+
+| City            | Taxi VOR (%) | Uber VOR (%) |
+|-----------------|--------------|--------------|
+| Boston          | 47           | 55           |
+| Los Angeles     | 53           | 63           |
+| New York City   | 53           | 68           |
+| San Francisco   | 52           | 65           |
+| Washington, D.C.| 50           | 58           |
+
+
+*`r fig_caption("New York City VOR (2023 and 2024)")`*
+```{r}
+src3 <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\templates\\VOR.png"
+
+dir.create("img-cache", showWarnings = FALSE)
+dst3 <- file.path("img-cache", "VOR.png")
+
+if (!file.exists(dst3)) {
+  ok3 <- file.copy(src3, dst3, overwrite = TRUE)
+  if (!ok3) stop("Could not copy VOR image from network share")
+}
+
+knitr::include_graphics(dst3)
+
+```
 
 

@@ -53,72 +53,9 @@ colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
 chart
 
 ```
-```{r}
-make_company_fare_chart <- function(
-    data,
-    area      = region_name,
-    year      = 2023,
-    month     = 1,
-    service   = "TAXI",
-    indicator = "FARE_PER_5KM",
-    title     = "Taxi Fare for a 5-Kilometre Trip ($)",
-    base_size = 10
-) {
-  df <- data %>%
-    dplyr::filter(
-      REPORTING_LEVEL            == "COMPANY",
-      PICKUP_AREA           == area,
-      SERVICE_TYPE    == service,
-      INDICATOR_NAME        == indicator,
-      YEAR            == year,
-      MONTH           == month
-    ) %>%
-    dplyr::mutate(
-      company = REPORTING_NAME,
-      fare    = as.numeric(INDICATOR_VALUE)
-    ) %>%
-    dplyr::arrange(dplyr::desc(fare)) %>%
-    dplyr::mutate(
-      company = factor(company, levels = rev(company))
-    )
-
-  if (nrow(df) == 0) stop("No rows matched your filters.")
-
-  ggplot(df, aes(x = company, y = fare)) +
-  geom_col(width = 0.7, fill = "#1f77b4") +
-  geom_text(
-    aes(label = scales::dollar(fare, accuracy = 0.01)),
-    hjust = -0.1,                       # push label a bit right of bar end
-    size  = 3
-  ) +
-  coord_flip() +
-  expand_limits(y = max(df$fare) * 1.05) +  # extra room for labels
-  scale_y_continuous(
-    labels = scales::dollar_format(accuracy = 0.01),
-    expand = c(0, 0.02)
-  ) +
-  labs(
-    title    = title,
-    subtitle = "Metro Vancouver Regional District",
-    x        = NULL,
-    y        = "Fare for a 5-Kilometre Trip",
-    caption  = "Service Type: TAXI"
-  ) +
-  theme_minimal(base_size = base_size) +
-  theme(
-    plot.title.position = "plot",
-    axis.title.y        = element_blank(),
-    axis.text.y         = element_text(hjust = 1),
-    panel.grid.major.y  = element_blank(),
-    panel.grid.minor    = element_blank(),
-    plot.margin         = margin(6, 8, 6, 6)
-  )
-}
-
-```
 
 
-```{r, fig.width=10, fig.height=5}
+```{r, fig.width=11, fig.height=12}
 company_fare_chart <- make_company_fare_chart(raw)
 company_fare_chart
 ```

@@ -1,11 +1,3 @@
-suppressPackageStartupMessages({
-  library(readxl)
-  library(dplyr)
-  library(lubridate)
-})
-
-trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\Output\\Analysis\\trend_analysis_20251211.xlsx"
-
 trend_raw <- read_excel(
   trend_path,
   col_types = c(
@@ -141,7 +133,7 @@ trend_direction_text <- function(code, subject = "this indicator") {
     )
   } else if (code == "TREND UP") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend suggests that a upward trajectory is evident."
+      "Looking over the past two years, statistical analysis of the long-term trend suggests that an upward trajectory is evident."
     )
   } else {
     NA_character_
@@ -155,9 +147,9 @@ shift_direction_text <- function(code) {
   if (code == "NO_SIGNIFICANT_SHIFT") {
     "Statistical analysis of the short-term trend suggests that there is no active shift in market direction."
   } else if (code == "SHIFT DOWN") {
-    "Statistical analysis of the short-term trend suggests that there is downward shift in market direction."
+    "Statistical analysis of the short-term trend suggests that there is a downward shift in market direction."
   } else if (code == "SHIFT UP") {
-    "Statistical analysis of the short-term trend suggests that there is upward shift in market direction."
+    "Statistical analysis of the short-term trend suggests that there is an upward shift in market direction."
   } else {
     NA_character_
   }

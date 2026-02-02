@@ -42,7 +42,7 @@ Observation selection note: In our data query, completed trips with valid data q
 
 #### Number of Wheelchair Accessible Vehicles (WAVs)
 
-Recall that this his indicator counts the number of distinct wheelchair-accessible vehicles (WAVs) that actively provided completed accessible trips during a given month. 
+Recall that this indicator counts the number of distinct wheelchair-accessible vehicles (WAVs) that actively provided completed accessible trips during a given month. 
 Let:
 -   	$WAV_{i,t}$= Number of distinct WAVs active in pickup area i during month t, based on observed accessible trips.
 Observation selection note: the following criteria and logic are applied:
@@ -80,7 +80,7 @@ Active vehicles by hour of week: The number of vehicles completed at least one t
 
 ### Affordability Factor(PN)
 Fare Cost Indicator
-Recall that his indicator measures the effective cost of passenger services using two complementary metrics:Fare per Kilometre: based on actual trip-level fare and distance data; and Real cost for a 5 Kilometre Trip: this metric captures the fare cost of a five-kilometre trip, measured in labour compensation of a typical B.C. worker.
+Recall that indicator measures the effective cost of passenger services using two complementary metrics:Fare per Kilometre: based on actual trip-level fare and distance data; and Real cost for a 5 Kilometre Trip: this metric captures the fare cost of a five-kilometre trip, measured in labour compensation of a typical B.C. worker.
 
 #### Metric 1. Fare for a 5 km trip
 
@@ -112,7 +112,7 @@ There is no analysis related to this factor.
 
 #### Wait Time
 
-Regall that this indicator is defined as the duration (in minutes) between the time a trip was requested and when the passenger was picked up.
+Recall that this indicator is defined as the duration (in minutes) between the time a trip was requested and when the passenger was picked up.
 Let:
 -   i: index for trips
 -   $w_i$= wait time for trip i
@@ -318,5 +318,4 @@ if (!file.exists(dst3)) {
 knitr::include_graphics(dst3)
 
 ```
-
 

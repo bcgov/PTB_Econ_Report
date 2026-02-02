@@ -6,7 +6,7 @@ Primary Factor: Accessibility
 
 **Measurement:** The number of active vehicles per 1,000 persons is calculated as the ratio of the total number of active vehicles (including both taxis and TNS) in an area relative to its population, normalized to a per 1,000 persons basis.
 
-**Interpretation:** A higher number of active vehicles per 1,000 persons indicates higher accessibility to services in the area, as more taxis and TNS vehicles are available to serve every 1,000 persons.
+**Interpretation:** A higher number of active vehicles per 1,000 persons indicates higher accessibility to services in the area, as more taxi and TNS vehicles are available to serve every 1,000 persons.
 
 Policy Context: Public Need and Accessibility Factor
 

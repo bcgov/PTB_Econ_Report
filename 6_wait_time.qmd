@@ -67,67 +67,6 @@ chart
 
 ```
 
-```{r}
-make_wait_time_percentile_chart <- function(
-    data,
-    region,
-    services  = c("TAXI", "TNS"),
-    area_type = "REGIONAL",
-    date_from = NULL,
-    date_to   = NULL,
-    title     = "Cumulative Distribution of Wait Times (minutes)",
-    base_size = 10,
-    colors    = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
-) {
-
-  # فقط indicatorهای percentile
-  df <- data %>%
-    filter(
-      area_type == !!area_type,
-      area == !!region,
-      service %in% services,
-      stringr::str_detect(indicator, "^WAIT_TIME_\\d+_PERCENTILE$")
-    )
-
-  if (!is.null(date_from)) df <- df %>% filter(date >= date_from)
-  if (!is.null(date_to))   df <- df %>% filter(date <= date_to)
-
-  if (nrow(df) == 0) stop("No percentile data found.")
-
-  # آخرین ماه
-  last_date <- max(df$date, na.rm = TRUE)
-  df <- df %>% filter(date == last_date)
-
-  # percentile عددی از اسم indicator
-  df <- df %>%
-    mutate(
-      percentile = as.numeric(stringr::str_extract(indicator, "\\d+")),
-      service = factor(service, levels = services)
-    ) %>%
-    group_by(service, percentile) %>%
-    summarise(value = mean(value, na.rm = TRUE), .groups = "drop")
-
-  ggplot(df, aes(x = percentile, y = value, color = service)) +
-    geom_line(linewidth = 1) +
-    geom_point(size = 2) +
-    scale_color_manual(values = colors, name = "Service Type") +
-    scale_x_continuous(breaks = seq(0, 100, 10)) +
-    scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
-    labs(
-      title    = title,
-      subtitle = paste(region, "Regional District"),
-      x        = "Percentile",
-      y        = "Wait Time (minutes)"
-    ) +
-    theme_minimal(base_size = base_size) +
-    theme(
-      plot.title.position = "plot",
-      legend.position = "top",
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank()
-    )
-}
-```
 
 ```{r}
 make_wait_time_percentile_chart(

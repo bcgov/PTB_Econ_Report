@@ -27,7 +27,7 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
     
 [^7]: The method of calculating The Vehicle Occupancy Rate Possible Range has been included in the Appendix.
     
-If no trips occur during the working period, the vehicle occupancy rate is zero, representing the lower end of the range. Conversely, if there is no idle time between trips, the vehicle occupancy rate reaches its upper limit. Based on 2024 data for taxi and TNS vehicles in the Metro Vancouver Regional District (MVRD), the upper limit of the vehicle occupancy rate is approximately 0.7 for TNS vehicles and 0.8 for taxis. These values define the upper end of the VORPR.
+If no trips occur during the working period, the vehicle occupancy rate is zero, representing the lower end of the range. Conversely, if there is no idle time between trips, the vehicle occupancy rate reaches its upper limit. Based on 2024 data for taxi and TNS vehicles in the Metro Vancouver Regional District (MVRD), the upper limit of the vehicle occupancy rate is approximately 0.7 for TNS vehicles and 0.8 for taxi. These values define the upper end of the VORPR.
 
 Existing studies provide baseline VOR levels for taxis and rideshare platforms. Cramer and Krueger (2016) found that Uber consistently achieved higher VOR than taxis across major U.S. cities. Their analysis showed that Uber’s VOR ranged from 55% to 68%, while taxi VOR remained lower, between 47% and 53%. The largest gap was observed in New York City, where Uber’s VOR (68%) exceeded taxi VOR (53%) by 15 percentage points. This trend suggests that rideshare platforms operate more efficiently than traditional taxi services (see Table 19 in Appendix 2 for detailed comparisons)[^8].
 
@@ -39,7 +39,7 @@ Additionally, data from the NYC Taxi & Limousine Commission (TLC) Factbook indic
 
 #### `r region_name` Regional District Taxi and TNS Vehicle Occupancy Rate Findings
 
-`r tbl_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`
+`r tbl_caption(paste(region_name, "Regional District taxi and TNS Vehicle Occupancy Rate Findings"))`
 
 ```{r}
 make_indicator_table_compact(
@@ -52,7 +52,7 @@ make_indicator_table_compact(
   currency  = FALSE)
 ```
 
-`r fig_caption(paste(region_name, "Regional District Taxi and TNS Vehicle Occupancy Rate Findings"))`
+`r fig_caption(paste(region_name, "Regional District taxi and TNS Vehicle Occupancy Rate Findings"))`
 
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_lines(
