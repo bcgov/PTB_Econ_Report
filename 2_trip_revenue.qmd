@@ -20,7 +20,8 @@ The Board’s Public Need Policy in the **Policy Manual** lists examples of the 
   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
   - If the proposed service attracts current taxi or TNS users, it will result in a redistribution of market share as measured by trip revenue among existing providers.
   - The redistribution can only be observed after the proposed service is introduced. However, historical trends can provide valuable indications. For instance, ongoing shifts in market shares of sectors can indicate changes in customer preference.
-
+  
+\newpage
 #### `r region_name` Regional District Trip Revenue Findings
 
 

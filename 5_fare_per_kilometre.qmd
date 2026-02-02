@@ -17,7 +17,8 @@ The Board's public need policy in the Policy Manual lists examples of the afford
 -   The proposed service provides more affordable options or services for consumers.
 
     -   In general, a lower fare for a 5-kilometre trip leads to improved affordability of service. On the other hand, the ratio of fare for a 5-kilometre trip to personal hourly wage rate can more accurately reflect affordability, with a lower ratio indicating better affordability.
-
+    
+\newpage
 #### `r region_name` Regional District Fare for a 5-Kilometre Trip Findings
 
 

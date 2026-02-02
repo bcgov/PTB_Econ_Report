@@ -26,6 +26,8 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
     -Assuming fixed costs, stable or gradually increasing revenue per active vehicle in the taxi sector indicates a lack of rapid disruption.
 -   The proposed service promotes overall profitability and economic sustainability of the industry.
     -Assuming fixed costs, stable or gradually increasing revenue per active vehicle in the taxi sector indicates overall profitability and economic sustainability for the industry.
+    
+\newpage
 
 #### `r region_name` Regional District Revenue per Active Vehicle Findings
 

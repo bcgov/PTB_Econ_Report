@@ -15,14 +15,25 @@ source("0_2setup2_peter.R")
 ```
 
 {{< include 0_4intro.qmd >}}
+\newpage
 {{< include 1_trip_volume.qmd >}}
+\newpage
 {{< include 2_trip_revenue.qmd >}}
+\newpage
 {{< include 3_number_wavs.qmd >}}
+\newpage
 {{< include 4_number_active_vehicles_per_1000.qmd >}}
+\newpage
 {{< include 5_fare_per_kilometre.qmd >}}
+\newpage
 {{< include 6_wait_time.qmd >}}
+\newpage
 {{< include 7_revenue_per_active_vehicle.qmd >}}
+\newpage
 {{< include 8_taxi_fleet_utilization_rate.qmd >}}
+\newpage
 {{< include 9_taxi_vehicle_occupancy_rate.qmd >}}
+\newpage
 {{< include 12_driver_earning.qmd >}}
+\newpage
 {{< include 11_appendix.qmd >}}

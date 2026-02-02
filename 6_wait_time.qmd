@@ -29,7 +29,8 @@ The Board’s Public Need Policy in the **Policy Manual** lists examples of the 
 -   The proposed service provides a service that is comfortable and convenient.
     -   A short wait time contributes to a more comfortable and convenient service. 
     -   The proposed service supports better customer service and customer satisfaction. A short wait time contributes to better customer service and customer satisfaction.
-
+    
+\newpage
 #### `r region_name` Regional District Wait Time Findings
 
 

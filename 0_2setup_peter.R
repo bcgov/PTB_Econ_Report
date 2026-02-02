@@ -34,11 +34,11 @@ suppressPackageStartupMessages({
 date_from <- lubridate::ym("2023-01") # report window start (inclusive)
 date_to   <- lubridate::ym("2025-11") # report window end   (inclusive)
 
-region_name <- "Metro Vancouver"          # display name used across report
+region_name <- "Capital"          # display name used across report
 
-tns_zone <- "ZONE 1"                      #for fleet
+tns_zone <- "ZONE 2"                      #for fleet
 
-municipal_name <- "City of Vancouver"     #for fleet
+municipal_name <- "The Corporation of the City of Victoria"     #for fleet
 
 
 # Indicators:

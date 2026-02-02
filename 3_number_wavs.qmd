@@ -16,6 +16,8 @@ The Board’s public need policy in the Policy Manual lists examples of the acce
   -There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
   - The number of WAVs on the road directly and positively correlates with the extent and quality of service provided to individuals with mobility disabilities.
   
+\newpage
+  
 #### `r region_name` Regional District Number of Wheelchair Accessible Vehicles Findings
 
 

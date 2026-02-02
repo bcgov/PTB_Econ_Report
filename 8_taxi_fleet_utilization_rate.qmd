@@ -30,6 +30,8 @@ The Board’s sound economic conditions policy in the Policy Manual lists exampl
 
     -   A low taxi fleet utilization rate suggests lower profitability or economic unsustainability in the market. 
 
+\newpage
+
 #### `r region_name` Regional District Taxi Fleet Utilization Rate Findings
 
 
