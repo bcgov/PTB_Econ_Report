@@ -2,7 +2,6 @@
 
 **Primary Factor:** Demand
 
-
 **Description:** Trip revenue represents, in nominal terms, the observed quantities demanded for trip services, reflecting the equilibrium between passenger demand and industry supply.
 
 **Measurement:** Trip revenue is calculated as the total fare amount of all completed trips reported to the Trip Database in an area over a month.
@@ -11,25 +10,20 @@
 
 As stated previously, it is helpful to note that although taxis and TNS are similar, they are not the same. taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined revenue of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
 
-
 Policy Context: Public Need and Demand Factor
 
 The Board’s Public Need Policy in the **Policy Manual** lists examples of the demand factor, which are set out below alongside their corresponding implications on trip revenue:
 
-- **There are people who would use the proposed service.**  
-  There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
-  - If the proposed service attracts current taxi or TNS users, it will result in a redistribution of market share as measured by trip revenue among existing providers.
-  - The redistribution can only be observed after the proposed service is introduced. However, historical trends can provide valuable indications. For instance, ongoing shifts in market shares of sectors can indicate changes in customer preference.
-  
+-   **There are people who would use the proposed service.**\
+    There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service.
+    -   If the proposed service attracts current taxi or TNS users, it will result in a redistribution of market share as measured by trip revenue among existing providers.
+    -   The redistribution can only be observed after the proposed service is introduced. However, historical trends can provide valuable indications. For instance, ongoing shifts in market shares of sectors can indicate changes in customer preference.
+
 \newpage
+
 #### `r region_name` Regional District Trip Revenue Findings
 
-
-
-
-
 `r tbl_caption(paste(region_name, "Regional District Trip Revenue (thousands of dollars)"))`
-
 
 ```{r}
 raw_norm_k <- raw_norm %>% dplyr::mutate(
@@ -49,8 +43,8 @@ make_indicator_table_compact(
   currency  = TRUE)
 ```
 
-
 `r fig_caption(paste(region_name, "Regional District Trip Revenue"))`
+
 ```{r, fig.width=10, fig.height=5}
 chart <- make_indicator_chart_stacked(
 data       = raw_norm,
@@ -68,14 +62,8 @@ chart
 
 #### Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for taxi services in the region. On a month-over-month (MoM) basis, taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TAXI")`
-`r shift_narrative("TRIP_REVENUE", "TAXI")`
+In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for taxi services in the region. On a month-over-month (MoM) basis, taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TAXI")` `r shift_narrative("TRIP_REVENUE", "TAXI")`
 
-In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TNS")`
-`r shift_narrative("TRIP_REVENUE", "TNS")`
-
-
-
-
+In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TNS")` `r shift_narrative("TRIP_REVENUE", "TNS")`
 
 **Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
