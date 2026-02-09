@@ -1,31 +1,18 @@
 ## Appendix 1: Technical Methodology
 
-A set of completed trips in a given area j during the period t is denoted by $T_{j,t}$, and each completed trip is denoted by i in $T_{j,t}$ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by $v_i$ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database. 
+A set of completed trips in a given area j during the period t is denoted by $T_{j,t}$, and each completed trip is denoted by i in $T_{j,t}$ is associated with a unique trip ID (one-to-one) and a unique vehicle ID denoted by $v_i$ (many to one). Indicators discussed in this report are calculated as follows. Unless otherwise mentioned, the underlying data is retrieved from the Trip Database.
 
-(temporary) list of indicators
-Utilization (Feb)
-Wait time (Mar)
-WAVs (APR)
-Fare Cost (May)
-Availability (Jun)
-Driver Hourly Earning (Sep)
-Trip Vol (Nov)
-Trip Rev (Dec)
-VOR (not yet published)
-
+(temporary) list of indicators: - Utilization (Feb) - Wait time (Mar) - WAVs (APR) - Fare Cost (May) - Availability (Jun) - Driver Hourly Earning (Sep) - Trip Vol (Nov) - Trip Rev (Dec) - VOR (not yet published)
 
 ### Demand Factor(PN)
 
 #### Trip Volume
 
-
-Trip volume is the total count of trip IDs of completed trips.
-$$
+Trip volume is the total count of trip IDs of completed trips. $$
 TV_{j,t} = \sum_{i \in \text{completed\_trips}}^{N_{j,t}} 1
 $$ {#eq-tv}
 
-where $TV_{j,t}$ represents trip volume in area j during period t, i on the right hand side denotes the index of trips. $N_{j,t}$ is the total number of completed trips in area j during period t. Each completed trip contributes a value of 1 to the summation.
-Observation selection note: In our data query, completed trips with valid data quality and a fare amount greater than $2.25 are included.
+where $TV_{j,t}$ represents trip volume in area j during period t, i on the right hand side denotes the index of trips. $N_{j,t}$ is the total number of completed trips in area j during period t. Each completed trip contributes a value of 1 to the summation. Observation selection note: In our data query, completed trips with valid data quality and a fare amount greater than \$2.25 are included.
 
 #### Trip Revenue
 
@@ -33,76 +20,70 @@ Trip revenue is the total fare amount collected from all completed trips.
 
 $$
 TR_{j,t} = \sum_{i=1}^{N_{j,t}} r_i
-$$ {#eq-tv}
+$$
 
-where $TR_{j,t}$ represents trip revenue in area j during period t, $r_{i}$ is the gross revenue (reported to the Trip Database) with i indexes completed trips, $N_{j,t}$ is the total number of completed trips in area j during period t.
-Observation selection note: In our data query, completed trips with valid data quality (strictly positive duration) and a fare amount strictly greater than 0 are included.
+where $TR_{j,t}$ represents trip revenue in area j during period t, $r_{i}$ is the gross revenue (reported to the Trip Database) with i indexes completed trips, $N_{j,t}$ is the total number of completed trips in area j during period t. Observation selection note: In our data query, completed trips with valid data quality (strictly positive duration) and a fare amount strictly greater than 0 are included.
 
 ### Accessibility Factor(PN)
 
 #### Number of Wheelchair Accessible Vehicles (WAVs)
 
-Recall that this indicator counts the number of distinct wheelchair-accessible vehicles (WAVs) that actively provided completed accessible trips during a given month. 
-Let:
--   	$WAV_{i,t}$= Number of distinct WAVs active in pickup area i during month t, based on observed accessible trips.
-Observation selection note: the following criteria and logic are applied:
--   1.  Trip-Level Filters:
-    -	Only completed trips.
-    - Trip type must be flagged as accessible. 
-    - Trip type must be flagged as accessible. 
--   2.	Vehicle Identification:
-    - A WAV is counted as “active” if it is associated with at least one completed accessible trip during the month.
-    - Distinct WAVs are counted by unique VEHICLE_ID and VEHICLE_REGISTRATION_NO per area and month.
-Note that regular trips by WAVs (i.e., not flagged as accessible riders) are excluded. Moreover, WAV status is inferred based on actual trip provision, not registry cross-referencing. 
+Recall that this indicator counts the number of distinct wheelchair-accessible vehicles (WAVs) that actively provided completed accessible trips during a given month. Let:
+
+-   $WAV_{i,t}$= Number of distinct WAVs active in pickup area i during month t, based on observed accessible trips. Observation selection note: the following criteria and logic are applied:
+
+-   1\. Trip-Level Filters: - Only completed trips.
+
+    -   Trip type must be flagged as accessible.
+
+    -   Trip type must be flagged as accessible.
+
+-   2\. Vehicle Identification:
+
+    -   A WAV is counted as “active” if it is associated with at least one completed accessible trip during the month.
+
+    -   Distinct WAVs are counted by unique VEHICLE_ID and VEHICLE_REGISTRATION_NO per area and month. Note that regular trips by WAVs (i.e., not flagged as accessible riders) are excluded. Moreover, WAV status is inferred based on actual trip provision, not registry cross-referencing.
 
 ### Availability indicator(PN)
-Recall that this indicator captures patterns in the presence of drivers, vehicles, and completed trips throughout the day. 
-This indicator is composed of three complementary metrics, each calculated by hour then aggregated monthly:
+
+Recall that this indicator captures patterns in the presence of drivers, vehicles, and completed trips throughout the day. This indicator is composed of three complementary metrics, each calculated by hour then aggregated monthly:
 
 #### Metric 1: Number of Active Vehicles per 1,000 Persons
 
-The number of active vehicles per 1,000 persons  is calculated as the ratio of total number of taxi and TNS active vehicles $V_{j,t}$ in area j during time period t to the area’s population  $(P_{j,t})$, multiplied by 1,000. 
+The number of active vehicles per 1,000 persons is calculated as the ratio of total number of taxi and TNS active vehicles $V_{j,t}$ in area j during time period t to the area’s population $(P_{j,t})$, multiplied by 1,000.
 
 $$
-Number of Active Vehicles Per 1000 Persons _{j,t}
+Number of Active Vehicles Per 1000 Persons _{j,t}
 = \frac{\lvert V_{j,t} \rvert}{P_{j,t}} \times 1000
-$$ {#eq-tv}
-#### Metric 2: Matching time by hour of the week
-Trip-level wait time definition:
+$$
+
+#### Metric 2: Matching time by hour of the week Trip-level wait time definition:
+
 $$
 w_i= t_i^p- t_i^h
-$$ {#eq-tv}
-Where: $t_{i^p}$ is pickup arrival time for trip $i$, $t_{i^h}$ is hail (request) time for trip $i$. The reported value is the median wait time for trips occurring in a given hour of the reporting period.
+$$ Where: $t_{i^p}$ is pickup arrival time for trip $i$, $t_{i^h}$ is hail (request) time for trip $i$. The reported value is the median wait time for trips occurring in a given hour of the reporting period.
 
 #### Metric 3. Hourly vehicle availability pattern
-Active vehicles by hour of week: The number of vehicles completed at least one trip during a given hour. 
 
+Active vehicles by hour of week: The number of vehicles completed at least one trip during a given hour.
 
 ### Affordability Factor(PN)
-Fare Cost Indicator
-Recall that indicator measures the effective cost of passenger services using two complementary metrics:Fare per Kilometre: based on actual trip-level fare and distance data; and Real cost for a 5 Kilometre Trip: this metric captures the fare cost of a five-kilometre trip, measured in labour compensation of a typical B.C. worker.
+
+Fare Cost Indicator Recall that indicator measures the effective cost of passenger services using two complementary metrics: Fare per Kilometre: based on actual trip-level fare and distance data; and Real cost for a 5 Kilometre Trip: this metric captures the fare cost of a five-kilometre trip, measured in labour compensation of a typical B.C. worker.
 
 #### Metric 1. Fare for a 5 km trip
 
-This first metric estimates the typical fare a passenger would pay for a 5 km trip, using actual trip records where the total trip distance falls within a ±0.25 km buffer (i.e., trips with distance between 4.75 km and 5.25 km). 
+This first metric estimates the typical fare a passenger would pay for a 5 km trip, using actual trip records where the total trip distance falls within a ±0.25 km buffer (i.e., trips with distance between 4.75 km and 5.25 km).
 
-Reported Statistics:
--   The 10th, 50th (median), and 90th percentiles of the fare distribution for (approximately, with ±0.25 km buffer) 5 km trips.
-Observation selection note:
--   Completed trips, non-zero fare, valid data
--   	Distance filter: 4.75≤$d_i$≤5.25km
-This serves as a standardized pricing benchmark, independent of trip distance variability. It is useful for understanding market-level pricing consistency, and differences between operators.
+Reported Statistics: - The 10th, 50th (median), and 90th percentiles of the fare distribution for (approximately, with ±0.25 km buffer) 5 km trips. Observation selection note: - Completed trips, non-zero fare, valid data - Distance filter: 4.75≤$d_i$≤5.25km This serves as a standardized pricing benchmark, independent of trip distance variability. It is useful for understanding market-level pricing consistency, and differences between operators.
 
 #### Metric 2: Real cost for a 5 km trip
-In this metric, tThe 5 km fare is also converted into real terms, expressed in minutes of labour by a typical B.C. worker. This is computed as:
-$$
+
+In this metric, The 5 km fare is also converted into real terms, expressed in minutes of labour by a typical B.C. worker. This is computed as: $$
 Real Cost=Fare (5km)/Hourly Wage ×60
-$$ {#eq-tv}
+$$
 
-This helps translates nominal pricing into affordability context. 
-Observation selection note: the same selection logics as in Metric 1 were applied.
-
-
+This helps translates nominal pricing into affordability context. Observation selection note: the same selection logics as in Metric 1 were applied.
 
 ### Safety Factor(PN)
 
@@ -112,51 +93,36 @@ There is no analysis related to this factor.
 
 #### Wait Time
 
-Recall that this indicator is defined as the duration (in minutes) between the time a trip was requested and when the passenger was picked up.
-Let:
--   i: index for trips
--   $w_i$= wait time for trip i
--   $t_i^p$= pickup arrival time for trip i
--   $t_i^h$= hail (request) time for trip i
-Then:
+Recall that this indicator is defined as the duration (in minutes) between the time a trip was requested and when the passenger was picked up. Let: - i: index for trips - $w_i$= wait time for trip i - $t_i^p$= pickup arrival time for trip i - $t_i^h$= hail (request) time for trip i Then:
 
 $$
 w_i = t_i^{p} - t_i^{h}
-$$ {#eq-tv}
+$$
 
-Reported Statistics:
--   The median wait time per month is reported, calculated separately by:
-	  -Pickup area, trip service type (e.g., Taxi vs. TNS), and geospatial area type, 
--	  The SQL uses the PERCENTILE_CONT(0.5) window function to compute the median of wait times (in minutes) for each grouping by year and month.
-Observation selection note: 
--   Select only trips with wait time between 10 seconds and 24 hours.
--   Excluding flagged street-hail trips.
--   Excluding pre-booked trips.
--   Keeping only trips with valid data quality and flagged as completed. 
+Reported Statistics: - The median wait time per month is reported, calculated separately by: -Pickup area, trip service type (e.g., Taxi vs. TNS), and geospatial area type, - The SQL uses the PERCENTILE_CONT(0.5) window function to compute the median of wait times (in minutes) for each grouping by year and month. Observation selection note: - Select only trips with wait time between 10 seconds and 24 hours. - Excluding flagged street-hail trips. - Excluding pre-booked trips. - Keeping only trips with valid data quality and flagged as completed.
 
 ### Competition Factor (SEC)
+
 There is no analysis related to this factor.
-### Innovation Factor (SEC) 
-There is no analysis related to this factor.
+
+### Innovation Factor (SEC) There is no analysis related to this factor.
 
 #### Concentration Indices
 
-Herfindahl-Hirschman Index (HHI) and Theil Index are both measures of market concentration. 
-The HHI index is calculated by summing the squares of each firm's market share, with lower values indicating more competition and higher values suggesting greater concentration. Specifically, the corresponding HHI Index for a given region is constructed as follows:
+Herfindahl-Hirschman Index (HHI) and Theil Index are both measures of market concentration. The HHI index is calculated by summing the squares of each firm's market share, with lower values indicating more competition and higher values suggesting greater concentration. Specifically, the corresponding HHI Index for a given region is constructed as follows:
 
 $$
 HHI_{j,t} = \sum_{i=1}^{n} s_{i,j,t}^{2}
-$$  {#eq-tv}
+$$
 
 where $s_{i,j,t}$is the market share of firm i in area j during period t, and n is the total number of companies The Theil Index is based on the concept of entropy from information theory. It measures the deviation of a distribution (like market shares) from a perfectly equal distribution. Specifically, the corresponding Theil Index for a given region is constructed as follows:
 
 $$
 T = \sum_{i=1}^{n}
 \left( \frac{x_i}{\mu} \ln\!\left(\frac{x_i}{\mu}\right) \right)
-$$ {#eq-tv}
-
-where n is the total number of companies, and $x_i$ represents the revenue share of the $i^{th}$ entity and μ is the average share. The Theil decomposition is conducted as follows: 
 $$
+
+where n is the total number of companies, and $x_i$ represents the revenue share of the $i^{th}$ entity and μ is the average share. The Theil decomposition is conducted as follows: $$
 T = 
 \sum_{j=1}^{k}
 \left(
@@ -172,13 +138,11 @@ T =
 \ln\!\left(\frac{y_{ij}}{y_j}\right)
 \right)
 = B + W
-$$ {#eq-tv}
+$$
 
+where $n_j$ refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region[^11_appendix-1].
 
-where n_j refers to the population size of the $j^{th}$ region, $y_j$ is the mean income of the $j^{th}$ region, and $y_{i,j}$ corresponds to the income of the $i^{th}$ entity in the $j^{th}$ region[^10].
-
-[^10]:Novotný, J. (2007). On the measurement of regional inequality: Does spatial dimension of income inequality matter? Annals of Regional Science, 41(3), 563-580. https://web.natur.cuni.cz/~pepino/NOVOTNY2007AnnalsofRegionalScience.pdf
-
+[^11_appendix-1]: Novotný, J. (2007). On the measurement of regional inequality: Does spatial dimension of income inequality matter? Annals of Regional Science, 41(3), 563-580. https://web.natur.cuni.cz/\~pepino/NOVOTNY2007AnnalsofRegionalScience.pdf
 
 ### Innovation Factor
 
@@ -186,34 +150,25 @@ There is no analysis related to this factor.
 
 ### Sustainability Factor
 
-
 #### Taxi Fleet Utilization
 
-Taxi fleet utilizationRecall that this indicator is calculated as the monthly average ratio of active taxi vehicles to the total approved fleet capacity, expressed as a percentage.
-Let:
--   $AV_{i,t}$ be the average (over the observation period, such as a month) number of active taxi vehicles per day in pickup area i during month $t$, as calculated from trip-level activity data.
--   $Capacity_{i,t}$ be the total number of taxi vehicles authorized to operate in pickup area $i$ during the same period.
-The formula is:
-$$
+Taxi fleet utilization Recall that this indicator is calculated as the monthly average ratio of active taxi vehicles to the total approved fleet capacity, expressed as a percentage. Let: - $AV_{i,t}$ be the average (over the observation period, such as a month) number of active taxi vehicles per day in pickup area i during month $t$, as calculated from trip-level activity data. - $Capacity_{i,t}$ be the total number of taxi vehicles authorized to operate in pickup area $i$ during the same period. The formula is: $$
 FleetUtilization_{i,t}
 = \frac{AV_{i,t}}{Capacity_{i,t}}*100
-$$ {#eq-tv}
+$$
 
 Note that vehicles are counted based on distinct vehicle IDs observed per day, then averaged across days in each calendar month. Fleet capacity values are assumed to reflect approved vehicles eligible to operate during the same month (based on the Board’s licensing records).
 
-Observation selection note: 
--   Only vehicles with at least one completed passenger trip on a given day are counted as "active" and hence selected for a given day.
--   Trips with missing or invalid pickup area information are excluded from the geospatial aggregation.
+Observation selection note: - Only vehicles with at least one completed passenger trip on a given day are counted as "active" and hence selected for a given day. - Trips with missing or invalid pickup area information are excluded from the geospatial aggregation.
 
-
-#### Vehicle Occupancy Rate 
+#### Vehicle Occupancy Rate
 
 A shift is defined as a series of trips performed by a driver, where the start time of each trip occurs within **60 minutes of the previous trip’s end**. After defining the group of trips that are included in one shift, the following attributes are calculated:
 
 -   Shift Start Time: (Denoted as $t_{\text{start}}^{\text{shift}}$) This is the earliest vehicle assignment DateTime ($t_{\text{assign},i}^{\text{vehicle}}$) in the shift.
 
 -   Shift End Time: Denoted as ( $t_{\text{end}}^{\text{shift}}$).\
-This is the latest drop-off arrival DateTime ( $t_{\text{arrive},i}^{\text{dropoff}}$ ) in the shift.
+    This is the latest drop-off arrival DateTime ( $t_{\text{arrive},i}^{\text{dropoff}}$ ) in the shift.
 
 -   Shift Length: Denoted as ( $L^{\text{shift}}$ ): The difference between the shift end time and shift start time:
 
@@ -221,21 +176,21 @@ $$
 L^{\text{shift}} 
 = t_{\text{end}}^{\text{shift}}
 - t_{\text{start}}^{\text{shift}}
-$$ {#eq-tv}
+$$
 
 -   Shift Occupancy: Denoted as ($D^{\text{shift}}$).\
-This is the total sum of all trip durations ($D_i$) within the shift:
+    This is the total sum of all trip durations ($D_i$) within the shift:
 
 $$
 D^{\text{shift}} 
 = \sum_{i=1}^{n} D_i
-$$ {#eq-tv}
+$$
 
 The Average Vehicle Occupancy Rate (VOR) is calculated as the ratio of the sum of all trip durations denoted by $D_{i,t}$ to the sum of all shift lengths denoted by $L_{i,t}$.
 
 $$
 VOR = \frac{D_{i,t}}{L_{i,t}}
-$$ {#eq-tv}
+$$
 
 This formula ensures that the VOR represents the proportion of time within a shift that a vehicle is actively engaged in service.
 
@@ -243,7 +198,7 @@ The Vehicle Occupancy Rate Possible Range (VORPR) is calculated as the ratio of 
 
 $$
 VORPR = \frac{D_{i,t}}{O_{i,t}}
-$$ {#eq-tv}
+$$
 
 The Operating time includes the time between vehicle assignment time and drop-off time.
 
@@ -251,13 +206,11 @@ $$
 O_i 
 = t_{\text{arrive},i}^{\text{dropoff}}
 - t_{\text{assign},i}^{\text{vehicle}}
-$$ {#eq-tv}
+$$
 
 ### Drivers’ Gross Hourly Earnings
 
-Recall that this indicator measures the median gross fare revenue earned per working hour by drivers within a defined geographic area and time period. 
-Let $GHE_{j,t}$ denote the gross hourly earning in area j during time $t$:
-$$
+Recall that this indicator measures the median gross fare revenue earned per working hour by drivers within a defined geographic area and time period. Let $GHE_{j,t}$ denote the gross hourly earning in area j during time $t$: $$
 GHE_{j,t}
 =
 \operatorname{Median}_{u \in D_{j,t}}
@@ -266,44 +219,50 @@ GHE_{j,t}
      {\sum_{s \in S_{d_{j,t}}} l_s^{\,t}}
 \right)
 \times 60
-$$
-	where: d indexes drivers, $D_{j,t}$ is the set of drivers active in area $j$ during period $t$, $s$ indexes inferred shifts, $S_{d,j,t}$is the set of shifts worked by driver d in area $j$, period $t$, $r_s$ is total fare revenue earned during shift $s$, $l_s$ the length of shift s in minutes.
+$$ where: d indexes drivers, $D_{j,t}$ is the set of drivers active in area $j$ during period $t$, $s$ indexes inferred shifts, $S_{d,j,t}$is the set of shifts worked by driver d in area $j$, period $t$, $r_s$ is total fare revenue earned during shift $s$, $l_s$ the length of shift s in minutes.
 
-The calculation of this indicator involves nested aggregations and multiple sub metrics, we hence provided a note on the computation here. Driver shifts are not explicitly reported in the Trip Database. Instead, shifts are inferred using observed trip activity. 
--   First, trips are ordered chronologically for each driver. 
--   A new shift is assumed to begin when the time gap between the end of one trip and the assignment time of the next trip exceeds 60 minutes. 
--   Trips separated by 60 minutes or less are treated as belonging to the same continuous working shift. 
-This approach approximates continuous working periods (clusters) while avoiding over-fragmentation of shifts due to short breaks between trips. We performed sensitivity analysis changing the gap time from 60 minutes to 45, 75, 90, and 120 minutes, and the resulting total working time is not sensitive to this parameter from 45 to 90 minutes.
-Reported statistics: For each inferred shift, we report the following statistics:
--   Shift fare revenue, which is measured by the sum of total passenger fares collected across all trips within the shift.
--   Shift length, which is then calculated by the elapsed time (in minutes) between the first vehicle assignment and the final drop-off in the shift.
--   Shift occupancy, which is calculated as the sum of trip durations within the shift.
-Within each calendar month, shift-level measures are aggregated at the driver level:
--   Total monthly shift fare revenue is calculated by summing shift fare revenue.
--   Total monthly working time is calculated by summing shift lengths.
--   Average driver hourly revenue is computed as:
+The calculation of this indicator involves nested aggregations and multiple sub metrics, we hence provided a note on the computation here. Driver shifts are not explicitly reported in the Trip Database. Instead, shifts are inferred using observed trip activity.
+
+-   First, trips are ordered chronologically for each driver.
+
+-    A new shift is assumed to begin when the time gap between the end of one trip and the assignment time of the next trip exceeds 60 minutes.
+
+-    Trips separated by 60 minutes or less are treated as belonging to the same continuous working shift.
+
+    This approach approximates continuous working periods (clusters) while avoiding over-fragmentation of shifts due to short breaks between trips. We performed sensitivity analysis changing the gap time from 60 minutes to 45, 75, 90, and 120 minutes, and the resulting total working time is not sensitive to this parameter from 45 to 90 minutes. Reported statistics: For each inferred shift, we report the following statistics:
+
+-    Shift fare revenue, which is measured by the sum of total passenger fares collected across all trips within the shift.
+
+-    Shift length, which is then calculated by the elapsed time (in minutes) between the first vehicle assignment and the final drop-off in the shift.
+
+-    Shift occupancy, which is calculated as the sum of trip durations within the shift. Within each calendar month, shift-level measures are aggregated at the driver level:
+
+-    Total monthly shift fare revenue is calculated by summing shift fare revenue.
+
+-    Total monthly working time is calculated by summing shift lengths. - Average driver hourly revenue is computed as:
 
 Average hourly revenue is then defined as $GHE_{j,t}=\operatorname{Median}_{u \in D_{j,t}}\left(\frac{\sum_{s \in S_{d_{j,t}}} r_s^{\,t}}{\sum_{s \in S_{d_{j,t}}} l_s^{\,t}}\right)\times 60$ (refer to the main equation in this indicator section). This produces a per-driver monthly estimate of gross fare revenue per working hour. The median is used and reported instead of the mean to reduce sensitivity to extreme values and to better reflect typical driver experience within the sector.
 
-
-### Variety Factor 
+### Variety Factor
 
 There is no analysis related to this factor.
 
 ## Appendix 2: Technical Methodology
-### New Vehicle Occupancy Rate 
+
+### New Vehicle Occupancy Rate
+
 `r tbl_caption("U.S. Cities VOR (2016)")`
 
-| City            | Taxi VOR (%) | Uber VOR (%) |
-|-----------------|--------------|--------------|
-| Boston          | 47           | 55           |
-| Los Angeles     | 53           | 63           |
-| New York City   | 53           | 68           |
-| San Francisco   | 52           | 65           |
-| Washington, D.C.| 50           | 58           |
-
+| City             | Taxi VOR (%) | Uber VOR (%) |
+|------------------|--------------|--------------|
+| Boston           | 47           | 55           |
+| Los Angeles      | 53           | 63           |
+| New York City    | 53           | 68           |
+| San Francisco    | 52           | 65           |
+| Washington, D.C. | 50           | 58           |
 
 *`r fig_caption("New York City VOR (2023 and 2024)")`*
+
 ```{r}
 src3 <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\templates\\VOR.png"
 
@@ -318,4 +277,3 @@ if (!file.exists(dst3)) {
 knitr::include_graphics(dst3)
 
 ```
-

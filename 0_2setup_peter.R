@@ -42,10 +42,10 @@ municipal_name <- "The Corporation of the City of Victoria"     #for fleet
 
 
 # Indicators:
-raw <- fread("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\output\\Indicators\\indicators_260130_112828.csv")
+raw <- fread("\\\\Sfp.idir.bcgov\\S143\\S86501\\PTBoard\\Economics\\Datahub\\Indicators\\output\\Indicators\\indicators_260130_112828.csv")
 
 #Trend analysis
-trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\Output\\Analysis\\trend_analysis_20251211.xlsx"
+trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\Indicators\\Output\\Analysis\\trend_analysis_20251211.xlsx"
 
 # ============================================================
 

@@ -125,15 +125,15 @@ trend_direction_text <- function(code, subject = "this indicator") {
   
   if (code == "NO_SIGNIFICANT_TREND") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend suggests that there is no meaningful change in direction."
+      "Looking over the past two years, Statistical analysis suggests no meaningful long-term trend."
     )
   } else if (code == "TREND DOWN") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend suggests that a downward trajectory is evident."
+      "Looking over the past two years, Statistical analysis suggests a long-term downward trend."
     )
   } else if (code == "TREND UP") {
     paste0(
-      "Looking over the past two years, statistical analysis of the long-term trend suggests that an upward trajectory is evident."
+      "Looking over the past two years, Statistical analysis suggests a long-term upward trend."
     )
   } else {
     NA_character_
@@ -145,11 +145,11 @@ shift_direction_text <- function(code) {
   code <- normalize_shift_code(code)
   
   if (code == "NO_SIGNIFICANT_SHIFT") {
-    "Statistical analysis of the short-term trend suggests that there is no active shift in market direction."
+    "Statistical analysis of the short-term trend suggests no active shift in market direction."
   } else if (code == "SHIFT DOWN") {
-    "Statistical analysis of the short-term trend suggests that there is a downward shift in market direction."
+    "Statistical analysis of the short-term trend suggests a downward shift in market direction."
   } else if (code == "SHIFT UP") {
-    "Statistical analysis of the short-term trend suggests that there is an upward shift in market direction."
+    "Statistical analysis of the short-term trend suggests an upward shift in market direction."
   } else {
     NA_character_
   }
