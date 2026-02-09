@@ -120,7 +120,7 @@ chart <- make_multi_indicator_chart_lines(
 chart
 
 ```
-Analysis and Conclusions
+#### Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV","TAXI","last_value_fmt")` active WAVs. On a year-over-year (YoY) basis, the number of active WAVs in the taxi fleet was `r metric("ACTIVE_WAV","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs in the taxi fleet changed by `r metric("ACTIVE_WAV","TAXI","mom_fmt")`. However, the number of active WAVs remained below the Board’s approved WAVs (`r metric("ALLOCATED_WAV","TAXI","last_value_fmt")` vehicles in `r end_label`), indicating that the full potential utilization of approved WAVs in this area had yet to be realized. `r trend_narrative("ALLOCATED_WAV","TAXI")` `r shift_narrative("ALLOCATED_WAV","TAXI")`
 

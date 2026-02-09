@@ -70,7 +70,7 @@ chart
 
 
 
-Analysis and Conclusions
+####Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FLEET_UTILIZATION_RATE","TAXI","last_value_fmt")` in taxi fleet utilization rate  trips. On a year-over-year (YoY) basis, the taxi fleet utilization rate  trips was `r metric("FLEET_UTILIZATION_RATE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FLEET_UTILIZATION_RATE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, taxi fleet utilization changed by `r metric("FLEET_UTILIZATION_RATE","TAXI","mom_fmt")`. `r trend_narrative("FLEET_UTILIZATION", "TAXI")` `r shift_narrative("FLEET_UTILIZATION", "TAXI")`
 

@@ -62,7 +62,7 @@ company_fare_chart
 ```
 
 
-Analysis and Conclusions
+#### Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TAXI","last_value_fmt")` in fare per 5 km for taxi trips. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FARE_PER_5KM","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("FARE_PER_5KM","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.On a month-over-month (MoM) basis, the fare per 5 km for taxi trips changed by `r metric("FARE_PER_5KM","TAXI","mom_fmt")`. `r trend_narrative("FARE_PER_5KM", "TAXI")` `r shift_narrative("FARE_PER_5KM", "TAXI")`[^6]
 

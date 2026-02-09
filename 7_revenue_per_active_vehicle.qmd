@@ -67,7 +67,7 @@ chart
 
 
 
-Analysis and Conclusions
+####Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("REVENUE_PER_VEHICLE","TAXI","last_value_fmt")` in revenue per active vehicle for taxi trips. On a year-over-year (YoY) basis, the revenue per active vehicle for taxi trips was `r metric("REVENUE_PER_VEHICLE","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("REVENUE_PER_VEHICLE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, revenue per active taxi vehicle changed by `r metric("REVENUE_PER_VEHICLE","TAXI","mom_fmt")`. `r trend_narrative("REVENUE_PER_VEHICLE", "TAXI")` `r shift_narrative("REVENUE_PER_VEHICLE", "TAXI")`
 

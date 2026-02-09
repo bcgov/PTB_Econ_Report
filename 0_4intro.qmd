@@ -19,7 +19,7 @@ The Board’s letter of instruction to Senior Economist included the application
 | Revenue per Active Vehicle:                      | ✓   |
 | Taxi Fleet Utilization Rate:                     | ✓   |
 | Taxi Vehicle Occupancy Rate:                     | ✓   |
-| Peak-Hour Taxi Vehicle Occupancy Rate:           | ✓   |
+| Driver hourly revenue:                           | ✓   |
 
 ## Application Details
 

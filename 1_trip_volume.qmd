@@ -10,7 +10,7 @@
 
 **Interpretation:** Increases in taxi trip volume or TNS trip volume indicate growth in the quantity demanded in the respective markets. Moreover, a shift in trip volume from the taxi sector to the TNS sector suggests evolving consumer preferences and competition between the two types of partially substitutable services.
 
-It is helpful to note that while taxis and TNS are similar, they are not the same. This means that taxis and TNS, while partially interchangeable, ultimately serve distinct consumer needs and preferences, reflecting their roles as separate yet complementary services in the transportation market. Any higher combined volume of taxi and TNS trips can result from offering passengers greater choice, not the inherent superiority of one service over the other.
+It is helpful to note that while Taxis and TNS are similar, but they are not the same.Taxis and TNS are partially interchangeable but ultimately serve distinct consumer needs, functioning as complementary services in the transportation market. Increases in combined trip volume reflect expanded consumer choice rather than the inherent superiority of either service.
 
 The Board’s public need policy in the Policy Manual lists examples of the demand factor, which are set out below alongside their corresponding implications on trip volume: 
 -   There are people who require access to, or are seeking access to, or would likely access a new, expanded, or improved passenger transportation service. 
@@ -25,7 +25,7 @@ The Board’s public need policy in the Policy Manual lists examples of the dema
 #### `r region_name` Regional District Trip Volume Findings
 
 
-`r tbl_caption(paste(region_name, "Regional District Trip Volume(thousands of trips)"))`
+`r tbl_caption(paste(region_name, "Regional District Trip Volume (thousands of trips)"))`
 
 
 ```{r}
@@ -71,7 +71,7 @@ chart
 
 
 
-Analysis and Conclusions
+#### Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_VOLUME","TAXI","last_value_fmt")` taxi trips. On a year-over-year (YoY) basis, the total taxi trip volume was `r metric("TRIP_VOLUME","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_VOLUME","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`.[^1] These results indicate strong momentum in demand for TAXI services in the region. On a month-over-month (MoM) basis, taxi trip volume was`r metric("TRIP_VOLUME","TAXI","mom_fmt")`. `r trend_narrative("TRIP_VOLUME", "TAXI")` `r shift_narrative("TRIP_VOLUME", "TAXI")`
 
