@@ -473,7 +473,8 @@ make_indicator_chart_lines <- function(
     title      = NULL,
     caption    = NULL,
     colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
-    base_size  = 10
+    base_size  = 10,
+    y_accuracy = 1
 ) {
   # get + tidy
   df <- filter_indicator(
@@ -502,7 +503,7 @@ make_indicator_chart_lines <- function(
     geom_line(linewidth = 1) +
     geom_point(size = 1.8, stroke = 0.2) +
     scale_color_manual(values = colors, name = "Service Type") +
-    scale_y_continuous(labels = label_number(accuracy = 0.1, trim = TRUE), limits = c(0, NA)) +
+    scale_y_continuous(labels = label_number(accuracy = y_accuracy, trim = TRUE), limits = c(0, NA)) +
     scale_x_date(breaks = scales::breaks_width("3 month"), date_labels = "%b\n%y") +
     labs(
       title    = title,

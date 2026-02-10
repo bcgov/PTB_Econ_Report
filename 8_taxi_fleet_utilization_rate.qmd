@@ -62,7 +62,8 @@ area_type  = "REGIONAL",
 date_from  = date_from,
 date_to    = date_to,
 title      = "Taxi Fleet Utilization Rate",
-colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
+colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A"),
+y_accuracy = 0.1
 )
 chart
 
