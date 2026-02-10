@@ -47,7 +47,7 @@ colors     = c(TAXI = "#69B7FF", TNS = "#1E3A8A")
 chart
 
 ```
-####Analysis and Conclusions
+#### Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("DRIVER_EARNING","TAXI","last_value_fmt")` in driver earnings for taxi services. On a year-over-year (YoY) basis, average driver earnings for taxi services were `r metric("DRIVER_EARNING","TAXI","yoy_fmt")` while on a year-to-date (YTD) basis it was `r metric("DRIVER_EARNING","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, driver earnings for taxi trips changed by `r metric("DRIVER_EARNING","TAXI","mom_fmt")`. `r trend_narrative("DRIVER_EARNING", "TAXI")` `r shift_narrative("DRIVER_EARNING", "TAXI")`
 

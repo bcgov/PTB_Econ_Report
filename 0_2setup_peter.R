@@ -910,7 +910,7 @@ make_wait_time_percentile_chart <- function(
     ggplot2::geom_point(size = 2) +
     ggplot2::scale_color_manual(values = colors, name = "Service Type") +
     ggplot2::scale_x_continuous(breaks = seq(0, 100, 10)) +
-    ggplot2::scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+    ggplot2::scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
     ggplot2::labs(
       title    = title,
       subtitle = paste(region, "Regional District"),

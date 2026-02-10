@@ -81,7 +81,7 @@ make_wait_time_percentile_chart(
 
 ```
 
-####Analysis and Conclusions
+#### Analysis and Conclusions
 
 In `r end_label`, `r region_name` Regional District recorded a total of `r metric("WAIT_TIME","TAXI","last_value_fmt")` in wait time for taxi trips. On a year-over-year (YoY) basis, the wait time for taxi trips was `r metric("WAIT_TIME","TAXI","yoy_fmt")`while on a year-to-date (YTD) basis it was `r metric("WAIT_TIME","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.On a month-over-month (MoM) basis, taxi wait time changed by `r metric("WAIT_TIME","TAXI","mom_fmt")`. `r trend_narrative("WAIT_TIME", "TAXI")` `r shift_narrative("WAIT_TIME", "TAXI")`
 
