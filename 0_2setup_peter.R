@@ -32,7 +32,7 @@ suppressPackageStartupMessages({
 # -----------------------------
 
 date_from <- lubridate::ym("2023-01") # report window start (inclusive)
-date_to   <- lubridate::ym("2025-11") # report window end   (inclusive)
+date_to   <- lubridate::ym("2025-12") # report window end   (inclusive)
 
 region_name <- "Capital"          # display name used across report
 
