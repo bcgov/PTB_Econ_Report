@@ -67,11 +67,11 @@ trend_direction_text <- function(code) {
   if (is.na(code) || code == "") return(NA_character_)
   
   if (code %in% c("no trend", "no significant trend", "no_significant_trend")) {
-    "Looking over the past two years, statistical analysis suggests no meaningful long-term trend."
+    "Looking over the past two years, statistical analysis of the long-term trend suggests that this indicator has remained stable."
   } else if (code %in% c("trend down", "trend_down")) {
-    "Looking over the past two years, statistical analysis suggests a long-term downward trend."
+    "Looking over the past two years, statistical analysis of the long-term trend suggests that this indicator is on a downward trajectory."
   } else if (code %in% c("trend up", "trend_up")) {
-    "Looking over the past two years, statistical analysis suggests a long-term upward trend."
+    "Looking over the past two years, statistical analysis of the long-term trend suggests that this indicator is on an upward trajectory."
   } else if (code %in% c("not conclusive", "inconclusive")) {
     "Looking over the past two years, results are not conclusive regarding a long-term trend."
   } else {
@@ -84,17 +84,19 @@ shift_direction_text <- function(code) {
   if (is.na(code) || code == "") return(NA_character_)
   
   if (code %in% c("no shift", "no significant shift", "no_significant_shift")) {
-    "Statistical analysis of the short-term trend suggests no active shift in market direction."
+    "Statistical analysis of the short-term trend suggests that there is no active shift in market direction."
   } else if (code %in% c("shift down", "shift_down")) {
-    "Statistical analysis of the short-term trend suggests a downward shift in market direction."
+    "Statistical analysis of the short-term trend suggests that there is a downward shift in market direction."
   } else if (code %in% c("shift up", "shift_up")) {
-    "Statistical analysis of the short-term trend suggests an upward shift in market direction."
+    "Statistical analysis of the short-term trend suggests that there is an upward shift in market direction."
   } else if (code %in% c("not conclusive", "inconclusive")) {
     "Short-term results are not conclusive regarding a shift in market direction."
   } else {
     NA_character_
   }
 }
+
+
 
 # ------------------------------------------------------------
 # 4) Core lookup: trend + shift for report month

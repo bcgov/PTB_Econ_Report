@@ -12,6 +12,7 @@ execute:
 ```{r}
 source("0_2setup_peter.R")
 source("0_2setup2_peter.R")
+prev_month_label
 ```
 
 {{< include 0_4intro.qmd >}}

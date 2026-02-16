@@ -57,6 +57,15 @@ trend_path <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\Datahub\\Tr
 end_label  <- format(date_to, "%B %Y")
 prev_label <- format(date_to %m-% years(1), "%B %Y")
 prev_year  <- year(date_to) - 1
+prev_year_date <- date_to %m-% years(1)
+
+
+# Month                      seeeeeeeeeeeeeeee this
+prev_month_date  <- date_to %m-% months(1)
+prev_month_label <- format(prev_month_date, "%B %Y")
+prev_month_year  <- year(prev_month_date)
+n_months <- lubridate::month(date_to)
+
 
 raw_norm <- raw %>%
   transmute(
@@ -991,4 +1000,130 @@ make_company_fare_chart <- function(
       panel.grid.minor    = element_blank(),
       plot.margin         = margin(6, 8, 6, 6)
     )
+}
+
+
+
+# ---- Prev-month metric (formatted by ind_units, like metric(...,"last_value_fmt")) ----
+prev_metric <- function(
+    indicator,
+    service,
+    field = c("last_value_fmt", "last_value")
+) {
+  field <- match.arg(field)
+  
+  meta <- ind_units[[indicator]]
+  if (is.null(meta)) stop("No metadata found in ind_units for indicator: ", indicator)
+  
+  v <- last_month_value(
+    data      = raw_norm,
+    indicator = indicator,
+    region    = region_name,
+    services  = service,
+    area_type = "REGIONAL",
+    date_from = date_from,
+    date_to   = prev_month_date
+  )
+  
+  if (field == "last_value") return(v)
+  fmt_value(v, meta)
+}
+
+
+
+# ---- Same-month previous-year metric (aligned with your data structure) ----
+prev_year_metric <- function(
+    indicator,
+    service,
+    field = c("last_value_fmt", "last_value")
+) {
+  field <- match.arg(field)
+  
+  # metadata for formatting
+  meta <- ind_units[[indicator]]
+  if (is.null(meta)) {
+    stop("No metadata found in ind_units for indicator: ", indicator)
+  }
+  
+  # get same-month previous-year value
+  v <- last_month_value(
+    data      = raw_norm,
+    indicator = indicator,
+    region    = region_name,
+    services  = service,
+    area_type = "REGIONAL",
+    date_from = NULL,                 # IMPORTANT: do not restrict by current window
+    date_to   = prev_year_date
+  )
+  
+  if (field == "last_value") return(v)
+  
+  fmt_value(v, meta)
+}
+
+# ---- YTD metric: total OR average-monthly; supports current year and previous year ----
+ytd_metric <- function(
+    indicator,
+    service,
+    field      = c("value_fmt", "value"),
+    agg        = c("total", "avg"),
+    end_date   = date_to,
+    year_offset = 0,                 # 0 = same year as end_date; -1 = previous year
+    area_type  = "REGIONAL"
+) {
+  field <- match.arg(field)
+  agg   <- match.arg(agg)
+  
+  meta <- ind_units[[indicator]]
+  if (is.null(meta)) stop("No metadata found in ind_units for indicator: ", indicator)
+  if (is.null(end_date)) stop("end_date cannot be NULL in ytd_metric().")
+  
+  # target year + month window
+  y_end <- lubridate::year(end_date) + year_offset
+  m_end <- lubridate::month(end_date)
+  n_months <- m_end  # Jan..end month
+  
+  # filter (NO date_from windowing for YTD)
+  df <- filter_indicator(
+    data      = raw_norm,
+    indicator = indicator,
+    region    = region_name,
+    services  = service,
+    area_type = area_type,
+    date_from = NULL,
+    date_to   = NULL
+  )
+  
+  if (nrow(df) == 0) {
+    v <- NA_real_
+  } else {
+    v <- df %>%
+      dplyr::filter(lubridate::year(date) == y_end,
+                    lubridate::month(date) <= m_end) %>%
+      dplyr::summarise(v = sum(value, na.rm = TRUE), .groups = "drop") %>%
+      dplyr::pull(v)
+  }
+  
+  # optional average-monthly
+  if (agg == "avg") {
+    if (is.na(v)) v <- NA_real_ else v <- v / n_months
+  }
+  
+  if (field == "value") return(v)
+  fmt_value(v, meta)
+}
+
+# change_phrase for increase and decrese
+change_phrase <- function(x, digits = 2) {
+  if (is.na(x)) return("no reported change")
+  
+  val <- round(abs(x), digits)
+  
+  if (x > 0) {
+    paste0("an increase of ", val, " per cent")
+  } else if (x < 0) {
+    paste0("a decrease of ", val, " per cent")
+  } else {
+    "no change"
+  }
 }

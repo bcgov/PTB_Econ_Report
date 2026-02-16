@@ -62,8 +62,51 @@ chart
 
 #### Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District saw a total of `r metric("TRIP_REVENUE","TAXI","last_value_fmt")` taxi trips revenue. On a year-over-year (YoY) basis, the total taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("TRIP_REVENUE","TAXI","ytd_yoy_fmt")`. relative to the same period in `r prev_year`. These results indicate strong momentum in demand for taxi services in the region. On a month-over-month (MoM) basis, taxi trip revenue was `r metric("TRIP_REVENUE","TAXI","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TAXI")` `r shift_narrative("TRIP_REVENUE", "TAXI")`
+In `r region_name` Regional District, total taxi trip revenue in `r end_label` was 
+`r paste0("$", format(round(metric("TRIP_REVENUE","TAXI","last_value") / 1e6, 1), nsmall = 1), " million")`, 
+compared with 
+`r paste0("$", format(round(prev_metric("TRIP_REVENUE","TAXI","last_value") / 1e6, 1), nsmall = 1), " million")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("TRIP_REVENUE","TAXI","mom_last"))` month over month. 
+`r shift_narrative("TRIP_REVENUE", "TAXI")`
 
-In `r end_label`, `r region_name` Regional District recorded `r metric("TRIP_REVENUE","TNS","last_value_fmt")` TNS trips. Compared with `r prev_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. These results indicate strong momentum in demand for TNS services in the region. On a month-over-month (MoM) basis, TNS trip revenue was `r metric("TRIP_REVENUE","TNS","mom_fmt")`. `r trend_narrative("TRIP_REVENUE", "TNS")` `r shift_narrative("TRIP_REVENUE", "TNS")`
+On a year-over-year basis, revenue in `r end_label` was 
+`r paste0("$", format(round(metric("TRIP_REVENUE","TAXI","last_value") / 1e6, 1), nsmall = 1), " million")`, 
+compared with 
+`r paste0("$", format(round(prev_year_metric("TRIP_REVENUE","TAXI","last_value") / 1e6, 1), nsmall = 1), " million")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("TRIP_REVENUE","TAXI","yoy_last"))` year over year.
+
+On a year-to-date basis, taxi trip revenue from January to `r end_label` totalled 
+`r paste0("$", format(round(ytd_metric("TRIP_REVENUE","TAXI", field="value", agg="total") / 1e6, 1), nsmall = 1), " million")`, 
+`r change_phrase(metric("TRIP_REVENUE","TAXI","ytd_yoy"))` from 
+`r paste0("$", format(round(ytd_metric("TRIP_REVENUE","TAXI", field="value", agg="total", year_offset=-1) / 1e6, 1), nsmall = 1), " million")` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("TRIP_REVENUE", "TAXI")`
+
+
+
+In `r region_name` Regional District, total TNS trip revenue in `r end_label` was 
+`r paste0("$", format(round(metric("TRIP_REVENUE","TNS","last_value") / 1e6, 1), nsmall = 1), " million")`, 
+compared with 
+`r paste0("$", format(round(prev_metric("TRIP_REVENUE","TNS","last_value") / 1e6, 1), nsmall = 1), " million")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("TRIP_REVENUE","TNS","mom_last"))` month over month. 
+`r shift_narrative("TRIP_REVENUE", "TNS")`
+
+On a year-over-year basis, revenue in `r end_label` was 
+`r paste0("$", format(round(metric("TRIP_REVENUE","TNS","last_value") / 1e6, 1), nsmall = 1), " million")`, 
+compared with 
+`r paste0("$", format(round(prev_year_metric("TRIP_REVENUE","TNS","last_value") / 1e6, 1), nsmall = 1), " million")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("TRIP_REVENUE","TNS","yoy_last"))` year over year.
+
+On a year-to-date basis, TNS trip revenue from January to `r end_label` totalled 
+`r paste0("$", format(round(ytd_metric("TRIP_REVENUE","TNS", field="value", agg="total") / 1e6, 1), nsmall = 1), " million")`, 
+`r change_phrase(metric("TRIP_REVENUE","TNS","ytd_yoy"))` from 
+`r paste0("$", format(round(ytd_metric("TRIP_REVENUE","TNS", field="value", agg="total", year_offset=-1) / 1e6, 1), nsmall = 1), " million")` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("TRIP_REVENUE", "TNS")`
+
 
 **Limitations:** Quantity demanded does not amount to demand. Quantity demanded refers to the actual trip revenue observed, whereas demand includes all potential trip revenue if there are no constraints. There can still be unmet demand due to limited vehicle availability preventing some customers from using the service.
