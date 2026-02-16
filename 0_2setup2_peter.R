@@ -1,172 +1,215 @@
-trend_raw <- read_excel(
-  trend_path,
-  col_types = c(
-    "text",    # LEVEL_NAME
-    "text",    # PICKUP_AREA
-    "text",    # TRIP_SERVICE_TYPE_CODE
-    "text",    # INDICATOR_TYPE
-    "date",    # period
-    "numeric", # YEAR_POINT
-    "numeric", # MONTH_POINT
-    "numeric", # INDICATOR_VALUE
-    "numeric", # INDICATOR_OBSERVATION
-    "text",    # MODEL_TYPE
-    "text",    # TREND_DIRECTION
-    "numeric", # ESTIMATED_ANNUAL_CHANGE_PCT
-    "numeric", # SLOPE_EST
-    "numeric", # SLOPE_P
-    "text",    # SHIFT_DIRECTION
-    "numeric", # ESTIMATED_SHIFT_PCT
-    "numeric", # SHIFT_EST
-    "numeric"  # SHIFT_P
-  )
-) |>
-  mutate(
-    date = as.Date(period)
-  )
-
-
 # ------------------------------------------------------------
-# Core lookup: returns both flags for the report month
+# 0) Optional: indicator aliases (backward compatible)
+#    If you previously had different names, map them here.
 # ------------------------------------------------------------
-model_override <- c(
-  "FLEET_UTILIZATION" = "LOGIT_ROLL_BINOMIAL",
-  "VEHICLE_OCCUPANCY_RATE" = "LOGIT_ROLL_BINOMIAL"
+indicator_alias <- c(
+  # Old -> New (observed in the new file)
+  "FLEET_UTILIZATION" = "FLEET_UTILIZATION_RATE"
 )
 
-trend_lookup_flags <- function(indicator,
-                               service    = "TAXI",
-                               area_type  = "REGIONAL",
-                               model_type = "RECENT_1M_SHIFT_LOG",
-                               region     = region_name,
-                               end_date   = date_to) {
+resolve_indicator <- function(indicator) {
+  if (indicator %in% names(indicator_alias)) unname(indicator_alias[[indicator]]) else indicator
+}
+
+# ------------------------------------------------------------
+# 1) Read the Excel output + build date
+# ------------------------------------------------------------
+read_trend_output <- function(trend_path) {
   
-  if (indicator %in% names(model_override)) {
-    model_type <- unname(model_override[[indicator]])
-  }
-  
-  yr <- year(end_date)
-  mo <- month(end_date)
-  
-  df <- trend_raw |>
-    filter(
-      LEVEL_NAME             == area_type,
-      PICKUP_AREA            == region,
-      TRIP_SERVICE_TYPE_CODE == service,
-      INDICATOR_TYPE         == indicator,
-      YEAR_POINT             == yr,
-      MONTH_POINT            == mo,
-      MODEL_TYPE             == model_type
+  trend_raw <- read_excel(
+    trend_path,
+    col_types = c(
+      "text",    # REPORTING_LEVEL
+      "text",    # REPORTING_NAME
+      "text",    # PICKUP_AREA
+      "text",    # SERVICE_TYPE
+      "text",    # INDICATOR_NAME
+      "numeric", # YEAR
+      "numeric", # MONTH
+      "text",    # MODEL_TYPE
+      "text",    # TREND_DIRECTION
+      "text",    # SHIFT_DIRECTION
+      "numeric", # avg_monthly_change_pct
+      "numeric", # slope_estimate
+      "numeric", # slope_p_value
+      "numeric", # shift_estimate
+      "numeric", # shift_p_value
+      "numeric"  # OBSERVATION_COUNT
+    )
+  ) |>
+    mutate(
+      YEAR  = as.integer(YEAR),
+      MONTH = as.integer(MONTH),
+      date  = as.Date(sprintf("%04d-%02d-01", YEAR, MONTH))
     )
   
-  if (nrow(df) == 0) {
-    return(list(
-      trend_direction = NA_character_,
-      shift_direction = NA_character_
-    ))
-  }
-  
-  row <- dplyr::slice_tail(df, n = 1)
-  
-  list(
-    trend_direction = row$TREND_DIRECTION[[1]],
-    shift_direction = row$SHIFT_DIRECTION[[1]]
-  )
+  trend_raw
+}
+
+trend_raw <- read_trend_output(trend_path)
+
+
+# ------------------------------------------------------------
+# 2) Normalizer (no typo-fix; just clean strings)
+# ------------------------------------------------------------
+normalize_dir <- function(x) {
+  if (is.na(x)) return(NA_character_)
+  x <- tolower(trimws(x))
+  gsub("\\s+", " ", x)
 }
 
 # ------------------------------------------------------------
-# Single accessor in the same style as metric()
+# 3) Map codes -> narrative sentences
+#    (handles: "trend up/down", "no trend", "not conclusive", etc.)
 # ------------------------------------------------------------
-trend_metric <- function(indicator,
-                         service   = "TAXI",
-                         type      = c("trend_direction", "shift_direction"),
-                         area_type = "REGIONAL") {
-  type  <- match.arg(type)
-  flags <- trend_lookup_flags(
-    indicator = indicator,
-    service   = service,
-    area_type = area_type
-  )
-  flags[[type]]
-}
-
-# Optional convenience wrappers (you can keep or delete)
-trend_direction_metric <- function(indicator,
-                                   service   = "TAXI",
-                                   area_type = "REGIONAL") {
-  trend_metric(indicator, service, "trend_direction", area_type)
-}
-
-shift_direction_metric <- function(indicator,
-                                   service   = "TAXI",
-                                   area_type = "REGIONAL") {
-  trend_metric(indicator, service, "shift_direction", area_type)
-}
-
-# ------------------------------------------------------------
-# Normalise codes coming out of Excel (fix typos)
-# ------------------------------------------------------------
-normalize_trend_code <- function(x) {
-  x <- toupper(trimws(x))
-  gsub("TRNED", "TREND", x, fixed = TRUE)
-}
-
-normalize_shift_code <- function(x) {
-  x <- toupper(trimws(x))
-  gsub("SHFIT", "SHIFT", x, fixed = TRUE)
-}
-
-# ------------------------------------------------------------
-# Map codes -> sentences
-# ------------------------------------------------------------
-trend_direction_text <- function(code, subject = "this indicator") {
+trend_direction_text <- function(code) {
+  code <- normalize_dir(code)
   if (is.na(code) || code == "") return(NA_character_)
-  code <- normalize_trend_code(code)
   
-  if (code == "NO_SIGNIFICANT_TREND") {
-    paste0(
-      "Looking over the past two years, Statistical analysis suggests no meaningful long-term trend."
-    )
-  } else if (code == "TREND DOWN") {
-    paste0(
-      "Looking over the past two years, Statistical analysis suggests a long-term downward trend."
-    )
-  } else if (code == "TREND UP") {
-    paste0(
-      "Looking over the past two years, Statistical analysis suggests a long-term upward trend."
-    )
+  if (code %in% c("no trend", "no significant trend", "no_significant_trend")) {
+    "Looking over the past two years, statistical analysis suggests no meaningful long-term trend."
+  } else if (code %in% c("trend down", "trend_down")) {
+    "Looking over the past two years, statistical analysis suggests a long-term downward trend."
+  } else if (code %in% c("trend up", "trend_up")) {
+    "Looking over the past two years, statistical analysis suggests a long-term upward trend."
+  } else if (code %in% c("not conclusive", "inconclusive")) {
+    "Looking over the past two years, results are not conclusive regarding a long-term trend."
   } else {
     NA_character_
   }
 }
 
 shift_direction_text <- function(code) {
+  code <- normalize_dir(code)
   if (is.na(code) || code == "") return(NA_character_)
-  code <- normalize_shift_code(code)
   
-  if (code == "NO_SIGNIFICANT_SHIFT") {
+  if (code %in% c("no shift", "no significant shift", "no_significant_shift")) {
     "Statistical analysis of the short-term trend suggests no active shift in market direction."
-  } else if (code == "SHIFT DOWN") {
+  } else if (code %in% c("shift down", "shift_down")) {
     "Statistical analysis of the short-term trend suggests a downward shift in market direction."
-  } else if (code == "SHIFT UP") {
+  } else if (code %in% c("shift up", "shift_up")) {
     "Statistical analysis of the short-term trend suggests an upward shift in market direction."
+  } else if (code %in% c("not conclusive", "inconclusive")) {
+    "Short-term results are not conclusive regarding a shift in market direction."
   } else {
     NA_character_
   }
 }
 
 # ------------------------------------------------------------
-# Narratives that you call in chunks
+# 4) Core lookup: trend + shift for report month
+#    Trend model: LONG_TERM_TREND
+#    Shift model: RECENT_K_SHIFT (your requirement)
+# ------------------------------------------------------------
+trend_lookup_flags <- function(trend_raw,
+                               indicator,
+                               service     = "TAXI",
+                               area_type   = "REGIONAL",
+                               region      = region_name,
+                               end_date    = date_to,
+                               trend_model = "LONG_TERM_TREND",
+                               shift_model = "RECENT_K_SHIFT") {
+  
+  indicator <- resolve_indicator(indicator)
+  
+  yr <- year(end_date)
+  mo <- month(end_date)
+  
+  base <- trend_raw |>
+    filter(
+      REPORTING_LEVEL == area_type,
+      REPORTING_NAME  == region,
+      SERVICE_TYPE    == service,
+      INDICATOR_NAME  == indicator,
+      YEAR            == yr,
+      MONTH           == mo
+    )
+  
+  # Long-term trend
+  df_trend <- base |> filter(MODEL_TYPE == trend_model)
+  trend_dir <- if (nrow(df_trend) == 0) NA_character_
+  else dplyr::slice_tail(df_trend, n = 1)$TREND_DIRECTION[[1]]
+  
+  # Short-term shift (RECENT_K_SHIFT)
+  df_shift <- base |> filter(MODEL_TYPE == shift_model)
+  shift_dir <- if (nrow(df_shift) == 0) NA_character_
+  else dplyr::slice_tail(df_shift, n = 1)$SHIFT_DIRECTION[[1]]
+  
+  list(
+    trend_direction = trend_dir,
+    shift_direction = shift_dir
+  )
+}
+
+# ------------------------------------------------------------
+# 5) Accessor
+# ------------------------------------------------------------
+trend_metric <- function(trend_raw,
+                         indicator,
+                         service   = "TAXI",
+                         type      = c("trend_direction", "shift_direction"),
+                         area_type = "REGIONAL",
+                         region    = region_name,
+                         end_date  = date_to) {
+  
+  type <- match.arg(type)
+  
+  flags <- trend_lookup_flags(
+    trend_raw  = trend_raw,
+    indicator  = indicator,
+    service    = service,
+    area_type  = area_type,
+    region     = region,
+    end_date   = end_date
+  )
+  
+  flags[[type]]
+}
+
+# ------------------------------------------------------------
+# 6) Narratives (Rmd-friendly)
+#    Assumes trend_raw, region_name, date_to exist in env.
 # ------------------------------------------------------------
 trend_narrative <- function(indicator,
-                            service = "TAXI",
-                            subject = "total trip revenue") {
-  code <- trend_metric(indicator, service, "trend_direction")
-  trend_direction_text(code, subject = subject)
+                            service   = "TAXI",
+                            area_type = "REGIONAL",
+                            region    = region_name,
+                            end_date  = date_to) {
+  
+  code <- trend_metric(
+    trend_raw  = trend_raw,
+    indicator  = indicator,
+    service    = service,
+    type       = "trend_direction",
+    area_type  = area_type,
+    region     = region,
+    end_date   = end_date
+  )
+  
+  trend_direction_text(code)
 }
 
 shift_narrative <- function(indicator,
-                            service = "TAXI") {
-  code <- trend_metric(indicator, service, "shift_direction")
+                            service   = "TAXI",
+                            area_type = "REGIONAL",
+                            region    = region_name,
+                            end_date  = date_to) {
+  
+  code <- trend_metric(
+    trend_raw  = trend_raw,
+    indicator  = indicator,
+    service    = service,
+    type       = "shift_direction",
+    area_type  = area_type,
+    region     = region,
+    end_date   = end_date
+  )
+  
   shift_direction_text(code)
 }
+
+# ------------------------------------------------------------
+# 7) Quick helpers (optional)
+# ------------------------------------------------------------
+list_indicators <- function(trend_raw) sort(unique(trend_raw$INDICATOR_NAME))
+list_models     <- function(trend_raw) sort(unique(trend_raw$MODEL_TYPE))
