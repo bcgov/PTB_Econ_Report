@@ -80,9 +80,9 @@ in `r prev_label`, representing
 `r change_phrase(metric("FARE_PER_5KM","TAXI","yoy_last"))` year over year.
 
 On a year-to-date basis, the average fare per 5 km for Taxi trips from January to `r end_label` was 
-`r ytd_metric("FARE_PER_5KM","TAXI", field="value", agg="avg")`, 
+`r format(round(ytd_metric("FARE_PER_5KM","TAXI", field="value", agg="avg"), 1), nsmall = 2)`, 
 `r change_phrase(metric("FARE_PER_5KM","TAXI","ytd_yoy"))` from 
-`r ytd_metric("FARE_PER_5KM","TAXI", field="value", agg="avg", year_offset=-1)` 
+`r format(round(ytd_metric("FARE_PER_5KM","TAXI", field="value", agg="avg", year_offset=-1), 1), nsmall = 2)`
 over the same period (January to `r prev_label`). 
 `r trend_narrative("FARE_PER_5KM","TAXI")`[^6]
 
@@ -104,9 +104,9 @@ in `r prev_label`, representing
 `r change_phrase(metric("FARE_PER_5KM","TNS","yoy_last"))` year over year.
 
 On a year-to-date basis, the average fare per 5 km for TNS trips from January to `r end_label` was 
-`r ytd_metric("FARE_PER_5KM","TNS", field="value", agg="avg")`, 
+`r format(round(ytd_metric("FARE_PER_5KM","TNS", field="value", agg="avg"), 1), nsmall = 2)`, 
 `r change_phrase(metric("FARE_PER_5KM","TNS","ytd_yoy"))` from 
-`r ytd_metric("FARE_PER_5KM","TNS", field="value", agg="avg", year_offset=-1)` 
+`r format(round(ytd_metric("FARE_PER_5KM","TNS", field="value", agg="avg", year_offset=-1), 1), nsmall = 2)` 
 over the same period (January to `r prev_label`). 
 `r trend_narrative("FARE_PER_5KM","TNS")`
 
