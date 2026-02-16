@@ -229,7 +229,7 @@ The calculation of this indicator involves nested aggregations and multiple sub 
 
 -    Trips separated by 60 minutes or less are treated as belonging to the same continuous working shift.
 
-    This approach approximates continuous working periods (clusters) while avoiding over-fragmentation of shifts due to short breaks between trips. We performed sensitivity analysis changing the gap time from 60 minutes to 45, 75, 90, and 120 minutes, and the resulting total working time is not sensitive to this parameter from 45 to 90 minutes. Reported statistics: For each inferred shift, we report the following statistics:
+This approach approximates continuous working periods (clusters) while avoiding over-fragmentation of shifts due to short breaks between trips. We performed sensitivity analysis changing the gap time from 60 minutes to 45, 75, 90, and 120 minutes, and the resulting total working time is not sensitive to this parameter from 45 to 90 minutes. Reported statistics: For each inferred shift, we report the following statistics:
 
 -    Shift fare revenue, which is measured by the sum of total passenger fares collected across all trips within the shift.
 
