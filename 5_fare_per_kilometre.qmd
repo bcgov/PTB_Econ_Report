@@ -64,10 +64,51 @@ company_fare_chart
 
 #### Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TAXI","last_value_fmt")` in fare per 5 km for taxi trips. On a year-over-year (YoY) basis, the fare per 5 km for taxi trips was `r metric("FARE_PER_5KM","TAXI","yoy_fmt")` while on a year-to-date (YTD) basis it was `r metric("FARE_PER_5KM","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`.On a month-over-month (MoM) basis, the fare per 5 km for taxi trips changed by `r metric("FARE_PER_5KM","TAXI","mom_fmt")`. `r trend_narrative("FARE_PER_5KM", "TAXI")` `r shift_narrative("FARE_PER_5KM", "TAXI")`[^6]
+In `r region_name` Regional District, the fare per 5 km for Taxi trips in `r end_label` was 
+`r metric("FARE_PER_5KM","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_metric("FARE_PER_5KM","TAXI")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("FARE_PER_5KM","TAXI","mom_last"))` month over month. 
+`r shift_narrative("FARE_PER_5KM","TAXI")`
+
+On a year-over-year basis, the fare per 5 km for Taxi trips in `r end_label` was 
+`r metric("FARE_PER_5KM","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_year_metric("FARE_PER_5KM","TAXI")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("FARE_PER_5KM","TAXI","yoy_last"))` year over year.
+
+On a year-to-date basis, the average fare per 5 km for Taxi trips from January to `r end_label` was 
+`r ytd_metric("FARE_PER_5KM","TAXI", field="value", agg="avg")`, 
+`r change_phrase(metric("FARE_PER_5KM","TAXI","ytd_yoy"))` from 
+`r ytd_metric("FARE_PER_5KM","TAXI", field="value", agg="avg", year_offset=-1)` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("FARE_PER_5KM","TAXI")`[^6]
 
 [^6]:There are a few trips whose distances are exactly 5 kilometres from the Trip Database. As such, all trips with distances not longer than 5.5 kilometres and not shorter than 4.5 kilometres were pooled together to calculate the fare distribution for a 5-kilometre trip. Fares for pooled trips were divided by their respective lengths, which is fare per kilometre, and then were multiplied by 5, yielding the fare distribution for a 5-kilometre trip. 
 
-In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("FARE_PER_5KM","TNS","last_value_fmt")` in fare per 5 km for TNS trips. Compared with `r prev_label`, the fare per 5 km for TNS trips was `r metric("FARE_PER_5KM","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, the fare per 5 km for TNS trips was `r metric("FARE_PER_5KM","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the fare per 5 km for TNS trips changed by `r metric("FARE_PER_5KM","TNS","mom_fmt")`. `r trend_narrative("FARE_PER_5KM", "TNS")` `r shift_narrative("FARE_PER_5KM", "TNS")`
+The fare per 5 km for TNS trips in `r end_label` was 
+`r metric("FARE_PER_5KM","TNS","last_value_fmt")`, 
+compared with 
+`r prev_metric("FARE_PER_5KM","TNS")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("FARE_PER_5KM","TNS","mom_last"))` month over month. 
+`r shift_narrative("FARE_PER_5KM","TNS")`
+
+On a year-over-year basis, the fare per 5 km for TNS trips in `r end_label` was 
+`r metric("FARE_PER_5KM","TNS","last_value_fmt")`, 
+compared with 
+`r prev_year_metric("FARE_PER_5KM","TNS")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("FARE_PER_5KM","TNS","yoy_last"))` year over year.
+
+On a year-to-date basis, the average fare per 5 km for TNS trips from January to `r end_label` was 
+`r ytd_metric("FARE_PER_5KM","TNS", field="value", agg="avg")`, 
+`r change_phrase(metric("FARE_PER_5KM","TNS","ytd_yoy"))` from 
+`r ytd_metric("FARE_PER_5KM","TNS", field="value", agg="avg", year_offset=-1)` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("FARE_PER_5KM","TNS")`
+
 
 **Limitations:** The number of Fare for a 5-Kilometre Trip does not address the Board's other examples of accessibility, including accessibility for people with other disabilities or underserved groups and communities. In addition, it does not reflect the reduction in the barriers to inclusion.
