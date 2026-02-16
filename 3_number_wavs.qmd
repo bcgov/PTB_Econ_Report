@@ -48,44 +48,6 @@ make_indicator_table_compact(
 
 ```
 
-<!-- `r tbl_caption(paste(region_name, "Regional District Number of 1Active Wheelchair Accessible Vehicles per 1,000 Persons"))` -->
-
-
-<!-- ```{r} -->
-<!-- make_new_table( -->
-<!--   data      = raw_norm, -->
-<!--   indicator = "ACTIVE_WAV_PER_1000_PERSONS", -->
-<!--   region    = region_name, -->
-<!--   date_from = date_from, -->
-<!--   date_to   = date_to, -->
-<!--   font_size     = 8, -->
-<!--   page_width_in = 8,    -->
-<!--   year_col_in   = 0.4 -->
-<!-- ) -->
-
-<!-- ``` -->
-
-<!-- Note: The above table reports the number of WAVs per 1,000 persons and the annual population data is available from BC Stats [^2] -->
-
-<!-- [^2]:BC Stats. (n.d.). Population Estimates & Projections for British Columbia. Retrieved January 20, 2025, from https://bcstats.shinyapps.io/popApp/ -->
-<!-- `r tbl_caption(paste(region_name, "Regional District Number of Active Wheelchair Accessible Vehicles Providing at Least One Accessible Trip per 1,000 Persons"))` -->
-
-
-<!-- ```{r} -->
-<!-- make_new_table( -->
-<!--   data      = raw_norm, -->
-<!--   indicator = "ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS", -->
-<!--   region    = region_name, -->
-<!--   date_from = date_from, -->
-<!--   date_to   = date_to, -->
-<!--   font_size     = 8, -->
-<!--   page_width_in = 8,    -->
-<!--   year_col_in   = 0.4 -->
-<!-- ) -->
-<!-- ``` -->
-<!-- Note: The above table reports the number of WAVs providing accessible trips per 1,000 persons and the annual population data is available from BC Stats[^3] -->
-
-<!-- [^3]:BC Stats. (n.d.). Population Estimates & Projections for British Columbia. Retrieved January 20, 2025, from https://bcstats.shinyapps.io/popApp/ -->
 
 `r fig_caption(paste(region_name, "Regional District Trip Volume"))`
 ```{r, fig.width=10, fig.height=5}
