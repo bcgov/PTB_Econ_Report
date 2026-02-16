@@ -122,14 +122,76 @@ chart
 ```
 #### Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV","TAXI","last_value_fmt")` active WAVs. On a year-over-year (YoY) basis, the number of active WAVs in the taxi fleet was `r metric("ACTIVE_WAV","TAXI","yoy_fmt")` while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs in the taxi fleet changed by `r metric("ACTIVE_WAV","TAXI","mom_fmt")`. However, the number of active WAVs remained below the Board’s approved WAVs (`r metric("ALLOCATED_WAV","TAXI","last_value_fmt")` vehicles in `r end_label`), indicating that the full potential utilization of approved WAVs in this area had yet to be realized. `r trend_narrative("ALLOCATED_WAV","TAXI")` `r shift_narrative("ALLOCATED_WAV","TAXI")`
+In `r region_name` Regional District, the number of active Taxi WAVs in `r end_label` was 
+`r metric("ACTIVE_WAV","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_metric("ACTIVE_WAV","TAXI")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("ACTIVE_WAV","TAXI","mom_last"))` month over month. 
+`r shift_narrative("ACTIVE_WAV","TAXI")`
 
-In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","last_value_fmt")` active WAVs providing accessible trips. On a year-over-year (YoY) basis, the number of active WAVs providing accessible trips was `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs providing accessible trips changed by `r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","mom_fmt")`. `r trend_narrative("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")` `r shift_narrative("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")`
+The Board approved `r metric("ALLOCATED_WAV","TAXI","last_value_fmt")` WAVs in `r end_label`, indicating that the number of active WAVs remained below the approved allocation.
+
+On a year-over-year basis, the number of active Taxi WAVs in `r end_label` was 
+`r metric("ACTIVE_WAV","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_year_metric("ACTIVE_WAV","TAXI")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("ACTIVE_WAV","TAXI","yoy_last"))` year over year.
+
+On a year-to-date basis, the average number of active Taxi WAVs from January to `r end_label` was 
+`r round (ytd_metric("ACTIVE_WAV","TAXI", field="value", agg="avg"))`, 
+`r change_phrase(metric("ACTIVE_WAV","TAXI","ytd_yoy"))` from 
+`r round (ytd_metric("ACTIVE_WAV","TAXI", field="value", agg="avg", year_offset=-1))` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("ACTIVE_WAV","TAXI")`
 
 
-<!-- In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","last_value_fmt")` vehicles per 1,000 persons. On a year-over-year (YoY) basis, the availability of active WAVs per 1,000 persons was `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs per 1,000 persons changed by `r metric("ACTIVE_WAV_PER_1000_PERSONS","TAXI","mom_fmt")`. `r trend_narrative("ACTIVE_WAV_PER_1000_PERSONS","TAXI")` `r shift_narrative("ACTIVE_WAV_PER_1000_PERSONS","TAXI")` -->
+The number of active WAVs providing accessible trips in `r end_label` was 
+`r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","mom_last"))` month over month. 
+`r shift_narrative("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")`
 
-<!-- In `r end_label`, `r region_name` Regional District recorded a total of `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","last_value_fmt")` vehicles per 1,000 persons providing accessible trips. On a year-over-year (YoY) basis, the availability of active WAVs per 1,000 persons providing accessible trips was `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","yoy_fmt")`, while on a year-to-date (YTD) basis it was `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, the number of active WAVs per 1,000 persons providing accessible trips changed by `r metric("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI","mom_fmt")`. `r trend_narrative("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI")` `r shift_narrative("ACTIVE_WAV_WITH_ACCESS_TRIP_PER_1000_PERSONS","TAXI")` -->
+On a year-over-year basis, the number of WAVs providing accessible trips in `r end_label` was 
+`r metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_year_metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","yoy_last"))` year over year.
+
+On a year-to-date basis, the average number of WAVs providing accessible trips from January to `r end_label` was 
+`r round (ytd_metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI", field="value", agg="avg"))`, 
+`r change_phrase(metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI","ytd_yoy"))` from 
+`r round (ytd_metric("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI", field="value", agg="avg", year_offset=-1))` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("ACTIVE_WAV_WITH_ACCESSIBLE_TRIP","TAXI")`
+
+
+
+Total number of accessible WAV trips in `r end_label` 
+`r metric("ACCESSIBLE_TRIP","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_metric("ACCESSIBLE_TRIP","TAXI")` 
+in `r prev_month_label`, representing 
+`r change_phrase(metric("ACCESSIBLE_TRIP","TAXI","mom_last"))` month over month. 
+`r shift_narrative("ACCESSIBLE_TRIP","TAXI")`
+
+On a year-over-year basis, Total number of accessible WAV trips in `r end_label` 
+`r metric("ACCESSIBLE_TRIP","TAXI","last_value_fmt")`, 
+compared with 
+`r prev_year_metric("ACCESSIBLE_TRIP","TAXI")` 
+in `r prev_label`, representing 
+`r change_phrase(metric("ACCESSIBLE_TRIP","TAXI","yoy_last"))` year over year.
+
+On a year-to-date basis, total number of accessible WAV trips from January to `r end_label` 
+`r ytd_metric("ACCESSIBLE_TRIP","TAXI", field="value", agg="total")`, 
+`r change_phrase(metric("ACCESSIBLE_TRIP","TAXI","ytd_yoy"))` from 
+`r ytd_metric("ACCESSIBLE_TRIP","TAXI", field="value", agg="total", year_offset=-1)` 
+over the same period (January to `r prev_label`). 
+`r trend_narrative("ACCESSIBLE_TRIP","TAXI")`
 
 
 Limitations: The number of active WAVs does not capture the Board’s other aspects of accessibility, including accessibility for persons with other disabilities, overall availability of services, essential service levels, service to underserved groups or communities, and inclusion. 
