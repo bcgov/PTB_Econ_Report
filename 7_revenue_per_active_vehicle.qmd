@@ -69,10 +69,6 @@ chart
 
 #### Analysis and Conclusions
 
-In `r end_label`, `r region_name` Regional District recorded a total of `r metric("REVENUE_PER_VEHICLE","TAXI","last_value_fmt")` in revenue per active vehicle for taxi trips. On a year-over-year (YoY) basis, the revenue per active vehicle for taxi trips was `r metric("REVENUE_PER_VEHICLE","TAXI","yoy_fmt")` while on a year-to-date (YTD) basis it was `r metric("REVENUE_PER_VEHICLE","TAXI","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, revenue per active taxi vehicle changed by `r metric("REVENUE_PER_VEHICLE","TAXI","mom_fmt")`. `r trend_narrative("REVENUE_PER_VEHICLE", "TAXI")` `r shift_narrative("REVENUE_PER_VEHICLE", "TAXI")`
-
-In `r end_label`, the `r region_name` Regional District recorded a total of `r metric("REVENUE_PER_VEHICLE","TNS","last_value_fmt")` in revenue per active vehicle for TNS trips. Compared with `r prev_label`, the revenue per active vehicle for TNS trips was `r metric("REVENUE_PER_VEHICLE","TNS","yoy_fmt")` (YoY). Year-to-date through `r end_label`, the revenue per active vehicle for TNS trips was `r metric("REVENUE_PER_VEHICLE","TNS","ytd_yoy_fmt")` relative to the same period in `r prev_year`. On a month-over-month (MoM) basis, revenue per active TNS vehicle changed by `r metric("REVENUE_PER_VEHICLE","TNS","mom_fmt")`. `r trend_narrative("REVENUE_PER_VEHICLE", "TNS")` `r shift_narrative("REVENUE_PER_VEHICLE", "TNS")`
-
 In `r region_name` Regional District, revenue per active Taxi vehicle in `r end_label` was 
 `r metric("REVENUE_PER_VEHICLE","TAXI","last_value_fmt")`, 
 compared with 
@@ -89,9 +85,9 @@ in `r prev_label`, representing
 `r change_phrase(metric("REVENUE_PER_VEHICLE","TAXI","yoy_last"))` year over year.
 
 On a year-to-date basis, the average revenue per active Taxi vehicle from January to `r end_label` was 
-`r format(round(ytd_metric("REVENUE_PER_VEHICLE","TAXI", field="value", agg="avg"), 1), nsmall = 2)`, 
+`r ytd_metric("REVENUE_PER_VEHICLE","TAXI", field="value_fmt", agg="avg")`, 
 `r change_phrase(metric("REVENUE_PER_VEHICLE","TAXI","ytd_yoy"))` from 
-`r format(round(ytd_metric("REVENUE_PER_VEHICLE","TAXI", field="value", agg="avg", year_offset=-1), 1), nsmall = 2)` 
+`r ytd_metric("REVENUE_PER_VEHICLE","TAXI", field="value_fmt", agg="avg", year_offset=-1)` 
 over the same period (January to `r prev_label`). 
 `r trend_narrative("REVENUE_PER_VEHICLE","TAXI")`
 
@@ -112,9 +108,9 @@ in `r prev_label`, representing
 `r change_phrase(metric("REVENUE_PER_VEHICLE","TNS","yoy_last"))` year over year.
 
 On a year-to-date basis, the average revenue per active TNS vehicle from January to `r end_label` was 
-`r format(round(ytd_metric("REVENUE_PER_VEHICLE","TNS", field="value", agg="avg"), 1), nsmall = 2)`, 
+`r ytd_metric("REVENUE_PER_VEHICLE","TNS", field="value_fmt", agg="avg")`, 
 `r change_phrase(metric("REVENUE_PER_VEHICLE","TNS","ytd_yoy"))` from 
-`r format(round(ytd_metric("REVENUE_PER_VEHICLE","TNS", field="value", agg="avg", year_offset=-1), 1), nsmall = 2)` 
+`r ytd_metric("REVENUE_PER_VEHICLE","TNS", field="value_fmt", agg="avg", year_offset=-1)` 
 over the same period (January to `r prev_label`). 
 `r trend_narrative("REVENUE_PER_VEHICLE","TNS")`
 
