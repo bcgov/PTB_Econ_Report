@@ -1,5 +1,5 @@
 ---
-title: "Economics Report"
+title: "Economic Report"
 toc: true
 number_sections: true
 format:
