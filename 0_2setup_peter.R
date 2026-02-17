@@ -684,7 +684,7 @@ fmt_value <- function(x, meta){
   unit <- meta$unit
   d    <- meta$digits %||% 0
   if (isTRUE(meta$currency) || unit == "currency")      return(fmt_num(x, d, currency = TRUE))
-  if (unit == "pct")                                    return(paste0(format(round(x, d), nsmall=d), "%"))
+  if (unit == "pct")                                    return(paste0(format(round(x, d), nsmall=d), " per cent"))
   if (unit == "minutes")                                return(paste0(fmt_num(x, d), " minutes"))
   fmt_num(x, d)
 }
