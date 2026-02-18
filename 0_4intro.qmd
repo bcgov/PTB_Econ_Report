@@ -2,7 +2,7 @@
 
 ## Commencing Investigation
 
-This economics report has been produced pursuant to a Board investigation under section 27 of the Act ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)). The Board investigation was commenced on ([DATE to be inserted]), with respect to application #([Application number to be inserted]).
+This economic report has been produced pursuant to a Board investigation under Section 27 of the Act ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)). The Board investigation was commenced on ([DATE to be inserted]), with respect to application #([Application number to be inserted]).
 
 The Board’s letter of instruction to Senior Economist included the application details, outlined below, along with a request for economic analysis pertaining to the following relevant indicators:
 [The indicators listed below should be reviewed and updated as required to reflect the specific scope and needs of the application.]
@@ -13,12 +13,12 @@ The Board’s letter of instruction to Senior Economist included the application
 | Trip Revenue:                                    | ✓   |
 | Number of Wheelchair Accessible Vehicles (WAVs): | ✓   |
 | Number of Active Vehicles per 1,000 Persons:     | ✓   |
-| Fare per Kilometre:                              | ✓   |
+| Fare per 5-Kilometre:                            | ✓   |
 | Wait Time:                                       | ✓   |
 | Concentration indices:                           | ✓   |
 | Revenue per Active Vehicle:                      | ✓   |
 | Taxi Fleet Utilization Rate:                     | ✓   |
-| Taxi Vehicle Occupancy Rate:                     | ✓   |
+| Vehicle Occupancy Rate:                          | ✓   |
 | Driver hourly revenue:                           | ✓   |
 
 ## Application Details
@@ -39,13 +39,13 @@ Additional details of the application include:
 
 The proposed operating area for this taxi application is mainly within the City of Vancouver[Municipality A], District of West Vancouver[Municipality B], and District of North Vancouver[Municipality C]. These municipalities are located in the Greater Vancouver Regional District[Regional District Name].
 
-For the purpose of statistical analysis, both taxi and TNS applications are associated with the same Region, as contemplated in the Board’s operating areas policy in the *Policy Manual*, even though taxi businesses do not generally operate at a regional level.
+For the purpose of statistical analysis, both taxi and TNS applications are associated with the same Region, as contemplated in the Board’s operating areas policy in the ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)), even though taxi businesses do not generally operate at a regional level.
 
 For taxi applicants, the Region is determined based on where the existing or proposed operating area is located. In this case, **this taxi application is located in Region 1[Regional District number]**. The Regional District is also determined based on where the existing or proposed operating area is located.
 
 ## Existing Licensees
 
-The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-correlated against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Infrastructure (MoTI). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024[Date to be inserted]**, the following relevant information can be observed about the existing licensees in the area:
+The Board maintains a database of taxi and TNS licensees approved by the Board and key terms and conditions set by the Board, such as fleets, operating areas, and rates. On a regular basis, this is cross-referenced against a list of active licensees provided by the Registrar of Passenger Transportation (Registrar) at the Ministry of Transportation and Transit (MoTT). The Board refers to this database as the “single source of licensee data” or **SSOLD**. Based on the SSOLD, last updated on **September 30, 2024[Date to be inserted]**, the following relevant information can be observed about the existing licensees in the area:
 
 -   At the municipal level,
     -   Number of taxi licensees operating: `r municipal_licensees`
@@ -61,19 +61,19 @@ The Board maintains a database of taxi and TNS licensees approved by the Board a
 
 ## Section 28 Criteria
 
-Under section 28(1) of the Act, the Board must consider the following factors when determining applications:
+Under Section 28(1) of the Act, the Board must consider the following factors when determining applications:
 
 -   Whether the applicant is fit, proper, and capable of providing the service applied for (threshold test); 
 -   Whether there is a public need for the service; and 
 -   Whether the application would promote sound economic conditions in the B.C. passenger transportation business.
 
-This economics report provides the Board with data analysis pertaining only to the “public need” (PN) and “sound economic conditions” (SEC) criteria. It does not speak to the fit, proper, and capable criteria.
+This economic report provides the Board with data analysis pertaining only to the “public need” (PN) and “sound economic conditions” (SEC) criteria. It does not speak to the fit, proper, and capable criteria.
 
 ## PN and SEC Factors
 
-The Board’s Policy Manual provides information on the factors the Board may consider when determining PN and SEC. This economics report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economics report does not determine whether PN and SEC exist.
+The Board’s ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)) provides information on the factors the Board may consider when determining PN and SEC. This economic report will focus on the underlying PN and SEC factors for the Board’s consideration in determining whether PN and SEC exist. For clarity, this economic report does not determine whether PN and SEC exist.
 
-Under the public need policy in the Policy Manual, PN is divided into the following factors:
+Under the public need policy in the ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)), PN is divided into the following factors:
 
 -   Demand
 -   Accessibility
@@ -81,38 +81,160 @@ Under the public need policy in the Policy Manual, PN is divided into the follow
 -   Safety
 -   Service Quality
 
-Under the sound economic conditions policy in the Policy Manual, SEC is divided into the following factors:
+Under the sound economic conditions policy in the ([Policy Manual](https://www.ptboard.bc.ca/policy-manual)), SEC is divided into the following factors:
 
 -   Sustainability
 -   Competition
 -   Innovation
 -   Variety
 
-This economics report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
+This economic report examines key indicators of the taxi and TNS sectors in B.C. Each indicator is identified with a primary PN or SEC factor, as indicated in the following chart:
 
+\newpage
 ```{r}
-src <- "\\\\Sfp.idir.bcgov\\s143\\S86501\\PTBoard\\Economics\\templates\\table_image.png"
+library(dplyr)
+library(tidyr)
+library(flextable)
+library(officer)
 
-# local copy inside your project
-dir.create("img-cache", showWarnings = FALSE)
-dst <- file.path("img-cache", "table_image.png")
 
-if (!file.exists(dst)) {
-  ok <- file.copy(src, dst, overwrite = TRUE)
-  if (!ok) stop("Could not copy image from network share")
+make_mapping_table <- function() {
+
+  # ---- column structure (like your screenshot) ----
+  cols_pn  <- c("Demand", "Quality", "Affordability", "Accessibility")
+  cols_sec <- c("Sustainability", "Competition", "Innovation", "Variety")
+  all_cols <- c(cols_pn, cols_sec)
+
+  # ---- rows (include section headers as separate rows) ----
+  df <- tibble::tibble(
+    Factor = c(
+      "Demand Factor",
+      "Trip Volume",
+      "Trip Revenue",
+      "Service Quality Factor",
+      "Wait Time",
+      "Affordability Factor",
+      "Fare per 5-Kilometre",
+      "Accessibility Factor",
+      "Number of Wheelchair Accessible Vehicles (WAVs)",
+      "Number of Accessible Trips(WAVs)",
+      "Number of Active Vehicles per 1000 Persons",
+      "Sustainability Factor",
+      "Revenue Per Vehicle",
+      "Taxi Fleet Utilization Rate",
+      "Vehicle Occupancy Rate",
+      "Driver Hourly Revenue"
+    )
+  ) %>%
+    bind_cols(as_tibble(setNames(replicate(length(all_cols), "", simplify = FALSE), all_cols)))
+
+  # ---- put X marks (edit these to match your mapping) ----
+  put_x <- function(row_label, col_name) {
+    df[df$Factor == row_label, col_name] <<- "X"
+  }
+
+  # Demand factor
+  put_x("Trip Volume",  "Demand")
+  put_x("Trip Revenue", "Demand")
+
+  # Service quality
+  put_x("Wait Time", "Quality")
+
+  # Affordability
+  put_x("Fare per 5-Kilometre", "Affordability")
+
+  # Accessibility
+  put_x("Number of Wheelchair Accessible Vehicles (WAVs)", "Accessibility")
+  put_x("Number of Accessible Trips(WAVs)", "Accessibility")  
+  put_x("Number of Active Vehicles per 1000 Persons",       "Accessibility")
+
+  # Sustainability (SEC)
+  put_x("Revenue Per Vehicle",                   "Sustainability")
+  put_x("Taxi Fleet Utilization Rate",           "Sustainability")
+  put_x("Vehicle Occupancy Rate",           "Sustainability")
+  put_x("Driver Hourly Revenue",           "Sustainability")
+  
+
+  # ---- build flextable ----
+  ft <- flextable(df)
+
+  # Top spanner row: PN vs SEC
+  ft <- add_header_row(
+    ft,
+    values    = c("", "Public Need (PN)", "Sound Economic Conditions (SEC)"),
+    colwidths = c(1, length(cols_pn), length(cols_sec))
+  )
+
+  # Style header
+  ft <- bold(ft, part = "header")
+  ft <- align(ft, align = "center", part = "header")
+  ft <- align(ft, j = 1, align = "left", part = "body")
+
+  # Set widths (tune as you like)
+  ft <- width(ft, j = 1, width = 3.2)
+  ft <- width(ft, j = 2:ncol(df), width = 1.05)
+
+  # Horizontal rules similar to screenshot
+  ft <- hline_top(ft, border = fp_border(width = 2), part = "header")
+  ft <- hline(ft, border = fp_border(width = 1), part = "header")
+
+  # Bottom rule
+  ft <- hline_bottom(ft, border = fp_border(width = 2), part = "body")
+
+  # Vertical divider between PN and SEC (after last PN column)
+  pn_last_col <- 1 + length(cols_pn)  # because first column is Factor
+  ft <- vline(ft, j = pn_last_col, border = fp_border(width = 1))
+
+  # Make section header rows bold and add separating lines
+  section_rows <- which(df$Factor %in% c(
+    "Demand Factor",
+    "Service Quality Factor",
+    "Affordability Factor",
+    "Accessibility Factor",
+    "Sustainability Factor",
+    "Competition Factor"
+  ))
+
+  ft <- bold(ft, i = section_rows, j = 1, part = "body")
+  for (i in section_rows) {
+    ft <- hline(ft, i = i, border = fp_border(width = 1))
+  }
+
+# ---- Clean + fit ----
+ft <- fontsize(ft, part = "all", size = 5)
+ft <- padding(ft, part = "all", padding = 2)
+
+# very important
+ft <- set_table_properties(ft, layout = "fixed", width = 1)
+
+n_cols <- ncol(df)
+
+# first column (long text)
+ft <- width(ft, j = 1, width = 2.0)
+
+# indicator columns (tight)
+ft <- width(ft, j = 2:n_cols, width = 0.55)
+
+# vertical alignment cleaner
+ft <- valign(ft, part = "all", valign = "top")
+
+
+
+  ft
 }
 
-knitr::include_graphics(dst)
-
+# usage:
+mapping_ft <- make_mapping_table()
+mapping_ft
 ```
 
-Please note that this economics report does not provide an analysis of the “innovation” or “variety” factors under SEC.
+Please note that this economic report does not provide an analysis of the “innovation” or “variety” factors under SEC.
 
 ## Report Constraints
 
-Under section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established data requirements outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
+Under Section 28(5) of the Act and the terms and conditions of licence, special authorization licences, including taxi and TNS, are required to submit trip data. The Board has established data requirements outlining the type of trip data that must be submitted. Trip data is submitted by licensees to the Registrar through the Vehicle Safety BC Portal (the Trip Database), also known as the “data warehouse”.
 
-Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economics report at this time.
+Since only the taxi and TNS sectors are required to report trip data under the data requirements, these are the only sectors eligible for an economic report at this time.
 
 Due to data limitations, only two[Number to be inserted] regions will be analyzed:
 
@@ -124,11 +246,11 @@ Due to data limitations, only two[Number to be inserted] regions will be analyze
 
 **Regional Districts within these Regions may be analyzed so long as there is adequate data reliability for those Regional Districts.**
 
-At this time, three other regions will not be included in this economics report due to insufficient data coverage, poor data quality, or unreliable trip data submissions: Region 3 (Vancouver Island excluding CRD); Region 4 (Interior); and, Region 5 (Northern B.C. and other).
+At this time, three other regions will not be included in this economic report due to insufficient data coverage, poor data quality, or unreliable trip data submissions: Region 3 (Vancouver Island excluding CRD); Region 4 (Interior); and, Region 5 (Northern B.C. and other).
 
 ## Qualifications
 
-This economics report was authored by the Board’s Senior Economist, **Peter Tseng**, who is ultimately responsible for the analysis contained in this report.
+This economic report was authored by the Board’s Senior Economist, **Peter Tseng**, who is ultimately responsible for the analysis contained in this report.
 
 Peter Tseng has over a decade of experience in economic analytics, policy evaluation, and statistical reporting. He holds a Ph.D. in Economics from the University of Victoria and has held senior roles with the BC Public Service, including at the Ministry of Finance and Ministry of Health.
 
